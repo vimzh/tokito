@@ -316,8 +316,8 @@ export function handleWebhookEvent(db: Db, event: { id: string; type: string; da
 }
 
 export function contactCallSummary(db: Db, campaignId: string) {
-  const rows = campaignCalls(db, campaignId)
-  const summary = new Map<string, { attempts: number; lastStatus: CallStatus; lastFailureCode: string | null; nextScheduledAt: number | null }>()
+  const rows = db.select().from(calls).where(eq(calls.campaignId, campaignId)).orderBy(asc(calls.createdAt)).all()
+  const summary = new Map<string, { attempts: number; lastStatus: CallStatus; lastFailureCode: string | null; nextScheduledAt: number | null; latestCallId: string }>()
   for (const call of rows) {
     if (!call.contactId) continue
     const current = summary.get(call.contactId)
@@ -326,6 +326,7 @@ export function contactCallSummary(db: Db, campaignId: string) {
       lastStatus: call.status,
       lastFailureCode: call.failureCode,
       nextScheduledAt: call.status === 'queued' && call.scheduledAt ? call.scheduledAt : current?.nextScheduledAt ?? null,
+      latestCallId: call.id,
     })
   }
   return summary

@@ -21,7 +21,8 @@ export function SurveyTable({ campaigns }: { campaigns: CampaignSummary[] }) {
             <TableRow key={campaign.id}>
               <TableCell className="py-5 font-medium"><Link className="underline-offset-4 hover:underline focus-visible:underline" href={`/survey/${campaign.id}`}>{campaign.name}</Link></TableCell>
               <TableCell>{formatDate(campaign.createdAt)}</TableCell>
-              <TableCell className="tabular-nums">{campaign.questionCount}</TableCell>
+              <TableCell className="tabular-nums">{campaign.contactCount}</TableCell>
+              <TableCell className="tabular-nums">{campaign.responseCount}</TableCell>
               <TableCell><Badge variant="secondary">{campaignStatusLabels[campaign.status]}</Badge></TableCell>
             </TableRow>
           ))}

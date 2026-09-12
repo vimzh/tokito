@@ -29,8 +29,12 @@ export function HomeOverview({ campaigns }: { campaigns: CampaignSummary[] }) {
                 <h3 className="text-xl">{campaign.name}</h3>
                 <Badge variant="outline">{campaignStatusLabels[campaign.status]}</Badge>
               </CardHeader>
-              <CardContent className="flex flex-wrap items-center justify-between gap-4">
+              <CardContent className="space-y-4">
                 <p className="max-w-2xl text-sm text-muted-foreground">{campaign.goal}</p>
+                <div className="space-y-2">
+                  <div className="flex justify-between gap-3 text-sm"><span>{homeContent.progress(campaign.responseCount, campaign.readyCount)}</span><span className="tabular-nums">{campaign.readyCount > 0 ? Math.round((campaign.responseCount / campaign.readyCount) * 100) : 0}%</span></div>
+                  <progress aria-label={homeContent.progress(campaign.responseCount, campaign.readyCount)} max={Math.max(1, campaign.readyCount)} value={campaign.responseCount} className="block h-2 w-full overflow-hidden rounded-full [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-primary [&::-moz-progress-bar]:bg-primary" />
+                </div>
                 <Button asChild variant="outline"><Link href={`/survey/${campaign.id}`}>{homeContent.view}<ArrowUpRight aria-hidden="true" /></Link></Button>
               </CardContent>
             </Card>

@@ -10,7 +10,7 @@ import { campaignContent, campaignStatusLabels } from "@/data/campaign";
 import type { OutreachStatus } from "@/lib/api";
 
 const copy = campaignContent.outreach;
-const countKeys = ["readyContacts", "remaining", "active", "queued", "completed", "declined", "callbacks", "optedOut", "failed", "unreachable"] as const;
+const countKeys = ["remaining", "active", "queued", "failed"] as const;
 
 export function OutreachPanel({ campaignId, outreach }: { campaignId: string; outreach: OutreachStatus & { timezone: string } }) {
   const [error, setError] = useState<string>();
@@ -54,7 +54,7 @@ export function OutreachPanel({ campaignId, outreach }: { campaignId: string; ou
         <p className="text-sm text-destructive">{copy.blocked} {blocking.map((reason) => copy.reasons[reason]).join("; ")}.</p>
       )}
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {countKeys.map((key) => (
           <div key={key} className="rounded-lg border p-3"><dt className="text-xs text-muted-foreground">{copy.counts[key]}</dt><dd className="mt-1 text-xl tabular-nums">{outreach.counts[key]}</dd></div>
         ))}

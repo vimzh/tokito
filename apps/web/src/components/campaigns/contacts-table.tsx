@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -70,7 +71,7 @@ function ContactRow({ campaignId, contact, pending, onStatus, onDelete }: { camp
       <TableCell className="text-sm">
         {contact.lastCall ? (
           <>
-            <span>{campaignContent.calls.statuses[contact.lastCall.lastStatus]}</span>
+            <Link href={`/survey/${campaignId}/calls/${contact.lastCall.latestCallId}`} className="underline-offset-4 hover:underline">{campaignContent.calls.statuses[contact.lastCall.lastStatus]}</Link>
             <span className="block text-xs text-muted-foreground">{campaignContent.outreach.attempts(contact.lastCall.attempts)}{contact.lastCall.lastFailureCode ? ` · ${campaignContent.outreach.failureCodes[contact.lastCall.lastFailureCode] ?? contact.lastCall.lastFailureCode}` : ""}</span>
           </>
         ) : <span className="text-muted-foreground">{copy.noValue}</span>}

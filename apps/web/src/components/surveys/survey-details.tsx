@@ -3,7 +3,11 @@ import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnswersOverview } from "@/components/campaigns/answers-overview";
 import { CallScript } from "@/components/campaigns/call-script";
+import { CampaignMetrics } from "@/components/campaigns/campaign-metrics";
+import { ExportButtons } from "@/components/campaigns/export-buttons";
+import { LiveRefresh } from "@/components/campaigns/live-refresh";
 import { CallsList } from "@/components/campaigns/calls-list";
 import { CallingPreferences } from "@/components/campaigns/calling-preferences";
 import { TestCallDialog } from "@/components/campaigns/test-call-dialog";
@@ -16,9 +20,10 @@ import { OutreachPanel } from "@/components/campaigns/outreach-panel";
 import { QuestionEditor } from "@/components/campaigns/question-editor";
 import { campaignContent as copy, campaignStatusLabels, preferencesContent } from "@/data/campaign";
 import { formatDate } from "@/lib/format";
-import type { CallSummary, Campaign, ContactList, OutreachStatus, TaskPreview } from "@/lib/api";
+import type { CallSummary, Campaign, CampaignResults, ContactList, OutreachStatus, TaskPreview } from "@/lib/api";
 
-export function SurveyDetails({ campaign, contacts, calls, preview, outreach }: { campaign: Campaign; contacts: ContactList; calls: CallSummary[]; preview: TaskPreview; outreach: OutreachStatus }) {
+export function SurveyDetails({ campaign, contacts, calls, preview, outreach, results }: { campaign: Campaign; contacts: ContactList; calls: CallSummary[]; preview: TaskPreview; outreach: OutreachStatus; results: CampaignResults }) {
+  const live = campaign.status === "running" || outreach.counts.active > 0 || outreach.counts.queued > 0;
   const readyContacts = contacts.contacts.filter((contact) => contact.status === "ready").map((contact) => ({ id: contact.id, name: contact.name, phone: contact.phone }));
   const language = preferencesContent.languages.find((item) => item.value === campaign.language)?.label ?? campaign.language;
   const mode = copy.conversationModes.find((item) => item.value === campaign.conversationMode)?.label;
@@ -32,8 +37,10 @@ export function SurveyDetails({ campaign, contacts, calls, preview, outreach }: 
         </div>
         <div className="flex flex-wrap gap-2"><TestCallDialog campaignId={campaign.id} contacts={readyContacts} disabled={campaign.questions.length === 0} /><CampaignEditor campaign={campaign} /><DeleteCampaignButton id={campaign.id} /></div>
       </header>
+      <LiveRefresh active={live} />
+      <CampaignMetrics results={results} live={live} />
       <Tabs defaultValue="overview" className="gap-6">
-        <TabsList variant="line" className="gap-4"><TabsTrigger value="overview">{copy.overview}</TabsTrigger><TabsTrigger value="contacts">{copy.contacts} ({contacts.total})</TabsTrigger><TabsTrigger value="responses">{copy.responses} ({calls.length})</TabsTrigger><TabsTrigger value="report">{copy.report}</TabsTrigger></TabsList>
+        <TabsList variant="line" className="gap-4"><TabsTrigger value="overview">{copy.overview}</TabsTrigger><TabsTrigger value="contacts">{copy.contacts} ({contacts.total})</TabsTrigger><TabsTrigger value="answers">{copy.answers}</TabsTrigger><TabsTrigger value="responses">{copy.responses} ({calls.length})</TabsTrigger><TabsTrigger value="report">{copy.report}</TabsTrigger></TabsList>
         <TabsContent value="overview" className="space-y-8">
           <section className="space-y-3"><h2 className="text-xl">{copy.outreach.title}</h2><OutreachPanel campaignId={campaign.id} outreach={{ ...outreach, timezone: campaign.timezone }} /></section>
           <section className="max-w-3xl space-y-3"><h2 className="text-xl">{copy.goal}</h2><p className="whitespace-pre-wrap leading-7 text-muted-foreground">{campaign.goal}</p></section>
@@ -66,9 +73,14 @@ export function SurveyDetails({ campaign, contacts, calls, preview, outreach }: 
           </section>
           {contacts.total > 0 ? <ContactsTable campaignId={campaign.id} list={contacts} /> : <p className="text-sm text-muted-foreground">{copy.contactsEmpty}</p>}
         </TabsContent>
-        <TabsContent value="responses" className="space-y-4">
+        <TabsContent value="answers" className="space-y-4">
+          <div><h2 className="text-xl">{copy.results.title}</h2><p className="mt-2 text-sm text-muted-foreground">{copy.results.description}</p></div>
+          <AnswersOverview campaignId={campaign.id} results={results} />
+        </TabsContent>
+        <TabsContent value="responses" className="space-y-6">
           <div><h2 className="text-xl">{copy.calls.title}</h2><p className="mt-2 text-sm text-muted-foreground">{copy.calls.description}</p></div>
           <CallsList campaignId={campaign.id} calls={calls} />
+          <ExportButtons campaignId={campaign.id} />
         </TabsContent>
         <TabsContent value="report"><Empty className="border"><EmptyHeader><EmptyDescription>{copy.reportEmpty}</EmptyDescription></EmptyHeader></Empty></TabsContent>
       </Tabs>

@@ -116,3 +116,12 @@ export const pauseOutreach = (id: string) => outreachRoute.pause.$post({ param: 
 export const stopOutreach = (id: string) => outreachRoute.stop.$post({ param: { id } }).then((response) => unwrap<Campaign>(response));
 export const scheduleCallback = (id: string, callId: string, at: string) =>
   callsRoute[":callId"].callback.$post({ param: { id, callId }, json: { at } }).then((response) => unwrap<CallSummary>(response));
+
+// ---- Results and exports (Phase 6) ----
+export type CampaignResults = Res<typeof campaignRoute.results.$get, 200>;
+export type QuestionResult = CampaignResults["questions"][number];
+export type ExportKind = "answers" | "calls";
+export type ExportFormat = "csv" | "xlsx";
+
+export const getResults = (id: string) => campaignRoute.results.$get({ param: { id } }).then((response) => unwrap<CampaignResults>(response));
+export const fetchExport = (id: string, kind: ExportKind, format: ExportFormat) => campaignRoute.export.$get({ param: { id }, query: { kind, format } });

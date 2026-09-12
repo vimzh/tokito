@@ -23,7 +23,8 @@ export function CallDetail({ campaignId, call }: { campaignId: string; call: Cal
           {call.optOut && <Badge variant="outline">{testCopy.optOut}</Badge>}
         </div>
         <h1 className="text-3xl sm:text-4xl">{call.personName || copy.noValue}</h1>
-        <p className="text-sm text-muted-foreground">{formatDateTime(call.createdAt)}{call.durationSeconds !== null ? ` · ${copy.duration(call.durationSeconds)}` : ""}</p>
+        <p className="text-sm text-muted-foreground">{formatDateTime(call.createdAt)}{call.durationSeconds !== null ? ` · ${copy.duration(call.durationSeconds)}` : ""}{call.attempt > 1 ? ` · ${campaignContent.outreach.attempts(call.attempt)}` : ""}</p>
+        {call.failureCode && <p className="text-sm text-destructive">{campaignContent.outreach.failureCodes[call.failureCode] ?? call.failureCode}{call.failureMessage ? `: ${call.failureMessage}` : ""}</p>}
       </header>
       <div className="grid gap-8 lg:grid-cols-2">
         <section className="space-y-3">

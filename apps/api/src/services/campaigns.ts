@@ -1,6 +1,6 @@
 import { asc, count, desc, eq } from 'drizzle-orm'
 import type { Db } from '../db'
-import { campaignEvents, campaigns, questions } from '../db/schema'
+import { calls, campaignEvents, campaigns, contacts, questions } from '../db/schema'
 import type { CreateCampaignInput, QuestionInput, ReplaceQuestionsInput, UpdateCampaignInput } from '../validation/campaigns'
 import { getSettings } from './settings'
 
@@ -38,6 +38,21 @@ function insertQuestions(tx: Db | Tx, campaignId: string, items: QuestionInput[]
 }
 
 export function listCampaigns(db: Db) {
+  const contactCounts = new Map(
+    db.select({ campaignId: contacts.campaignId, total: count(contacts.id) }).from(contacts).groupBy(contacts.campaignId).all().map((row) => [row.campaignId, row.total]),
+  )
+  const readyCounts = new Map(
+    db.select({ campaignId: contacts.campaignId, total: count(contacts.id) }).from(contacts).where(eq(contacts.status, 'ready')).groupBy(contacts.campaignId).all().map((row) => [row.campaignId, row.total]),
+  )
+  const completedCalls = db.select({ campaignId: calls.campaignId, contactId: calls.contactId, id: calls.id }).from(calls).where(eq(calls.status, 'completed')).all()
+  const responseCounts = new Map<string, number>()
+  const seen = new Set<string>()
+  for (const call of completedCalls) {
+    const key = `${call.campaignId}:${call.contactId ?? call.id}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    responseCounts.set(call.campaignId, (responseCounts.get(call.campaignId) ?? 0) + 1)
+  }
   return db
     .select({
       id: campaigns.id,
@@ -55,6 +70,7 @@ export function listCampaigns(db: Db) {
     .groupBy(campaigns.id)
     .orderBy(desc(campaigns.updatedAt))
     .all()
+    .map((row) => ({ ...row, contactCount: contactCounts.get(row.id) ?? 0, readyCount: readyCounts.get(row.id) ?? 0, responseCount: responseCounts.get(row.id) ?? 0 }))
 }
 
 export function getCampaign(db: Db, campaignId: string) {

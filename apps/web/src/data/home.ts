@@ -8,7 +8,8 @@ export const homeContent = {
   all: "All campaigns",
   allDescription: "Open a campaign to review its goal and questions.",
   view: "View campaign",
-  table: { name: "Campaign", date: "Created", questions: "Questions", status: "Status" },
+  table: { name: "Campaign", date: "Created", contacts: "Contacts", responses: "Responses", status: "Status" },
+  progress: (responses: number, ready: number) => `${responses} of ${ready} ${ready === 1 ? "person" : "people"} completed`,
   empty: {
     title: "No campaigns yet",
     description: "Describe what you want to learn and Tokito will help you ask it.",
