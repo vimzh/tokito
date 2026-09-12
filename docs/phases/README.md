@@ -14,17 +14,17 @@ Detailed phase documents live next to this file (`phase-01.md`, `phase-02.md`, �
 | Workspace shell | Done: sidebar, navigation, profile card, Home / Connections / Settings pages. |
 | Home page | Done (Phases 1 and 6): real campaigns with contacts, responses, and progress for running campaigns. |
 | Create campaign | Done (Phase 1): the review step saves a draft through a server action and redirects to the campaign page. |
-| Campaign detail | Done (Phases 1–3): goal, background, topics, a typed question editor with AI drafting, calling preferences, edit and delete, a Contacts tab with upload, mapping, validation, and per-row fixes, a Call script preview, a Test a call dialog, a metrics row with live refresh, an Answers tab with per-question aggregates and quotes linked to calls, a Responses tab with the calls list and CSV/XLSX exports, and a transcript page. The Report tab is a placeholder until Phase 7. |
+| Campaign detail | Done (Phases 1–3): goal, background, topics, a typed question editor with AI drafting, calling preferences, edit and delete, a Contacts tab with upload, mapping, validation, and per-row fixes, a Call script preview, a Test a call dialog, a metrics row with live refresh, an Answers tab with per-question aggregates and quotes linked to calls, a Responses tab with the calls list and CSV/XLSX exports, a transcript page, and a Report tab with a versioned AI report (themes, disagreements, requests, gaps, labeled suggestions, every quote linked to its call) and a question box with citations. |
 | Connections page | Mockup: lists planned apps, nothing connects. |
 | Settings page | Done (Phases 2–3): workspace calling defaults, default country, and the opt-out list. |
 | API | Done (Phase 1): campaigns CRUD and question replacement with zod validation, CORS, JSON errors, and service tests. |
 | Database | Done (Phase 1): `campaigns`, `questions`, `campaign_events` tables, first migration, seed script. |
 | Version control | Done (Phase 1): git initialized with a baseline commit. |
-| AI | Done (Phases 2 and 4): Strands Agents SDK with the OpenAI provider drafts questions and runs the text call simulator; needs `OPENAI_API_KEY`. |
+| AI | Done (Phases 2, 4, 7): Strands Agents SDK with the OpenAI provider drafts questions, runs the text call simulator, writes the report, and answers questions over the evidence; needs `OPENAI_API_KEY`. |
 | Calling | Done in code (Phase 5): CALL-E adapter, scheduler with calling hours, attempts, budget, webhooks, polling, callbacks, start/pause/stop. Needs `CALLE_API_KEY` and a public webhook URL; no live call yet. |
 | Discord, external apps | Not started. |
 
-Phases 1 to 5 are complete in code: campaigns, questions, drafting, preferences, contact lists, the CALL-E task builder, result mapping, a text simulator, and the outreach scheduler with CALL-E adapter, webhooks, and callbacks. Phase 6 adds the results dashboard and exports. The first live call is still pending a CALL-E key. Reports, Discord, and integrations remain. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
+Phases 1 to 5 are complete in code: campaigns, questions, drafting, preferences, contact lists, the CALL-E task builder, result mapping, a text simulator, and the outreach scheduler with CALL-E adapter, webhooks, and callbacks. Phases 6 and 7 add the results dashboard, exports, and the versioned report with ask-the-report. The first live call is still pending a CALL-E key. Discord and integrations remain. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
 
 ## Phase overview
 
@@ -36,7 +36,7 @@ Phases 1 to 5 are complete in code: campaigns, questions, drafting, preferences,
 | 4 | Conversation layer (done 2026-09-13) | The layer that turns a campaign into CALL-E's task and result schema, plus a text simulator to exercise it, and the mapping from results and transcripts into answers. | 2, 3 |
 | 5 | Telephony and outreach control (code done 2026-09-13; live call pending) | Real outbound calls through CALL-E (heycall-e.com), webhook handling, call outcomes, retries, calling hours, callbacks, start/pause. | 4 |
 | 6 | Progress and results dashboard (done 2026-09-13) | Live per-contact status, transcripts, summaries, per-question answers, callback list, exports. | 5 |
-| 7 | Reports and asking questions of the data | Campaign-level report with counts, themes, supporting quotes, disagreements, gaps, labeled suggestions, and a Q&A box over the answers. | 6 |
+| 7 | Reports and asking questions of the data (done 2026-09-13) | Campaign-level report with counts, themes, supporting quotes, disagreements, gaps, labeled suggestions, and a Q&A box over the answers. | 6 |
 | 8 | Discord agent | Manage the same campaigns from Discord: create, review questions, upload contacts, start/pause, progress, answers, reports, notifications. | 7 |
 | 9 | External app connections | Google Sheets (contacts in, results out), Google Calendar (callbacks), Notion (published report), with real OAuth and visible failures. | 8 |
 | 10 | Reliability, trust, and demo | Test and evaluation checklist from `hackathon.md` executed and recorded, consent and retention controls, reliability brief, demo script, deployment. | 9 |

@@ -64,6 +64,7 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. API te
 | `POST` | `/api/campaigns/:id/simulations` | Start a text simulation; `POST …/:callId/turns` sends the person's line. |
 | `GET` | `/api/campaigns/:id/results` | Participation counts and per-question aggregates with every answer linked to its call. |
 | `GET` | `/api/campaigns/:id/export` | `kind=answers|calls`, `format=csv|xlsx`; the web app proxies it at `/survey/:id/export` behind the session. |
+| `GET` | `/api/campaigns/:id/report` | Latest report and version list (`?version=n`); `POST` generates a new version; `POST …/ask` answers a question with citations; `GET …/questions` lists earlier questions. |
 | `GET` | `/api/campaigns/:id/outreach` | Readiness, reasons, and counts; `POST …/start`, `…/pause`, `…/stop`. |
 | `POST` | `/api/webhooks/calle` | CALL-E terminal events, idempotent by event id. |
 | `POST` | `/api/outreach/tick` | Run one scheduler pass by hand. |

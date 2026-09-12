@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnswersOverview } from "@/components/campaigns/answers-overview";
+import { AskReport } from "@/components/campaigns/ask-report";
+import { GenerateReportButton } from "@/components/campaigns/generate-report-button";
+import { ReportView } from "@/components/campaigns/report-view";
 import { CallScript } from "@/components/campaigns/call-script";
 import { CampaignMetrics } from "@/components/campaigns/campaign-metrics";
 import { ExportButtons } from "@/components/campaigns/export-buttons";
@@ -20,9 +22,9 @@ import { OutreachPanel } from "@/components/campaigns/outreach-panel";
 import { QuestionEditor } from "@/components/campaigns/question-editor";
 import { campaignContent as copy, campaignStatusLabels, preferencesContent } from "@/data/campaign";
 import { formatDate } from "@/lib/format";
-import type { CallSummary, Campaign, CampaignResults, ContactList, OutreachStatus, TaskPreview } from "@/lib/api";
+import type { AskResult, CallSummary, Campaign, CampaignResults, ContactList, OutreachStatus, ReportResponse, TaskPreview } from "@/lib/api";
 
-export function SurveyDetails({ campaign, contacts, calls, preview, outreach, results }: { campaign: Campaign; contacts: ContactList; calls: CallSummary[]; preview: TaskPreview; outreach: OutreachStatus; results: CampaignResults }) {
+export function SurveyDetails({ campaign, contacts, calls, preview, outreach, results, report, questions }: { campaign: Campaign; contacts: ContactList; calls: CallSummary[]; preview: TaskPreview; outreach: OutreachStatus; results: CampaignResults; report: ReportResponse; questions: AskResult[] }) {
   const live = campaign.status === "running" || outreach.counts.active > 0 || outreach.counts.queued > 0;
   const readyContacts = contacts.contacts.filter((contact) => contact.status === "ready").map((contact) => ({ id: contact.id, name: contact.name, phone: contact.phone }));
   const language = preferencesContent.languages.find((item) => item.value === campaign.language)?.label ?? campaign.language;
@@ -82,7 +84,14 @@ export function SurveyDetails({ campaign, contacts, calls, preview, outreach, re
           <CallsList campaignId={campaign.id} calls={calls} />
           <ExportButtons campaignId={campaign.id} />
         </TabsContent>
-        <TabsContent value="report"><Empty className="border"><EmptyHeader><EmptyDescription>{copy.reportEmpty}</EmptyDescription></EmptyHeader></Empty></TabsContent>
+        <TabsContent value="report" className="space-y-8">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div><h2 className="text-xl">{copy.reportView.title}</h2><p className="mt-2 max-w-3xl text-sm text-muted-foreground">{copy.reportView.description}</p></div>
+            <GenerateReportButton campaignId={campaign.id} hasReport={report.report !== null} disabled={results.responses.total === 0} />
+          </div>
+          {report.report ? <ReportView campaignId={campaign.id} report={report.report} versions={report.versions} /> : <p className="text-sm text-muted-foreground">{results.responses.total === 0 ? copy.reportView.needCalls : copy.reportView.empty}</p>}
+          <AskReport campaignId={campaign.id} history={questions} disabled={results.responses.total === 0} />
+        </TabsContent>
       </Tabs>
     </div>
   );

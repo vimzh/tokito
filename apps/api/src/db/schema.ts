@@ -218,6 +218,37 @@ export const providerEvents = sqliteTable('provider_events', {
   error: text('error'),
 })
 
+export const reports = sqliteTable(
+  'reports',
+  {
+    id: text('id').primaryKey(),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    version: integer('version').notNull(),
+    model: text('model').notNull(),
+    promptVersion: text('prompt_version').notNull(),
+    content: text('content', { mode: 'json' }).$type<Record<string, unknown>>().notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [uniqueIndex('reports_campaign_version').on(table.campaignId, table.version)],
+)
+
+export const reportQuestions = sqliteTable(
+  'report_questions',
+  {
+    id: text('id').primaryKey(),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    question: text('question').notNull(),
+    answer: text('answer', { mode: 'json' }).$type<Record<string, unknown>>().notNull(),
+    model: text('model').notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [index('report_questions_campaign').on(table.campaignId)],
+)
+
 export type Campaign = typeof campaigns.$inferSelect
 export type Question = typeof questions.$inferSelect
 export type CampaignEvent = typeof campaignEvents.$inferSelect
@@ -228,3 +259,5 @@ export type OptOut = typeof optOuts.$inferSelect
 export type Call = typeof calls.$inferSelect
 export type CallTurn = typeof callTurns.$inferSelect
 export type Answer = typeof answers.$inferSelect
+export type Report = typeof reports.$inferSelect
+export type ReportQuestion = typeof reportQuestions.$inferSelect

@@ -9,6 +9,7 @@ import { InvalidPhoneError } from './services/opt-outs'
 import { SpreadsheetError } from './services/spreadsheet'
 import { SimulationError } from './calls/simulator'
 import { OutreachError } from './calls/scheduler'
+import { ReportError } from './reports/generate'
 import { ProviderError, ProviderNotConfiguredError } from './calls/provider'
 import { runScheduledTick, schedulerRoutes, webhookRoutes } from './routes/outreach'
 import { NotFoundError } from './services/campaigns'
@@ -18,7 +19,7 @@ const app = new Hono()
   .use('/api/*', cors({ origin: process.env.WEB_ORIGIN ?? 'http://localhost:3000' }))
   .onError((error, c) => {
     if (error instanceof NotFoundError) return c.json({ error: { message: error.message } }, 404)
-    if (error instanceof SpreadsheetError || error instanceof ImportStateError || error instanceof InvalidPhoneError || error instanceof SimulationError || error instanceof OutreachError)
+    if (error instanceof SpreadsheetError || error instanceof ImportStateError || error instanceof InvalidPhoneError || error instanceof SimulationError || error instanceof OutreachError || error instanceof ReportError)
       return c.json({ error: { message: error.message } }, 400)
     if (error instanceof AiNotConfiguredError || error instanceof ProviderNotConfiguredError) return c.json({ error: { message: error.message } }, 503)
     if (error instanceof ProviderError) return c.json({ error: { message: error.message, code: error.code } }, 502)

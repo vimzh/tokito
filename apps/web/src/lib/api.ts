@@ -125,3 +125,18 @@ export type ExportFormat = "csv" | "xlsx";
 
 export const getResults = (id: string) => campaignRoute.results.$get({ param: { id } }).then((response) => unwrap<CampaignResults>(response));
 export const fetchExport = (id: string, kind: ExportKind, format: ExportFormat) => campaignRoute.export.$get({ param: { id }, query: { kind, format } });
+
+// ---- Reports and ask-the-report (Phase 7) ----
+const reportRoute = campaignRoute.report;
+
+export type ReportResponse = Res<typeof reportRoute.$get, 200>;
+export type Report = NonNullable<ReportResponse["report"]>;
+export type ReportContent = Report["content"];
+export type ReportQuote = ReportContent["themes"][number]["quotes"][number];
+export type AskResult = Res<typeof reportRoute.ask.$post, 201>;
+
+export const getReport = (id: string, version?: number) =>
+  reportRoute.$get({ param: { id }, query: version ? { version: String(version) } : {} }).then((response) => unwrap<ReportResponse>(response));
+export const generateReport = (id: string) => reportRoute.$post({ param: { id } }).then((response) => unwrap<Report>(response));
+export const askReport = (id: string, question: string) => reportRoute.ask.$post({ param: { id }, json: { question } }).then((response) => unwrap<AskResult>(response));
+export const listReportQuestions = (id: string) => reportRoute.questions.$get({ param: { id } }).then((response) => unwrap<AskResult[]>(response));
