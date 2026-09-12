@@ -4,12 +4,20 @@ import type { AppType } from "api/src/index";
 const client = hc<AppType>(process.env.API_URL ?? "http://localhost:3002");
 const campaignsRoute = client.api.campaigns;
 const campaignRoute = campaignsRoute[":id"];
+const settingsRoute = client.api.settings;
 
 export type CampaignSummary = InferResponseType<typeof campaignsRoute.$get, 200>[number];
 export type Campaign = InferResponseType<typeof campaignRoute.$get, 200>;
 export type CampaignStatus = Campaign["status"];
+export type Question = Campaign["questions"][number];
+export type QuestionType = Question["type"];
 export type CreateCampaignInput = InferRequestType<typeof campaignsRoute.$post>["json"];
 export type UpdateCampaignInput = InferRequestType<typeof campaignRoute.$patch>["json"];
+export type ReplaceQuestionsInput = InferRequestType<typeof campaignRoute.questions.$put>["json"];
+export type QuestionInput = ReplaceQuestionsInput["questions"][number];
+export type DraftResult = InferResponseType<typeof campaignRoute.questions.draft.$post, 200>;
+export type WorkspaceSettings = InferResponseType<typeof settingsRoute.$get, 200>;
+export type UpdateSettingsInput = InferRequestType<typeof settingsRoute.$put>["json"];
 
 export type ApiIssue = { path: string[]; message: string };
 
@@ -31,6 +39,9 @@ export const getCampaign = (id: string) => campaignRoute.$get({ param: { id } })
 export const createCampaign = (json: CreateCampaignInput) => campaignsRoute.$post({ json }).then((response) => unwrap<Campaign>(response));
 export const updateCampaign = (id: string, json: UpdateCampaignInput) =>
   campaignRoute.$patch({ param: { id }, json }).then((response) => unwrap<Campaign>(response));
-export const replaceQuestions = (id: string, questions: string[]) =>
-  campaignRoute.questions.$put({ param: { id }, json: { questions } }).then((response) => unwrap<Campaign>(response));
+export const replaceQuestions = (id: string, json: ReplaceQuestionsInput) =>
+  campaignRoute.questions.$put({ param: { id }, json }).then((response) => unwrap<Campaign>(response));
+export const draftQuestions = (id: string) => campaignRoute.questions.draft.$post({ param: { id } }).then((response) => unwrap<DraftResult>(response));
 export const deleteCampaign = (id: string) => campaignRoute.$delete({ param: { id } }).then((response) => unwrap<void>(response));
+export const getSettings = () => settingsRoute.$get().then((response) => unwrap<WorkspaceSettings>(response));
+export const updateSettings = (json: UpdateSettingsInput) => settingsRoute.$put({ json }).then((response) => unwrap<WorkspaceSettings>(response));

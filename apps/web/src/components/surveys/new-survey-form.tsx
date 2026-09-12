@@ -14,6 +14,7 @@ import { createCampaignAction } from "@/actions/campaigns";
 export function NewSurveyForm() {
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
+  const [context, setContext] = useState("");
   const [source, setSource] = useState("ai");
   const [approach, setApproach] = useState("dynamic");
   const [questions, setQuestions] = useState("");
@@ -42,6 +43,7 @@ export function NewSurveyForm() {
             {[
               [copy.name, name.trim()],
               [copy.goal, goal.trim()],
+              [copy.context, context.trim() || copy.emptyAdditional],
               [copy.source, copy.sources.find((option) => option.value === source)?.title],
               [copy.approach, copy.approaches.find((option) => option.value === approach)?.title],
               [copy.questions, source === "manual" ? questions.trim() : copy.aiNote],
@@ -53,6 +55,7 @@ export function NewSurveyForm() {
           <form action={formAction} className="space-y-4">
             <input type="hidden" name="name" value={name.trim()} />
             <input type="hidden" name="goal" value={goal.trim()} />
+            <input type="hidden" name="context" value={context.trim()} />
             <input type="hidden" name="questionSource" value={source} />
             <input type="hidden" name="conversationMode" value={approach} />
             <input type="hidden" name="questions" value={source === "manual" ? questions : ""} />
@@ -70,6 +73,7 @@ export function NewSurveyForm() {
             <h2 id="survey-basics" className="text-xl">{copy.basics}</h2>
             <div className="space-y-2"><Label htmlFor="survey-name">{copy.name}</Label><Input id="survey-name" value={name} onChange={(event) => setName(event.target.value)} placeholder={copy.namePlaceholder} maxLength={120} required /></div>
             <div className="space-y-2"><Label htmlFor="survey-goal">{copy.goal}</Label><Textarea id="survey-goal" value={goal} onChange={(event) => setGoal(event.target.value)} placeholder={copy.goalPlaceholder} className="min-h-28" maxLength={2000} required /></div>
+            <div className="space-y-2"><Label htmlFor="survey-context">{copy.context}</Label><p id="context-hint" className="text-sm text-muted-foreground">{copy.contextHint}</p><Textarea id="survey-context" aria-describedby="context-hint" value={context} onChange={(event) => setContext(event.target.value)} placeholder={copy.contextPlaceholder} className="min-h-28" maxLength={4000} /></div>
           </section>
           <section className="space-y-4" aria-labelledby="survey-source">
             <h2 id="survey-source" className="text-xl">{copy.source}</h2>

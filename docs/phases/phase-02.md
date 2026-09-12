@@ -1,6 +1,6 @@
 # Phase 2 — Question drafting and campaign setup
 
-Status: in progress, started September 13, 2026.
+Status: complete, September 13, 2026.
 
 ## Outcome
 
@@ -42,4 +42,24 @@ An organizer describes a goal and some background, asks Tokito to draft question
 
 ## Completion note
 
-_Fill in when the phase ends._
+**What changed.**
+
+- The AI layer was rewritten twice on the user's instruction during this phase: first from the Anthropic SDK to the OpenAI SDK, then to the Strands Agents SDK (`@strands-agents/sdk` 1.17) with its OpenAI model provider. Services depend on one small `StructuredRun` function in `src/ai/agent.ts`; a fresh Strands `Agent` with a zod `structuredOutputSchema` runs each request so nothing accumulates history. Tests fake that function. No code imports the `openai` package directly; it is present only as the SDK's peer dependency.
+- The calling provider was decided as CALL-E (heycall-e.com). The Phase 4 and 5 plans in `README.md` were rewritten around its call-task API, result schema, transcript turns, and webhooks.
+- Drafting never saves. `POST /api/campaigns/:id/questions/draft` returns a proposal; the Draft panel shows it with each question's type, options, and purpose; Accept over existing questions asks for confirmation; Discard changes nothing.
+- The question editor saves the whole ordered list through `PUT /api/campaigns/:id/questions` (text, type, options, required, source). Choice questions require two to eight distinct options.
+- The API build uses `--packages external` because bundling the Strands SDK pulls in optional AWS peers.
+
+**Checks run.**
+
+| Check | Result |
+|---|---|
+| `bun run lint`, `bun run typecheck`, `bun run build` | Pass |
+| `bun test` in `apps/api` (12 tests: service, validation, settings defaults, drafter normalization and failure) | Pass |
+| Migration 0001 applied to the dev database; hot API server serves `/api/settings` | Pass |
+| `curl` draft without a key → 503 "AI drafting is not configured"; PATCH with end before start → 400 with the hours message | Pass |
+| HTTP session: detail page shows Background, the question editor with answer types, the Draft button, calling preferences summary; Settings page shows real defaults and no preview notice; create page has the Background field | Pass |
+| Acceptance check 1 (real drafting output for the restaurant goal) | Not run: no `OPENAI_API_KEY` in this environment. The prompt and schema are in `src/ai/draft-questions.ts`; record the first real output here when a key is available |
+| Browser-driven editor, draft accept/discard, preferences dialog, settings save | Not run: needs a logged-in browser session |
+
+**What the next phase should know.** Phase 3 adds contacts. The `campaigns` row now carries language, calling hours, time zone, max attempts, and clarifications; Phase 4's CALL-E task builder reads those. `questions.source` tells whether a question came from the drafter. `src/ai/agent.ts` is the place to add tools if a later phase needs an agent that calls the API.

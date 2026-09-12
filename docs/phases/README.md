@@ -14,22 +14,23 @@ Detailed phase documents live next to this file (`phase-01.md`, `phase-02.md`, �
 | Workspace shell | Done: sidebar, navigation, profile card, Home / Connections / Settings pages. |
 | Home page | Done (Phase 1): lists real campaigns from the API with an empty state. |
 | Create campaign | Done (Phase 1): the review step saves a draft through a server action and redirects to the campaign page. |
-| Campaign detail | Done (Phase 1): real goal, topics, questions, and settings, with edit and delete. Responses and Report tabs are honest placeholders until Phases 6 and 7. |
+| Campaign detail | Done (Phases 1–2): goal, background, topics, a typed question editor with AI drafting, calling preferences, edit and delete. Responses and Report tabs are placeholders until Phases 6 and 7. |
 | Connections page | Mockup: lists planned apps, nothing connects. |
-| Settings page | Mockup: language, max call length, calling hours; resets on reload. |
+| Settings page | Done (Phase 2): workspace calling defaults saved through the API and copied into new campaigns. |
 | API | Done (Phase 1): campaigns CRUD and question replacement with zod validation, CORS, JSON errors, and service tests. |
 | Database | Done (Phase 1): `campaigns`, `questions`, `campaign_events` tables, first migration, seed script. |
 | Version control | Done (Phase 1): git initialized with a baseline commit. |
-| Calling, Discord, external apps, AI | Not started. |
+| AI | Done (Phase 2): Strands Agents SDK with the OpenAI provider drafts questions; needs `OPENAI_API_KEY`. |
+| Calling, Discord, external apps | Not started. Calling provider decided: CALL-E. |
 
-Phase 1 is complete: campaigns are real end to end. Everything from question drafting onward is still to build. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
+Phases 1 and 2 are complete: campaigns, questions, drafting, and preferences are real. Contacts, calls, results, reports, Discord, and integrations remain. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
 
 ## Phase overview
 
 | # | Phase | What exists at the end | Depends on |
 |---|---|---|---|
 | 1 | Foundation: real campaigns end to end (done 2026-09-13) | Campaigns and questions are saved in SQLite through the API and shown on the dashboard. Git history begins. | — |
-| 2 | Question drafting and campaign setup | An OpenAI model, run through the Strands Agents SDK, drafts a questionnaire from the goal; organizer edits, reorders, and sets question types and calling preferences. | 1 |
+| 2 | Question drafting and campaign setup (done 2026-09-13) | An OpenAI model, run through the Strands Agents SDK, drafts a questionnaire from the goal; organizer edits, reorders, and sets question types and calling preferences. | 1 |
 | 3 | Contact lists | Excel upload, column mapping, validation of numbers and duplicates, extra context columns, opt-out list. | 1 |
 | 4 | Conversation engine | The layer that turns a campaign into CALL-E's task and result schema, plus a text simulator to exercise it, and the mapping from results and transcripts into answers. | 2, 3 |
 | 5 | Telephony and outreach control | Real outbound calls through CALL-E (heycall-e.com), webhook handling, call outcomes, retries, calling hours, callbacks, start/pause. | 4 |
@@ -171,7 +172,7 @@ This changes the shape of Phase 4: because CALL-E runs the spoken conversation i
 **Goal.** Manage the same campaigns from Discord with shared state.
 
 **Scope.**
-- Discord bot in `apps/discord` (or inside the API process) using slash commands plus a natural-language channel handler backed by Claude tool use over the same API the dashboard uses.
+- Discord bot in `apps/discord` (or inside the API process) using slash commands plus a natural-language channel handler backed by a Strands agent (OpenAI model) with tools over the same API the dashboard uses.
 - Capabilities: create a campaign from a message, show and edit drafted questions, upload an Excel attachment as the contact list, review readiness, start / pause / resume, ask progress, look up what people said about a topic, request the report, and receive notifications for completion and problems needing attention.
 - Link a Discord server to a workspace; every action is attributed to a Discord user.
 - Messages that change state confirm before acting (start calling, pause).

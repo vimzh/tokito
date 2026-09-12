@@ -7,6 +7,9 @@ export const newSurveyContent = {
   namePlaceholder: "New menu feedback",
   goal: "Your goal",
   goalPlaceholder: "Understand what customers think of our new menu and what they would change.",
+  context: "Background",
+  contextHint: "Optional. Who you are, what changed, and anything the assistant may use to explain a question during a call.",
+  contextPlaceholder: "We are a family restaurant in Pune. The new menu launched last month with six new mains and slightly higher prices.",
   source: "Who writes the questions?",
   sources: [
     { value: "ai", title: "Let AI draft them", description: "Use your goal and extra topics to draft questions for you to review." },
@@ -26,7 +29,7 @@ export const newSurveyContent = {
   preview: "Review configuration",
   reviewTitle: "Your campaign configuration",
   reviewNote: "Check your choices, then save the campaign as a draft. Contacts and calling come later.",
-  aiNote: "Questions will be drafted from your goal and additional topics in a later update. The draft is saved without questions for now.",
+  aiNote: "After saving, draft the questions with AI on the campaign page and review them before anything is called.",
   save: "Save draft",
   saving: "Saving…",
   edit: "Edit configuration",

@@ -27,8 +27,8 @@ export function CampaignEditor({ campaign }: { campaign: Campaign }) {
         <form action={formAction} className="space-y-5">
           <div className="space-y-2"><Label htmlFor="edit-name">{copy.name}</Label><Input id="edit-name" name="name" defaultValue={campaign.name} maxLength={120} required /></div>
           <div className="space-y-2"><Label htmlFor="edit-goal">{copy.goalLabel}</Label><Textarea id="edit-goal" name="goal" defaultValue={campaign.goal} className="min-h-28" maxLength={2000} required /></div>
+          <div className="space-y-2"><Label htmlFor="edit-context">{copy.contextLabel}</Label><p id="edit-context-hint" className="text-sm text-muted-foreground">{copy.contextHint}</p><Textarea id="edit-context" name="context" aria-describedby="edit-context-hint" defaultValue={campaign.context ?? ""} className="min-h-28" maxLength={4000} /></div>
           <div className="space-y-2"><Label htmlFor="edit-topics">{copy.topicsLabel}</Label><Textarea id="edit-topics" name="additionalTopics" defaultValue={campaign.additionalTopics ?? ""} className="min-h-20" maxLength={2000} /></div>
-          <div className="space-y-2"><Label htmlFor="edit-questions">{copy.questionsLabel}</Label><p id="edit-questions-hint" className="text-sm text-muted-foreground">{copy.questionsHint}</p><Textarea id="edit-questions" name="questions" aria-describedby="edit-questions-hint" defaultValue={campaign.questions.map((question) => question.text).join("\n")} className="min-h-36" maxLength={10000} /></div>
           {state.error && <p role="alert" className="text-sm text-destructive">{state.error}</p>}
           <DialogFooter>
             <Button type="button" variant="outline" disabled={pending} onClick={() => setOpen(false)}>{copy.cancel}</Button>
