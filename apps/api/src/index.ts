@@ -4,6 +4,7 @@ import { HTTPException } from 'hono/http-exception'
 import { campaignRoutes } from './routes/campaigns'
 import { settingsRoutes } from './routes/settings'
 import { optOutRoutes } from './routes/opt-outs'
+import { eventRoutes } from './routes/events'
 import { ImportStateError } from './services/contacts'
 import { InvalidPhoneError } from './services/opt-outs'
 import { SpreadsheetError } from './services/spreadsheet'
@@ -33,6 +34,7 @@ const app = new Hono()
   .route('/api/campaigns', campaignRoutes)
   .route('/api/settings', settingsRoutes)
   .route('/api/opt-outs', optOutRoutes)
+  .route('/api/events', eventRoutes)
   .route('/api/webhooks', webhookRoutes)
   .route('/api/outreach', schedulerRoutes)
 

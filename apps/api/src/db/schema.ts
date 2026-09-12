@@ -26,6 +26,7 @@ const callingPreferences = {
 export const workspaceSettings = sqliteTable('workspace_settings', {
   id: text('id').primaryKey(),
   ...callingPreferences,
+  discordChannelId: text('discord_channel_id'),
   updatedAt: integer('updated_at').notNull(),
 })
 

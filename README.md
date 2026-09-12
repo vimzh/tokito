@@ -14,14 +14,15 @@ bun run dev
 - Web (Next.js): http://localhost:3000
 - API (Hono): http://localhost:3002
 
-Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. API tests: `cd apps/api && bun test`.
+Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. Tests: `cd apps/api && bun test` and `cd apps/discord && bun test`.
 
 ## Apps
 
 | App | Path | Notes |
 |---|---|---|
 | Web | `apps/web` | Next.js 16 app with shadcn/ui. Server components and server actions call the API through a typed Hono RPC client in `src/lib/api.ts`. |
-| API | `apps/api` | Hono on Bun with SQLite through `bun:sqlite` and Drizzle. Schema in `src/db/schema.ts`, routes in `src/routes`, logic in `src/services`. |
+| API | `apps/api` | Hono on Bun with SQLite through `bun:sqlite` and Drizzle. Schema in `src/db/schema.ts`, routes in `src/routes`, logic in `src/services`, calling in `src/calls`, reports in `src/reports`. |
+| Discord bot | `apps/discord` | discord.js bot with `/tokito` slash commands and a mention-driven Strands agent whose tools call the API. Run with `cd apps/discord && bun run dev:bot` after `bun run register`; it exits at once when `DISCORD_TOKEN` is unset. |
 
 ### Environment
 
@@ -32,6 +33,8 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. API te
 | `AUTH_SECRET` | Auth.js session secret. Generate with `bunx auth secret`. |
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Optional Google OAuth web client. |
 | `API_URL` | Base URL of the API, default `http://localhost:3002`. |
+
+`apps/discord/.env` (copy from `.env.example`): `DISCORD_TOKEN`, `DISCORD_APP_ID`, optional `DISCORD_GUILD_ID` for instant command registration, `API_URL`, `DASHBOARD_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL`.
 
 `apps/api/.env` (copied from `.env.example`):
 
@@ -68,6 +71,7 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. API te
 | `GET` | `/api/campaigns/:id/outreach` | Readiness, reasons, and counts; `POST …/start`, `…/pause`, `…/stop`. |
 | `POST` | `/api/webhooks/calle` | CALL-E terminal events, idempotent by event id. |
 | `POST` | `/api/outreach/tick` | Run one scheduler pass by hand. |
+| `GET` | `/api/events` | Campaign event log across campaigns (`?after=<ms>`); `POST` records an activity entry from another surface, such as Discord. |
 | `GET` | `/api/opt-outs` | Opt-out list; `POST /api/opt-outs`, `POST /api/opt-outs/remove`. |
 | `GET` | `/api/settings` | Workspace calling defaults. |
 | `PUT` | `/api/settings` | Update workspace calling defaults. |

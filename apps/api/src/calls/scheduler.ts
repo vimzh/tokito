@@ -244,6 +244,13 @@ export async function tick(db: Db, provider: CallProvider, options: { now?: numb
       }
     }
 
+    // Nothing left to dial and nothing in flight: the campaign is done.
+    const after = outreachStatus(db, campaign.id, { now, providerConfigured: true })
+    if (after.counts.remaining === 0 && after.counts.active === 0 && after.counts.queued === 0 && after.campaignStatus === 'running') {
+      setStatus(db, campaign.id, 'completed', { outreachStoppedAt: now }, 'outreach.completed')
+      continue
+    }
+
     // Polling fallback for calls whose terminal webhook has not arrived.
     const stale = campaignCalls(db, campaign.id).filter((call) => ACTIVE.includes(call.status) && call.providerCallId && (call.lastPolledAt ?? 0) + schedulerConfig.pollAfterMinutes * 60_000 <= now)
     for (const call of stale) {
