@@ -59,7 +59,18 @@ An organizer describes a goal and some background, asks Tokito to draft question
 | Migration 0001 applied to the dev database; hot API server serves `/api/settings` | Pass |
 | `curl` draft without a key → 503 "AI drafting is not configured"; PATCH with end before start → 400 with the hours message | Pass |
 | HTTP session: detail page shows Background, the question editor with answer types, the Draft button, calling preferences summary; Settings page shows real defaults and no preview notice; create page has the Background field | Pass |
-| Acceptance check 1 (real drafting output for the restaurant goal) | Not run: no `OPENAI_API_KEY` in this environment. The prompt and schema are in `src/ai/draft-questions.ts`; record the first real output here when a key is available |
+| Acceptance check 1 (real drafting output for the restaurant goal) | Pass, run later the same day with a real key against `gpt-5.5` (13.6 s), `gpt-5.6-sol` (17.9 s), and `gpt-6-astra` (14.6 s). All three returned 8 schema-valid questions, opened with a screening choice question about whether the person had ordered from the new menu, covered prices, portions, vegetarian choices, and missed dishes, and ended with an optional open question. None used leading wording. The `gpt-5.5` output is recorded below. |
 | Browser-driven editor, draft accept/discard, preferences dialog, settings save | Not run: needs a logged-in browser session |
+
+**Recorded `gpt-5.5` draft (restaurant goal, 2026-09-13).**
+
+1. Choice (Yes, I ordered from the new menu / I visited but did not order from the new menu / No, I have not visited since then / I'm not sure): Since the new menu launched last month, have you visited our restaurant and ordered from it?
+2. Open: Which new dish or dishes did you try, if any?
+3. Open: What did you like about the new dish or dishes you tried?
+4. Open: What, if anything, would you improve about the new dish or dishes you tried?
+5. Rating 1–5: How fair did the new menu prices feel for what you received, where 1 is not fair at all and 5 is very fair?
+6. Open: How did the portion sizes feel to you?
+7. Open: How do you feel about the vegetarian choices on the new menu?
+8. Open, optional: Is there anything else you would like to add about the new menu, including any old dishes you miss?
 
 **What the next phase should know.** Phase 3 adds contacts. The `campaigns` row now carries language, calling hours, time zone, max attempts, and clarifications; Phase 4's CALL-E task builder reads those. `questions.source` tells whether a question came from the drafter. `src/ai/agent.ts` is the place to add tools if a later phase needs an agent that calls the API.
