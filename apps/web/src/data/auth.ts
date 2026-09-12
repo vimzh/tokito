@@ -1,0 +1,17 @@
+export const authContent = {
+  login: "Login",
+  loginTitle: "Log in to Tokito",
+  loginDescription: "Enter your email and password to get started.",
+  email: "Email",
+  password: "Password",
+  loggingIn: "Logging in…",
+  invalidCredentials: "The email or password is incorrect. Please try again.",
+  loginUnavailable: "Unable to log in right now. Please try again.",
+  demoDescription: "Hi! Want to try the demo? Log in with these credentials.",
+  demoEmail: "demo@theategmail.com",
+  demoPassword: "demo1234",
+  continueWithGoogle: "Continue with Google",
+  googleAccount: "Google account",
+  oauthNotConfigured: "Google OAuth is not configured",
+  signOut: "Sign out",
+} as const;
