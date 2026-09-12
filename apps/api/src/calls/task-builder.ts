@@ -16,7 +16,7 @@ export function buildResultSchema(questions: CallQuestion[]) {
     questions.map((question, index) => [
       questionKey(index),
       z.object({
-        status: z.enum(answerStatuses).describe('answered when the person gave an answer; skipped when they moved on; declined when they refused; unknown when they did not know; not_asked when the call ended before it.'),
+        answer_status: z.enum(answerStatuses).describe('answered when the person gave an answer; skipped when they moved on; declined when they refused; unknown when they did not know; not_asked when the call ended before it.'),
         value: z.string().describe(valueDescription(question)),
         notes: z.string().describe('Reasons, examples, or follow-up details the person gave, in their words. Empty if none.'),
       }),
@@ -26,15 +26,33 @@ export function buildResultSchema(questions: CallQuestion[]) {
     outcome: z.enum(callOutcomes).describe('completed: all questions handled. partial: some answered before the call ended. declined: did not want to take part. wrong_person: the number did not reach the intended person. callback_requested: asked to be called at another time. opted_out: asked never to be called again. no_conversation: nothing meaningful was said.'),
     answers: z.object(answerShape),
     callback: z.object({
-      requested: z.boolean(),
+      requested: z.enum(['yes', 'no']).describe('yes only if the person asked to be called at another time.'),
       preferred_time: z.string().describe('The time or day the person asked for, in their words. Empty if none.'),
     }),
-    opt_out: z.boolean().describe('True only if the person asked not to be contacted again.'),
-    summary: z.string().describe('Two or three sentences on what the person said, without adding opinions.'),
+    opt_out: z.enum(['yes', 'no']).describe('yes only if the person asked not to be contacted again.'),
+    person_summary: z.string().describe('Two or three sentences on what the person said, without adding opinions.'),
     requests_for_organizer: z.string().describe('Anything the person asked the organizer to do or send. Empty if none.'),
   })
   const questionMap = Object.fromEntries(questions.map((question, index) => [questionKey(index), question.id]))
-  return { zodSchema, jsonSchema: z.toJSONSchema(zodSchema) as Record<string, unknown>, questionMap }
+  return { zodSchema, jsonSchema: sanitizeJsonSchema(z.toJSONSchema(zodSchema) as Record<string, unknown>), questionMap }
+}
+
+// CALL-E accepts only type, properties, required, enum, description, items, and additionalProperties: false.
+export const unsupportedSchemaKeys = ['$ref', '$schema', '$defs', 'oneOf', 'anyOf', 'allOf', 'not', 'format', 'pattern'] as const
+
+export function sanitizeJsonSchema(schema: Record<string, unknown>): Record<string, unknown> {
+  const { $schema: _dropped, ...rest } = schema as Record<string, unknown> & { $schema?: string }
+  return rest
+}
+
+export function findUnsupportedSchemaKeys(schema: unknown, path = '$'): string[] {
+  if (Array.isArray(schema)) return schema.flatMap((item, index) => findUnsupportedSchemaKeys(item, `${path}[${index}]`))
+  if (!schema || typeof schema !== 'object') return []
+  return Object.entries(schema).flatMap(([key, value]) => [
+    ...((unsupportedSchemaKeys as readonly string[]).includes(key) ? [`${path}.${key}`] : []),
+    ...(key === 'additionalProperties' && value === true ? [`${path}.additionalProperties=true`] : []),
+    ...findUnsupportedSchemaKeys(value, `${path}.${key}`),
+  ])
 }
 
 function valueDescription(question: CallQuestion) {
@@ -99,7 +117,7 @@ export function buildTask(campaign: TaskCampaign, questions: CallQuestion[], con
   lines.push('Thank them for their time, say the organizer will read their answers, and say goodbye.')
   lines.push('')
   lines.push('RECORDING THE RESULT')
-  lines.push("Fill the result exactly as the person answered, in their words. Use the status values for gaps. Set outcome, callback, and opt_out truthfully. Write a two or three sentence summary of what they said without adding opinions.")
+  lines.push("Fill the result exactly as the person answered, in their words. Use the answer_status values for gaps. Set outcome, callback, and opt_out truthfully. Write a two or three sentence person_summary of what they said without adding opinions.")
   return lines.join('\n')
 }
 

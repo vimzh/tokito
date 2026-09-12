@@ -70,6 +70,7 @@ export const updateCampaignSchema = z
     additionalTopics: z.string().trim().max(2000).nullable().optional(),
     conversationMode: z.enum(conversationModes).optional(),
     clarificationsAllowed: z.boolean().optional(),
+    maxCalls: z.number().int().min(1).max(100000).nullable().optional(),
   })
   .extend(callingPreferencesSchema.partial().shape)
   .refine((data) => Object.keys(data).length > 0, { message: 'Provide at least one field to update.' })

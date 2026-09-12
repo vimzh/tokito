@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { campaignContent } from "@/data/campaign";
+import { ScheduleCallback } from "@/components/campaigns/schedule-callback";
 import { formatDateTime } from "@/lib/format";
 import type { CallSummary } from "@/lib/api";
 
@@ -24,7 +25,13 @@ export function CallsList({ campaignId, calls }: { campaignId: string; calls: Ca
                 <TableCell className="max-w-80 whitespace-normal text-muted-foreground">{call.summary ?? ""}</TableCell>
                 <TableCell className="tabular-nums">{copy.answered(answered, call.answers.length)}</TableCell>
                 <TableCell className="whitespace-nowrap text-muted-foreground">{formatDateTime(call.createdAt)}</TableCell>
-                <TableCell><Link className="text-sm underline-offset-4 hover:underline" href={`/survey/${campaignId}/calls/${call.id}`}>{copy.open}</Link></TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link className="text-sm underline-offset-4 hover:underline" href={`/survey/${campaignId}/calls/${call.id}`}>{copy.open}</Link>
+                    {call.status === "callback_requested" && call.contactId && <ScheduleCallback campaignId={campaignId} callId={call.id} requestedTime={call.callbackTime} />}
+                    {call.status === "queued" && call.scheduledAt && <span className="text-xs text-muted-foreground">{campaignContent.outreach.callbackScheduled(formatDateTime(call.scheduledAt))}</span>}
+                  </div>
+                </TableCell>
               </TableRow>
             );
           })}

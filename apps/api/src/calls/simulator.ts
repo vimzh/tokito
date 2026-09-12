@@ -2,11 +2,12 @@ import { and, asc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import type { MessageData } from '@strands-agents/sdk'
 import type { Db } from '../db'
-import { answers, calls, callTurns, campaignEvents, campaigns, contacts, questions } from '../db/schema'
+import { answers, calls, callTurns, campaigns, contacts, questions } from '../db/schema'
 import type { StructuredRun } from '../ai/agent'
 import { NotFoundError } from '../services/campaigns'
 import { buildCallSpec } from './task-builder'
-import { mapResult, statusFromOutcome, type MappedResult } from './result-mapper'
+import type { MappedResult } from './result-mapper'
+import { callQuestions, persistCallResult } from './persist'
 
 const id = () => crypto.randomUUID()
 const MAX_TURNS = 60
@@ -116,42 +117,15 @@ export async function simulationTurn(db: Db, campaignId: string, callId: string,
 
 async function finalizeSimulation(db: Db, campaignId: string, callId: string, run: StructuredRun): Promise<MappedResult> {
   const call = loadCall(db, campaignId, callId)
-  const { questions: rows } = loadCampaign(db, campaignId)
-  const known = rows.filter((question) => Object.values(call.questionMap).includes(question.id))
-  const { zodSchema } = buildCallSpec({ ...loadCampaign(db, campaignId).campaign }, known)
+  const known = callQuestions(db, call)
+  const { zodSchema } = buildCallSpec(loadCampaign(db, campaignId).campaign, known)
   const transcript = loadTurns(db, callId).map((turn) => `${turn.speaker === 'assistant' ? 'Assistant' : 'Person'}: ${turn.text}`).join('\n')
   const extraction = await run({
     system: `You read a transcript of a phone call and fill in the result record exactly as the person answered. Never invent an answer. Use skipped, declined, unknown, or not_asked for every gap. Copy the person's own words. For rating questions write only the digit. For choice questions write the option exactly as offered, or "other: " and their words.\n\nThe call's instructions were:\n${call.task}`,
     prompt: `Transcript:\n${transcript}`,
     schema: zodSchema,
   })
-  const mapped = mapResult(extraction.output, known, call.questionMap)
-  const now = Date.now()
-  db.transaction((tx) => {
-    tx.delete(answers).where(eq(answers.callId, callId)).run()
-    if (mapped.answers.length) {
-      tx.insert(answers)
-        .values(mapped.answers.map((answer) => ({ id: id(), callId, campaignId, contactId: call.contactId, ...answer, createdAt: now })))
-        .run()
-    }
-    tx.update(calls)
-      .set({
-        status: statusFromOutcome(mapped.outcome),
-        summary: mapped.summary,
-        structuredResult: extraction.output as Record<string, unknown>,
-        requestsForOrganizer: mapped.requestsForOrganizer,
-        callbackRequested: mapped.callbackRequested,
-        callbackTime: mapped.callbackTime,
-        optOut: mapped.optOut,
-        endedAt: now,
-        durationSeconds: call.startedAt ? Math.round((now - call.startedAt) / 1000) : null,
-        updatedAt: now,
-      })
-      .where(eq(calls.id, callId))
-      .run()
-    tx.insert(campaignEvents).values({ id: id(), campaignId, type: 'call.simulated', payload: { callId, outcome: mapped.outcome }, createdAt: now }).run()
-  })
-  return mapped
+  return persistCallResult(db, call, { structured: extraction.output, eventType: 'call.simulated' })
 }
 
 export function listCalls(db: Db, campaignId: string) {

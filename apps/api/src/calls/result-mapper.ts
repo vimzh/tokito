@@ -44,7 +44,7 @@ export function mapResult(structured: unknown, questions: CallQuestion[], questi
   const answers: MappedAnswer[] = Object.entries(questionMap).map(([key, questionId]) => {
     const question = byId.get(questionId)
     const raw = data.answers[key]
-    const status: AnswerStatus = raw?.status ?? 'unknown'
+    const status: AnswerStatus = raw?.answer_status ?? 'unknown'
     const value = status === 'answered' ? empty(raw?.value) : null
     let valueNumber: number | null = null
     let finalValue = value
@@ -63,10 +63,10 @@ export function mapResult(structured: unknown, questions: CallQuestion[], questi
     parsed: true,
     outcome: data.outcome,
     answers,
-    callbackRequested: data.callback.requested || data.outcome === 'callback_requested',
+    callbackRequested: data.callback.requested === 'yes' || data.outcome === 'callback_requested',
     callbackTime: empty(data.callback.preferred_time),
-    optOut: data.opt_out || data.outcome === 'opted_out',
-    summary: empty(data.summary),
+    optOut: data.opt_out === 'yes' || data.outcome === 'opted_out',
+    summary: empty(data.person_summary),
     requestsForOrganizer: empty(data.requests_for_organizer),
   }
 }

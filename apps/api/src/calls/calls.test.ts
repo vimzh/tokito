@@ -3,7 +3,7 @@ import { migrate } from 'drizzle-orm/bun-sqlite/migrator'
 import { createDb, type Db } from '../db'
 import type { StructuredRun } from '../ai/agent'
 import { createCampaign, replaceQuestions } from '../services/campaigns'
-import { buildCallSpec, buildResultSchema, type CallQuestion } from './task-builder'
+import { buildCallSpec, buildResultSchema, findUnsupportedSchemaKeys, type CallQuestion } from './task-builder'
 import { mapResult, statusFromProvider } from './result-mapper'
 import { getCall, listCalls, simulationTurn, startSimulation } from './simulator'
 
@@ -38,7 +38,9 @@ describe('task builder', () => {
     const { jsonSchema } = buildResultSchema(questions)
     const properties = (jsonSchema as { properties: { answers: { properties: Record<string, unknown> } } }).properties
     expect(Object.keys(properties.answers.properties)).toEqual(['q1', 'q2', 'q3'])
-    expect(Object.keys(properties)).toEqual(expect.arrayContaining(['outcome', 'callback', 'opt_out', 'summary']))
+    expect(Object.keys(properties)).toEqual(expect.arrayContaining(['outcome', 'callback', 'opt_out', 'person_summary']))
+    expect(findUnsupportedSchemaKeys(jsonSchema)).toEqual([])
+    expect(Object.keys(jsonSchema)).not.toContain('$schema')
   })
 })
 
@@ -48,10 +50,10 @@ describe('result mapper', () => {
     const result = mapResult(
       {
         outcome: 'partial',
-        answers: { q1: { status: 'answered', value: 'yes', notes: '' }, q2: { status: 'declined', value: '', notes: '' }, q3: { status: 'answered', value: 'about a 4', notes: 'pasta was small' } },
-        callback: { requested: false, preferred_time: '' },
-        opt_out: false,
-        summary: 'Tried it, would not discuss prices.',
+        answers: { q1: { answer_status: 'answered', value: 'yes', notes: '' }, q2: { answer_status: 'declined', value: '', notes: '' }, q3: { answer_status: 'answered', value: 'about a 4', notes: 'pasta was small' } },
+        callback: { requested: 'no', preferred_time: '' },
+        opt_out: 'no',
+        person_summary: 'Tried it, would not discuss prices.',
         requests_for_organizer: '',
       },
       questions,
@@ -65,7 +67,7 @@ describe('result mapper', () => {
   })
 
   test('callback and opt-out are surfaced; unparseable results become unknown', () => {
-    const cb = mapResult({ outcome: 'callback_requested', answers: { q1: { status: 'not_asked', value: '', notes: '' }, q2: { status: 'not_asked', value: '', notes: '' }, q3: { status: 'not_asked', value: '', notes: '' } }, callback: { requested: true, preferred_time: 'tomorrow after 6' }, opt_out: false, summary: '', requests_for_organizer: '' }, questions, map)
+    const cb = mapResult({ outcome: 'callback_requested', answers: { q1: { answer_status: 'not_asked', value: '', notes: '' }, q2: { answer_status: 'not_asked', value: '', notes: '' }, q3: { answer_status: 'not_asked', value: '', notes: '' } }, callback: { requested: 'yes', preferred_time: 'tomorrow after 6' }, opt_out: 'no', person_summary: '', requests_for_organizer: '' }, questions, map)
     expect(cb).toMatchObject({ callbackRequested: true, callbackTime: 'tomorrow after 6' })
     const bad = mapResult({ nonsense: true }, questions, map)
     expect(bad.parsed).toBe(false)
@@ -99,7 +101,7 @@ describe('simulator', () => {
         const turns = (history?.length ?? 0) + 1
         return { output: schema.parse({ say: turns >= 3 ? 'Thank you, goodbye.' : 'Have you tried the new menu?', end_call: turns >= 3 }), model: 'fake' }
       }
-      return { output: schema.parse({ outcome: 'completed', answers: { q1: { status: 'answered', value: 'Yes', notes: '' }, q2: { status: 'answered', value: 'Too expensive', notes: 'pasta' } }, callback: { requested: false, preferred_time: '' }, opt_out: false, summary: 'Tried it; found it expensive.', requests_for_organizer: '' }), model: 'fake' }
+      return { output: schema.parse({ outcome: 'completed', answers: { q1: { answer_status: 'answered', value: 'Yes', notes: '' }, q2: { answer_status: 'answered', value: 'Too expensive', notes: 'pasta' } }, callback: { requested: 'no', preferred_time: '' }, opt_out: 'no', person_summary: 'Tried it; found it expensive.', requests_for_organizer: '' }), model: 'fake' }
     }
     const { call, turn } = await startSimulation(db, campaignId, { personName: 'Tester' }, run)
     expect(call.status).toBe('in_progress')

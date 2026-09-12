@@ -50,7 +50,7 @@ export function ContactsTable({ campaignId, list }: { campaignId: string; list: 
         <Table>
           <TableHeader><TableRow>{Object.values(copy.table).map((label) => <TableHead key={label}>{label}</TableHead>)}</TableRow></TableHeader>
           <TableBody>
-            {rows.length === 0 && <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">{copy.noMatches}</TableCell></TableRow>}
+            {rows.length === 0 && <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">{copy.noMatches}</TableCell></TableRow>}
             {rows.map((contact) => <ContactRow key={contact.id} campaignId={campaignId} contact={contact} pending={pending} onStatus={(next) => run(() => setContactStatusAction(campaignId, contact.id, next))} onDelete={() => run(() => deleteContactAction(campaignId, contact.id))} />)}
           </TableBody>
         </Table>
@@ -67,6 +67,14 @@ function ContactRow({ campaignId, contact, pending, onStatus, onDelete }: { camp
       <TableCell className="tabular-nums">{contact.phone ?? contact.phoneRaw}{contact.phone && contact.phone !== contact.phoneRaw && <span className="block text-xs text-muted-foreground">{contact.phoneRaw}</span>}</TableCell>
       <TableCell><Badge variant={contact.status === "ready" ? "secondary" : "outline"}>{copy.statuses[contact.status]}</Badge>{contact.problem && <span className="block pt-1 text-xs text-muted-foreground">{copy.problems[contact.problem]}</span>}</TableCell>
       <TableCell className="max-w-64 truncate text-sm text-muted-foreground" title={context}>{context}</TableCell>
+      <TableCell className="text-sm">
+        {contact.lastCall ? (
+          <>
+            <span>{campaignContent.calls.statuses[contact.lastCall.lastStatus]}</span>
+            <span className="block text-xs text-muted-foreground">{campaignContent.outreach.attempts(contact.lastCall.attempts)}{contact.lastCall.lastFailureCode ? ` · ${campaignContent.outreach.failureCodes[contact.lastCall.lastFailureCode] ?? contact.lastCall.lastFailureCode}` : ""}</span>
+          </>
+        ) : <span className="text-muted-foreground">{copy.noValue}</span>}
+      </TableCell>
       <TableCell>
         <div className="flex flex-wrap gap-1">
           <ContactEditor campaignId={campaignId} contact={contact} />

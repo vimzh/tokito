@@ -5,6 +5,7 @@ import type { CommitImportInput, UpdateContactInput } from '../validation/contac
 import { NotFoundError } from './campaigns'
 import { normalizePhone } from './phone'
 import { parseSpreadsheet, suggestMapping } from './spreadsheet'
+import { contactCallSummary } from '../calls/scheduler'
 
 const id = () => crypto.randomUUID()
 const PREVIEW_ROWS = 5
@@ -111,7 +112,8 @@ export function listContacts(db: Db, campaignId: string) {
   const rows = db.select().from(contacts).where(eq(contacts.campaignId, campaignId)).orderBy(asc(sql`${contacts}.rowid`)).all()
   const counts: Record<ContactStatus, number> = { ready: 0, invalid: 0, duplicate: 0, opted_out: 0, excluded: 0 }
   for (const row of rows) counts[row.status] += 1
-  return { contacts: rows, counts, total: rows.length }
+  const callSummary = contactCallSummary(db, campaignId)
+  return { contacts: rows.map((row) => ({ ...row, lastCall: callSummary.get(row.id) ?? null })), counts, total: rows.length }
 }
 
 export function updateContact(db: Db, campaignId: string, contactId: string, input: UpdateContactInput) {

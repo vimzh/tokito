@@ -42,6 +42,10 @@ export const campaigns = sqliteTable('campaigns', {
   clarificationsAllowed: integer('clarifications_allowed', { mode: 'boolean' }).notNull().default(true),
   lastDraftModel: text('last_draft_model'),
   lastDraftPromptVersion: text('last_draft_prompt_version'),
+  maxCalls: integer('max_calls'),
+  outreachStartedAt: integer('outreach_started_at'),
+  outreachPausedAt: integer('outreach_paused_at'),
+  outreachStoppedAt: integer('outreach_stopped_at'),
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
 })
@@ -139,6 +143,11 @@ export const calls = sqliteTable(
     personName: text('person_name'),
     provider: text('provider', { enum: callProviders }).notNull(),
     providerCallId: text('provider_call_id'),
+    providerRecipientId: text('provider_recipient_id'),
+    providerAttemptId: text('provider_attempt_id'),
+    idempotencyKey: text('idempotency_key'),
+    scheduledAt: integer('scheduled_at'),
+    lastPolledAt: integer('last_polled_at'),
     attempt: integer('attempt').notNull().default(1),
     status: text('status', { enum: callStatuses }).notNull(),
     task: text('task').notNull(),
@@ -197,6 +206,17 @@ export const answers = sqliteTable(
   },
   (table) => [index('answers_campaign').on(table.campaignId), index('answers_call').on(table.callId), index('answers_question').on(table.questionId)],
 )
+
+export const providerEvents = sqliteTable('provider_events', {
+  id: text('id').primaryKey(),
+  provider: text('provider', { enum: callProviders }).notNull(),
+  type: text('type').notNull(),
+  callId: text('call_id'),
+  payload: text('payload', { mode: 'json' }).$type<Record<string, unknown>>().notNull(),
+  receivedAt: integer('received_at').notNull(),
+  processedAt: integer('processed_at'),
+  error: text('error'),
+})
 
 export type Campaign = typeof campaigns.$inferSelect
 export type Question = typeof questions.$inferSelect

@@ -42,6 +42,10 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. API te
 | `WEB_ORIGIN` | Origin allowed by CORS, default `http://localhost:3000`. |
 | `OPENAI_API_KEY` | OpenAI key used by the Strands Agents SDK for question drafting. Without it, drafting returns a clear "not configured" error. |
 | `OPENAI_MODEL` | OpenAI model id, default `gpt-5.5`. |
+| `CALLE_API_KEY` | CALL-E (heycall-e.com) API key for real phone calls. Without it, outreach cannot start. |
+| `CALLE_BASE_URL` | CALL-E API base URL, default `https://api.heycall-e.com`. |
+| `CALLE_WEBHOOK_URL` | Public URL of this API's `/api/webhooks/calle` endpoint, sent with each call so CALL-E can post terminal events. Polling covers missed events. |
+| `OUTREACH_TICK_SECONDS` | How often the scheduler dials and polls, default 30. |
 
 ### API routes
 
@@ -54,6 +58,14 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. API te
 | `PATCH` | `/api/campaigns/:id` | Update name, goal, context, topics, or conversation mode. |
 | `PUT` | `/api/campaigns/:id/questions` | Replace the ordered question list (text, type, options, required). |
 | `POST` | `/api/campaigns/:id/questions/draft` | Draft questions with the AI agent; returns a proposal without saving. |
+| `GET` | `/api/campaigns/:id/contacts` | Contacts with status, problem, and last-call summary; `POST …/imports`, `POST …/imports/:importId/commit`, `PATCH`/`DELETE …/:contactId`. |
+| `GET` | `/api/campaigns/:id/task-preview` | The CALL-E task text and result schema for this campaign. |
+| `GET` | `/api/campaigns/:id/calls` | Calls with answers; `GET …/:callId` adds the transcript. `POST …/:callId/callback` schedules a callback. |
+| `POST` | `/api/campaigns/:id/simulations` | Start a text simulation; `POST …/:callId/turns` sends the person's line. |
+| `GET` | `/api/campaigns/:id/outreach` | Readiness, reasons, and counts; `POST …/start`, `…/pause`, `…/stop`. |
+| `POST` | `/api/webhooks/calle` | CALL-E terminal events, idempotent by event id. |
+| `POST` | `/api/outreach/tick` | Run one scheduler pass by hand. |
+| `GET` | `/api/opt-outs` | Opt-out list; `POST /api/opt-outs`, `POST /api/opt-outs/remove`. |
 | `GET` | `/api/settings` | Workspace calling defaults. |
 | `PUT` | `/api/settings` | Update workspace calling defaults. |
 | `DELETE` | `/api/campaigns/:id` | Delete a campaign and its questions. |

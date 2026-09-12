@@ -80,6 +80,7 @@ export async function updatePreferencesAction(id: string, _previous: ActionState
       defaultCountry: text(formData, "defaultCountry"),
       conversationMode: text(formData, "conversationMode") === "fixed" ? "fixed" : "dynamic",
       clarificationsAllowed: formData.get("clarificationsAllowed") === "on",
+      maxCalls: text(formData, "maxCalls") ? number(formData, "maxCalls") : null,
     });
   } catch (error) {
     return errorState(error);

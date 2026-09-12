@@ -5,6 +5,7 @@ import * as service from '../services/campaigns'
 import { defaultDrafter } from '../ai/draft-questions'
 import { contactRoutes } from './contacts'
 import { callRoutes } from './calls'
+import { outreachRoutes } from './outreach'
 import { validationHook } from '../validation/hook'
 import { createCampaignSchema, replaceQuestionsSchema, updateCampaignSchema } from '../validation/campaigns'
 
@@ -30,3 +31,4 @@ export const campaignRoutes = new Hono()
   })
   .route('/', contactRoutes)
   .route('/', callRoutes)
+  .route('/', outreachRoutes)

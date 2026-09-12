@@ -12,12 +12,13 @@ import { ContactsTable } from "@/components/campaigns/contacts-table";
 import { CampaignEditor } from "@/components/campaigns/campaign-editor";
 import { DeleteCampaignButton } from "@/components/campaigns/delete-campaign-button";
 import { DraftQuestionsPanel } from "@/components/campaigns/draft-questions-panel";
+import { OutreachPanel } from "@/components/campaigns/outreach-panel";
 import { QuestionEditor } from "@/components/campaigns/question-editor";
 import { campaignContent as copy, campaignStatusLabels, preferencesContent } from "@/data/campaign";
 import { formatDate } from "@/lib/format";
-import type { CallSummary, Campaign, ContactList, TaskPreview } from "@/lib/api";
+import type { CallSummary, Campaign, ContactList, OutreachStatus, TaskPreview } from "@/lib/api";
 
-export function SurveyDetails({ campaign, contacts, calls, preview }: { campaign: Campaign; contacts: ContactList; calls: CallSummary[]; preview: TaskPreview }) {
+export function SurveyDetails({ campaign, contacts, calls, preview, outreach }: { campaign: Campaign; contacts: ContactList; calls: CallSummary[]; preview: TaskPreview; outreach: OutreachStatus }) {
   const readyContacts = contacts.contacts.filter((contact) => contact.status === "ready").map((contact) => ({ id: contact.id, name: contact.name, phone: contact.phone }));
   const language = preferencesContent.languages.find((item) => item.value === campaign.language)?.label ?? campaign.language;
   const mode = copy.conversationModes.find((item) => item.value === campaign.conversationMode)?.label;
@@ -34,6 +35,7 @@ export function SurveyDetails({ campaign, contacts, calls, preview }: { campaign
       <Tabs defaultValue="overview" className="gap-6">
         <TabsList variant="line" className="gap-4"><TabsTrigger value="overview">{copy.overview}</TabsTrigger><TabsTrigger value="contacts">{copy.contacts} ({contacts.total})</TabsTrigger><TabsTrigger value="responses">{copy.responses} ({calls.length})</TabsTrigger><TabsTrigger value="report">{copy.report}</TabsTrigger></TabsList>
         <TabsContent value="overview" className="space-y-8">
+          <section className="space-y-3"><h2 className="text-xl">{copy.outreach.title}</h2><OutreachPanel campaignId={campaign.id} outreach={{ ...outreach, timezone: campaign.timezone }} /></section>
           <section className="max-w-3xl space-y-3"><h2 className="text-xl">{copy.goal}</h2><p className="whitespace-pre-wrap leading-7 text-muted-foreground">{campaign.goal}</p></section>
           <section className="max-w-3xl space-y-3"><h2 className="text-xl">{copy.context}</h2><p className="whitespace-pre-wrap leading-7 text-muted-foreground">{campaign.context || copy.noContext}</p></section>
           <section className="max-w-3xl space-y-3"><h2 className="text-xl">{copy.additionalTopics}</h2><p className="whitespace-pre-wrap leading-7 text-muted-foreground">{campaign.additionalTopics || copy.noAdditionalTopics}</p></section>

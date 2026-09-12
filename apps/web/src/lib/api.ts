@@ -102,3 +102,17 @@ export const startSimulation = (id: string, json: { contactId?: string; personNa
   simulationsRoute.$post({ param: { id }, json }).then((response) => unwrap<SimulationStart>(response));
 export const sendSimulationTurn = (id: string, callId: string, text: string) =>
   simulationsRoute[":callId"].turns.$post({ param: { id, callId }, json: { text } }).then((response) => unwrap<SimulationTurn>(response));
+
+// ---- Outreach through CALL-E (Phase 5) ----
+const outreachRoute = campaignRoute.outreach;
+
+export type OutreachStatus = Res<typeof outreachRoute.$get, 200>;
+export type ReadinessReason = OutreachStatus["reasons"][number];
+export type ContactCallSummary = NonNullable<Contact["lastCall"]>;
+
+export const getOutreach = (id: string) => outreachRoute.$get({ param: { id } }).then((response) => unwrap<OutreachStatus>(response));
+export const startOutreach = (id: string) => outreachRoute.start.$post({ param: { id } }).then((response) => unwrap<Campaign>(response));
+export const pauseOutreach = (id: string) => outreachRoute.pause.$post({ param: { id } }).then((response) => unwrap<Campaign>(response));
+export const stopOutreach = (id: string) => outreachRoute.stop.$post({ param: { id } }).then((response) => unwrap<Campaign>(response));
+export const scheduleCallback = (id: string, callId: string, at: string) =>
+  callsRoute[":callId"].callback.$post({ param: { id, callId }, json: { at } }).then((response) => unwrap<CallSummary>(response));
