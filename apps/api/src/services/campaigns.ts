@@ -1,7 +1,8 @@
 import { asc, count, desc, eq } from 'drizzle-orm'
 import type { Db } from '../db'
 import { campaignEvents, campaigns, questions } from '../db/schema'
-import type { CreateCampaignInput, ReplaceQuestionsInput, UpdateCampaignInput } from '../validation/campaigns'
+import type { CreateCampaignInput, QuestionInput, ReplaceQuestionsInput, UpdateCampaignInput } from '../validation/campaigns'
+import { getSettings } from './settings'
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0]
 
@@ -18,10 +19,21 @@ function recordEvent(tx: Db | Tx, campaignId: string, type: string, payload?: Re
   tx.insert(campaignEvents).values({ id: id(), campaignId, type, payload, createdAt: Date.now() }).run()
 }
 
-function insertQuestions(tx: Db | Tx, campaignId: string, texts: string[]) {
-  if (texts.length === 0) return
+function insertQuestions(tx: Db | Tx, campaignId: string, items: QuestionInput[]) {
+  if (items.length === 0) return
   tx.insert(questions)
-    .values(texts.map((text, position) => ({ id: id(), campaignId, position, text })))
+    .values(
+      items.map((item, position) => ({
+        id: id(),
+        campaignId,
+        position,
+        text: item.text,
+        type: item.type,
+        options: item.type === 'choice' ? item.options : null,
+        required: item.required,
+        source: item.source,
+      })),
+    )
     .run()
 }
 
@@ -55,6 +67,7 @@ export function getCampaign(db: Db, campaignId: string) {
 export function createCampaign(db: Db, input: CreateCampaignInput) {
   const now = Date.now()
   const campaignId = id()
+  const { language, maxCallMinutes, callingHoursStart, callingHoursEnd, timezone, maxAttempts } = getSettings(db)
   db.transaction((tx) => {
     tx.insert(campaigns)
       .values({
@@ -65,11 +78,22 @@ export function createCampaign(db: Db, input: CreateCampaignInput) {
         additionalTopics: input.additionalTopics || null,
         questionSource: input.questionSource,
         conversationMode: input.conversationMode,
+        language,
+        maxCallMinutes,
+        callingHoursStart,
+        callingHoursEnd,
+        timezone,
+        maxAttempts,
         createdAt: now,
         updatedAt: now,
       })
       .run()
-    insertQuestions(tx, campaignId, input.questionSource === 'manual' ? (input.questions ?? []) : [])
+    const manualQuestions = input.questionSource === 'manual' ? (input.questions ?? []) : []
+    insertQuestions(
+      tx,
+      campaignId,
+      manualQuestions.map((text) => ({ text, type: 'open', options: [], required: true, source: 'manual' })),
+    )
     recordEvent(tx, campaignId, 'campaign.created', { questionSource: input.questionSource })
   })
   return getCampaign(db, campaignId)
@@ -92,10 +116,20 @@ export function replaceQuestions(db: Db, campaignId: string, input: ReplaceQuest
   db.transaction((tx) => {
     tx.delete(questions).where(eq(questions.campaignId, campaignId)).run()
     insertQuestions(tx, campaignId, input.questions)
-    tx.update(campaigns).set({ updatedAt: Date.now() }).where(eq(campaigns.id, campaignId)).run()
-    recordEvent(tx, campaignId, 'questions.replaced', { count: input.questions.length })
+    tx.update(campaigns)
+      .set({
+        updatedAt: Date.now(),
+        ...(input.draft ? { lastDraftModel: input.draft.model, lastDraftPromptVersion: input.draft.promptVersion } : {}),
+      })
+      .where(eq(campaigns.id, campaignId))
+      .run()
+    recordEvent(tx, campaignId, 'questions.replaced', { count: input.questions.length, draft: input.draft ?? null })
   })
   return getCampaign(db, campaignId)
+}
+
+export function recordDraft(db: Db, campaignId: string, payload: Record<string, unknown>) {
+  recordEvent(db, campaignId, 'questions.drafted', payload)
 }
 
 export function deleteCampaign(db: Db, campaignId: string) {

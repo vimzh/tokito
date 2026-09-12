@@ -29,10 +29,10 @@ Phase 1 is complete: campaigns are real end to end. Everything from question dra
 | # | Phase | What exists at the end | Depends on |
 |---|---|---|---|
 | 1 | Foundation: real campaigns end to end (done 2026-09-13) | Campaigns and questions are saved in SQLite through the API and shown on the dashboard. Git history begins. | — |
-| 2 | Question drafting and campaign setup | Claude drafts a questionnaire from the goal; organizer edits, reorders, and sets question types and calling preferences. | 1 |
+| 2 | Question drafting and campaign setup | An OpenAI model, run through the Strands Agents SDK, drafts a questionnaire from the goal; organizer edits, reorders, and sets question types and calling preferences. | 1 |
 | 3 | Contact lists | Excel upload, column mapping, validation of numbers and duplicates, extra context columns, opt-out list. | 1 |
-| 4 | Conversation engine | A provider-independent call agent that asks, clarifies, follows up, respects skips and stops, and records structured answers and transcripts. Testable in text without a phone. | 2, 3 |
-| 5 | Telephony and outreach control | Real outbound calls through a chosen provider, webhook handling, call outcomes, retries, calling hours, callbacks, start/pause. | 4 |
+| 4 | Conversation engine | The layer that turns a campaign into CALL-E's task and result schema, plus a text simulator to exercise it, and the mapping from results and transcripts into answers. | 2, 3 |
+| 5 | Telephony and outreach control | Real outbound calls through CALL-E (heycall-e.com), webhook handling, call outcomes, retries, calling hours, callbacks, start/pause. | 4 |
 | 6 | Progress and results dashboard | Live per-contact status, transcripts, summaries, per-question answers, callback list, exports. | 5 |
 | 7 | Reports and asking questions of the data | Campaign-level report with counts, themes, supporting quotes, disagreements, gaps, labeled suggestions, and a Q&A box over the answers. | 6 |
 | 8 | Discord agent | Manage the same campaigns from Discord: create, review questions, upload contacts, start/pause, progress, answers, reports, notifications. | 7 |
@@ -65,7 +65,7 @@ See [phase-01.md](phase-01.md) for the task-level breakdown.
 **Goal.** Make the "describe the goal, review the questions" step real.
 
 **Scope.**
-- Add the Claude API to `apps/api` (model id and settings in one config module). A `draftQuestions` service takes goal, background context, audience, and extra topics and returns 4–8 questions with a type each: open, rating (1–5), or single choice with options. Store the prompt version alongside generated questions.
+- Add the Strands Agents SDK to `apps/api` with OpenAI as the model provider (model id and settings in one config module). A `draftQuestions` service takes goal, background context, and extra topics and returns 4–8 questions with a type each: open, rating (1–5), or single choice with options. Store the prompt version alongside generated questions.
 - Campaign background: a "context" field organizers fill in (who they are, what changed, anything the assistant may use to clarify a question). This is the only material the call agent may use later to explain a question.
 - Question editor on the campaign page: edit text, change type and options, add, remove, reorder, mark a question required or optional, toggle whether clarification is allowed. Manual mode skips drafting.
 - Calling preferences move from the mock Settings page into per-campaign settings with workspace defaults: language, max call length, calling hours and time zone, max attempts per contact, follow-up mode (dynamic or fixed).
@@ -74,7 +74,7 @@ See [phase-01.md](phase-01.md) for the task-level breakdown.
 **Acceptance checks.**
 - A restaurant goal produces relevant, non-leading questions that skip "have you tried it" assumptions (it should include a screening question).
 - Edits persist; the review screen shows the final questions and settings.
-- Claude failures show an error and keep the campaign editable; no partially saved questionnaires.
+- Model failures show an error and keep the campaign editable; no partially saved questionnaires.
 
 ### Phase 3 — Contact lists
 
@@ -98,7 +98,7 @@ See [phase-01.md](phase-01.md) for the task-level breakdown.
 
 **Scope.**
 - A per-call state machine: introduction (identify the assistant, the organization, the reason, and recording/transcription notice), consent, questions in order, follow-ups, wrap-up. Explicit states for skip, decline, "don't know", ask to stop, callback request, and opt-out.
-- Claude drives each turn with a prompt built from the campaign goal, approved context, question list, question types, follow-up mode, and the transcript so far. The model returns both the next utterance and structured events (answer captured, follow-up asked, question skipped, callback requested, stop requested).
+- An OpenAI model, run through the Strands Agents SDK, drives each turn with a prompt built from the campaign goal, approved context, question list, question types, follow-up mode, and the transcript so far. The model returns both the next utterance and structured events (answer captured, follow-up asked, question skipped, callback requested, stop requested).
 - Follow-up rules from the brief: explore reasons and examples, stay within the campaign goal, never lead, never re-ask something already answered, stop when the person wants to stop, respect the maximum call length.
 - Rating and choice questions are captured as values, open questions as text; gaps stay gaps (`skipped`, `declined`, `unknown`), never invented.
 - Tables: `calls`, `call_turns` (transcript), `answers`. Post-call summarization writes a short summary and a list of unanswered questions per call.
@@ -111,22 +111,27 @@ See [phase-01.md](phase-01.md) for the task-level breakdown.
 
 ### Phase 5 — Telephony and outreach control
 
-**Goal.** Real calls, safely.
+**Goal.** Real calls, safely, through CALL-E.
+
+**Provider decision (September 13, 2026).** The calling provider is [CALL-E](https://www.heycall-e.com/) ([docs](https://docs.heycall-e.com/)). It is a hosted AI voice agent: Tokito creates a call task with a natural-language `task`, `recipients` (E.164 phones plus locale and region), a `recipient_result_schema` (JSON Schema for the per-person structured answers), `metadata`, and a `webhook_url`; CALL-E places the call, runs the spoken conversation, and returns `status`, `summary`, `structured_result`, `task_completed`, `completion_confidence`, `evidence`, and per-attempt `transcript_turns` (`speaker`, `text`, `offset_seconds`). Auth is a bearer API key; SDKs exist for TypeScript (`@call-e/calle`) and Python; early pricing is $0.05 per billable call with 20 free calls. Outbound calling is limited to supported regions and a valid number can still be rejected with `unsupported_region`, so region support must be checked before the demo.
+
+This changes the shape of Phase 4: because CALL-E runs the spoken conversation itself, Tokito's conversation engine becomes the layer that turns a campaign into a CALL-E task (introduction, consent notice, questions in order, follow-up rules, skip and stop handling, callback capture) and a result schema, and that maps CALL-E's structured result and transcript back into answers. The text simulator in Phase 4 stays, so the task and schema can be exercised without spending calls.
 
 **Scope.**
-- Choose the provider by a short spike comparing Vapi (hosted voice agent) with Twilio plus a speech stack. Record the decision and the cost per minute in `docs/decisions/`.
-- Provider adapter with one interface: place call, receive events, end call. The conversation engine from Phase 4 sits behind it.
-- Webhook endpoints that are idempotent (dedupe by provider event id) and store raw events for debugging.
-- Outcomes mapped to call status: completed, no answer, busy, voicemail, failed, disconnected mid-call, declined, callback requested.
-- Scheduler: a queue that respects calling hours and time zone, max attempts, spacing between retries, one active call per contact, and campaign `running` / `paused` state. Callbacks are scheduled as future queue items and shown as such.
-- Start, pause, resume, and stop controls on the campaign page with confirmation and a visible reason when nothing can be dialed (outside hours, no ready contacts, no provider credentials).
-- Budget guard: per-campaign cap on minutes and contacts for the first version.
+- CALL-E adapter with one interface: create call task, fetch task, handle webhook events. Store `call_id`, recipient and attempt ids, and `provider_call_id` on `calls`.
+- Task builder: campaign goal, approved context, questions, and rules → the `task` text and `recipient_result_schema` (one property per question with the right type: string, integer 1–5, or enum; plus `skipped`, `declined`, `callback_requested`, `callback_time`, `opted_out`, `stop_requested`).
+- Webhook endpoint that is idempotent (dedupe by the `CALL-E-Event-Id` header and event `id`), stores raw events for debugging, and handles `call.completed`, `call.failed`, and `call.result_validation_failed`. Polling `GET /v1/calls/{call_id}` as a fallback when a webhook is missed.
+- Outcomes mapped to call status: completed, no answer, busy, failed, declined, callback requested, opted out, using recipient and attempt `status` and `failure_code`.
+- Scheduler: a queue that respects calling hours and time zone, max attempts, spacing between retries, one active task per contact, and campaign `running` / `paused` state. Callbacks are scheduled as future queue items and shown as such.
+- Start, pause, resume, and stop controls on the campaign page with confirmation and a visible reason when nothing can be dialed (outside hours, no ready contacts, no CALL-E key, unsupported region).
+- Budget guard: per-campaign cap on calls for the first version, using the per-call price.
 
 **Acceptance checks.**
-- A consenting tester receives a call, answers, and their answers appear in the database matching what they said.
+- A consenting tester receives a call, answers, and their answers appear in the database matching what they said and the transcript.
 - Duplicate webhook deliveries create no duplicate calls or answers.
 - No-answer leads to a retry within limits and then a final "unreachable" status.
 - Pausing stops new dials immediately; in-progress calls finish.
+- An `unsupported_region` rejection is shown on the contact, not swallowed.
 
 ### Phase 6 — Progress and results dashboard
 

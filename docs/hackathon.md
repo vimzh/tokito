@@ -57,7 +57,7 @@ The agent should complete one connected job: collect the contact list, conduct c
 | Google Sheets | Read a shared contact list or write results from an uploaded Excel list. |
 | Google Calendar | Record requested callback times; the calling system must actually execute the callbacks. |
 | Notion | Publish the final report for the society team. |
-| Calling provider, to be selected | Place calls and support the spoken conversation. |
+| CALL-E (heycall-e.com) | Place calls and run the spoken conversation; return transcripts and structured answers. Chosen September 13, 2026. |
 | HubSpot or another customer tool | Optional customer context for business outreach; unnecessary for the society example. |
 
 Use Discord, Sheets, Calendar, and Notion as the proposed external-app set, subject to organizer confirmation. Do not rely on counting our own dashboard or a local Excel upload as an external integration. Do not rely on the calling provider counting toward the minimum until that interpretation is confirmed.

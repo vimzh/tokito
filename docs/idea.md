@@ -120,7 +120,7 @@ This is an illustrative scenario, not a claim that these calls or findings alrea
 - Handle no answer, disconnected calls, and callback requests with visible outcomes.
 - Limit call length and repeat attempts, and avoid duplicate calls.
 
-The calling service has not been chosen. Twilio, Vapi, or another suitable provider are candidates from the original sketch.
+The calling service is CALL-E (heycall-e.com), chosen on September 13, 2026 in place of the Twilio or Vapi options from the original sketch. See the Phase 5 notes in docs/phases/README.md.
 
 ### Web dashboard
 
@@ -207,7 +207,6 @@ We should test whether this saves organizer effort and improves useful responses
 
 - What background should campaign organizers provide so Tokito can ask informed questions about their topic and audience?
 - Which languages and calling regions should be supported first?
-- Which calling provider fits those needs?
 - Which external app connections belong in the hackathon build?
 - How should callers request and confirm callback times?
 - Which answer and report export formats are needed?

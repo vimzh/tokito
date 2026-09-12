@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { db } from '../db'
 import * as service from '../services/campaigns'
+import { defaultDrafter } from '../ai/draft-questions'
 import { validationHook } from '../validation/hook'
 import { createCampaignSchema, replaceQuestionsSchema, updateCampaignSchema } from '../validation/campaigns'
 
@@ -15,6 +16,12 @@ export const campaignRoutes = new Hono()
   .put('/:id/questions', zValidator('json', replaceQuestionsSchema, validationHook), (c) =>
     c.json(service.replaceQuestions(db, c.req.param('id'), c.req.valid('json'))),
   )
+  .post('/:id/questions/draft', async (c) => {
+    const campaign = service.getCampaign(db, c.req.param('id'))
+    const draft = await defaultDrafter()(campaign)
+    service.recordDraft(db, campaign.id, { model: draft.model, promptVersion: draft.promptVersion, count: draft.questions.length })
+    return c.json(draft)
+  })
   .delete('/:id', (c) => {
     service.deleteCampaign(db, c.req.param('id'))
     return c.body(null, 204)

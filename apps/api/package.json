@@ -13,8 +13,10 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.9.1",
+    "@strands-agents/sdk": "^1.17.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.13.3",
+    "openai": "^6.45.0",
     "zod": "^4.6.2"
   },
   "devDependencies": {
