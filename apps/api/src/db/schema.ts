@@ -121,6 +121,83 @@ export const optOuts = sqliteTable('opt_outs', {
   createdAt: integer('created_at').notNull(),
 })
 
+export const callStatuses = ['queued', 'dialing', 'in_progress', 'completed', 'no_answer', 'busy', 'failed', 'declined', 'callback_requested', 'opted_out', 'canceled'] as const
+export const callProviders = ['calle', 'simulator'] as const
+export const answerStatuses = ['answered', 'skipped', 'declined', 'unknown', 'not_asked'] as const
+export const callSpeakers = ['assistant', 'person', 'unknown'] as const
+export type CallStatus = (typeof callStatuses)[number]
+export type AnswerStatus = (typeof answerStatuses)[number]
+
+export const calls = sqliteTable(
+  'calls',
+  {
+    id: text('id').primaryKey(),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    contactId: text('contact_id').references(() => contacts.id, { onDelete: 'set null' }),
+    personName: text('person_name'),
+    provider: text('provider', { enum: callProviders }).notNull(),
+    providerCallId: text('provider_call_id'),
+    attempt: integer('attempt').notNull().default(1),
+    status: text('status', { enum: callStatuses }).notNull(),
+    task: text('task').notNull(),
+    resultSchema: text('result_schema', { mode: 'json' }).$type<Record<string, unknown>>().notNull(),
+    questionMap: text('question_map', { mode: 'json' }).$type<Record<string, string>>().notNull(),
+    summary: text('summary'),
+    structuredResult: text('structured_result', { mode: 'json' }).$type<Record<string, unknown>>(),
+    requestsForOrganizer: text('requests_for_organizer'),
+    callbackRequested: integer('callback_requested', { mode: 'boolean' }).notNull().default(false),
+    callbackTime: text('callback_time'),
+    optOut: integer('opt_out', { mode: 'boolean' }).notNull().default(false),
+    failureCode: text('failure_code'),
+    failureMessage: text('failure_message'),
+    startedAt: integer('started_at'),
+    endedAt: integer('ended_at'),
+    durationSeconds: integer('duration_seconds'),
+    createdAt: integer('created_at').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (table) => [index('calls_campaign').on(table.campaignId), index('calls_contact').on(table.contactId)],
+)
+
+export const callTurns = sqliteTable(
+  'call_turns',
+  {
+    id: text('id').primaryKey(),
+    callId: text('call_id')
+      .notNull()
+      .references(() => calls.id, { onDelete: 'cascade' }),
+    position: integer('position').notNull(),
+    speaker: text('speaker', { enum: callSpeakers }).notNull(),
+    text: text('text').notNull(),
+    offsetSeconds: integer('offset_seconds'),
+  },
+  (table) => [uniqueIndex('call_turns_call_position').on(table.callId, table.position)],
+)
+
+export const answers = sqliteTable(
+  'answers',
+  {
+    id: text('id').primaryKey(),
+    callId: text('call_id')
+      .notNull()
+      .references(() => calls.id, { onDelete: 'cascade' }),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    contactId: text('contact_id'),
+    questionId: text('question_id').notNull(),
+    questionText: text('question_text').notNull(),
+    status: text('status', { enum: answerStatuses }).notNull(),
+    value: text('value'),
+    valueNumber: integer('value_number'),
+    notes: text('notes'),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [index('answers_campaign').on(table.campaignId), index('answers_call').on(table.callId), index('answers_question').on(table.questionId)],
+)
+
 export type Campaign = typeof campaigns.$inferSelect
 export type Question = typeof questions.$inferSelect
 export type CampaignEvent = typeof campaignEvents.$inferSelect
@@ -128,3 +205,6 @@ export type WorkspaceSettings = typeof workspaceSettings.$inferSelect
 export type Contact = typeof contacts.$inferSelect
 export type ContactImport = typeof contactImports.$inferSelect
 export type OptOut = typeof optOuts.$inferSelect
+export type Call = typeof calls.$inferSelect
+export type CallTurn = typeof callTurns.$inferSelect
+export type Answer = typeof answers.$inferSelect

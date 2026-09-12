@@ -78,3 +78,27 @@ export const deleteContact = (id: string, contactId: string) => contactRoute.$de
 export const listOptOuts = () => optOutsRoute.$get().then((response) => unwrap<OptOut[]>(response));
 export const addOptOut = (json: { phone: string; reason?: string }) => optOutsRoute.$post({ json }).then((response) => unwrap<OptOut>(response));
 export const removeOptOut = (phone: string) => optOutsRoute.remove.$post({ json: { phone } }).then((response) => unwrap<void>(response));
+
+// ---- Calls and the text simulator (Phase 4) ----
+const callsRoute = campaignRoute.calls;
+const simulationsRoute = campaignRoute.simulations;
+
+export type TaskPreview = Res<typeof campaignRoute["task-preview"]["$get"], 200>;
+export type CallSummary = Res<typeof callsRoute.$get, 200>[number];
+export type CallDetail = Res<typeof callsRoute[":callId"]["$get"], 200>;
+export type CallTurn = CallDetail["turns"][number];
+export type Answer = CallDetail["answers"][number];
+export type CallStatus = CallSummary["status"];
+export type AnswerStatus = Answer["status"];
+export type SimulationStart = Res<typeof simulationsRoute.$post, 201>;
+export type SimulationTurn = Res<typeof simulationsRoute[":callId"]["turns"]["$post"], 200>;
+export type MappedResult = NonNullable<SimulationTurn["result"]>;
+
+export const getTaskPreview = (id: string, contactId?: string) =>
+  campaignRoute["task-preview"].$get({ param: { id }, query: contactId ? { contactId } : {} }).then((response) => unwrap<TaskPreview>(response));
+export const listCalls = (id: string) => callsRoute.$get({ param: { id } }).then((response) => unwrap<CallSummary[]>(response));
+export const getCall = (id: string, callId: string) => callsRoute[":callId"].$get({ param: { id, callId } }).then((response) => unwrap<CallDetail>(response));
+export const startSimulation = (id: string, json: { contactId?: string; personName?: string }) =>
+  simulationsRoute.$post({ param: { id }, json }).then((response) => unwrap<SimulationStart>(response));
+export const sendSimulationTurn = (id: string, callId: string, text: string) =>
+  simulationsRoute[":callId"].turns.$post({ param: { id, callId }, json: { text } }).then((response) => unwrap<SimulationTurn>(response));

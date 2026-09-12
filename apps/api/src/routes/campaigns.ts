@@ -4,6 +4,7 @@ import { db } from '../db'
 import * as service from '../services/campaigns'
 import { defaultDrafter } from '../ai/draft-questions'
 import { contactRoutes } from './contacts'
+import { callRoutes } from './calls'
 import { validationHook } from '../validation/hook'
 import { createCampaignSchema, replaceQuestionsSchema, updateCampaignSchema } from '../validation/campaigns'
 
@@ -28,3 +29,4 @@ export const campaignRoutes = new Hono()
     return c.body(null, 204)
   })
   .route('/', contactRoutes)
+  .route('/', callRoutes)
