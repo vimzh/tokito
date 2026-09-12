@@ -1,4 +1,6 @@
-# Next.js + Hono monorepo
+# Tokito
+
+Google Forms, but people answer your questions over a phone call. Product brief: [docs/idea.md](docs/idea.md). Build plan: [docs/phases/README.md](docs/phases/README.md).
 
 ## Development
 
@@ -7,23 +9,62 @@ bun run setup
 bun run dev
 ```
 
-- Next.js: http://localhost:3000
-- Hono: http://localhost:3002
+`bun run setup` installs dependencies, creates the env files, runs database migrations, and seeds three draft campaigns.
 
-Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`.
+- Web (Next.js): http://localhost:3000
+- API (Hono): http://localhost:3002
+
+Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. API tests: `cd apps/api && bun test`.
+
+## Apps
+
+| App | Path | Notes |
+|---|---|---|
+| Web | `apps/web` | Next.js 16 app with shadcn/ui. Server components and server actions call the API through a typed Hono RPC client in `src/lib/api.ts`. |
+| API | `apps/api` | Hono on Bun with SQLite through `bun:sqlite` and Drizzle. Schema in `src/db/schema.ts`, routes in `src/routes`, logic in `src/services`. |
+
+### Environment
+
+`apps/web/.env.local` (copied from `.env.example`):
+
+| Variable | Purpose |
+|---|---|
+| `AUTH_SECRET` | Auth.js session secret. Generate with `bunx auth secret`. |
+| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Optional Google OAuth web client. |
+| `API_URL` | Base URL of the API, default `http://localhost:3002`. |
+
+`apps/api/.env` (copied from `.env.example`):
+
+| Variable | Purpose |
+|---|---|
+| `DB_FILE_NAME` | SQLite file, default `local.db`. |
+| `PORT` | API port, default `3002`. |
+| `WEB_ORIGIN` | Origin allowed by CORS, default `http://localhost:3000`. |
+
+### API routes
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/api/health` | Liveness check. |
+| `GET` | `/api/campaigns` | List campaigns with question counts. |
+| `POST` | `/api/campaigns` | Create a draft campaign, optionally with questions. |
+| `GET` | `/api/campaigns/:id` | Campaign with ordered questions. |
+| `PATCH` | `/api/campaigns/:id` | Update name, goal, context, topics, or conversation mode. |
+| `PUT` | `/api/campaigns/:id/questions` | Replace the ordered question list. |
+| `DELETE` | `/api/campaigns/:id` | Delete a campaign and its questions. |
+
+Validation errors return `400` with `{ error: { message, issues } }`; unknown ids return `404`.
+
+Database commands in `apps/api`: `bun run db:generate` (new migration from schema changes), `bun run db:migrate`, `bun run db:seed`, `bun run db:studio`.
 
 ## Demo login
 
 Click **Login** on the landing page and use `demo@theategmail.com` / `demo1234`.
 The dialog displays these public demo credentials. Auth.js stores the one-day JWT
-session in an HTTP-only cookie; `/home` requires a session. This is a shared demo
-account, not a private account system.
-
-Set a unique `AUTH_SECRET` in `apps/web/.env.local` (see `.env.example`).
-Google credentials are not required for demo login.
-With the frontend running, verify the flow using
-`python3 scripts/check-demo-auth.py http://localhost:4000`.
+session in an HTTP-only cookie; workspace routes require a session. This is a shared demo
+account, not a private account system. With the frontend running, verify the flow using
+`python3 scripts/check-demo-auth.py http://localhost:3000`.
 
 ## Optional Google OAuth
 
-Copy `apps/web/.env.example` to `apps/web/.env.local`, then add a unique Auth.js secret and Google OAuth web-client credentials. Register `http://localhost:3000/api/auth/callback/google` as the local authorized redirect URI in Google Cloud.
+Add a Google OAuth web client to `apps/web/.env.local` and register `http://localhost:3000/api/auth/callback/google` as the local authorized redirect URI in Google Cloud.

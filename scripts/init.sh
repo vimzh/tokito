@@ -17,4 +17,11 @@ if [[ ! -f apps/web/.env.local ]]; then
   echo "Created apps/web/.env.local; add OAuth credentials when needed."
 fi
 
+if [[ ! -f apps/api/.env ]]; then
+  cp apps/api/.env.example apps/api/.env
+  echo "Created apps/api/.env."
+fi
+
+(cd apps/api && bun run db:migrate && bun run db:seed)
+
 echo "Ready. Run: bun run dev"

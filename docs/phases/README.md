@@ -12,23 +12,23 @@ Detailed phase documents live next to this file (`phase-01.md`, `phase-02.md`, �
 | Landing page | Done: hero, use cases, features, planned connections. Copy lives in `apps/web/src/data`. |
 | Auth | Done for demo purposes: Auth.js with a shared demo credential login and optional Google OAuth. `/home` and other workspace routes require a session. |
 | Workspace shell | Done: sidebar, navigation, profile card, Home / Connections / Settings pages. |
-| Home page | Mockup: reads three hard-coded sample surveys from `apps/web/src/data/surveys.ts`. |
-| Create survey | Mockup: form with name, goal, AI vs manual questions, dynamic vs fixed conversation, extra topics. Shows a review panel only; nothing is saved. |
-| Survey detail | Mockup: overview, sample responses, sample report, all from the hard-coded data. |
+| Home page | Done (Phase 1): lists real campaigns from the API with an empty state. |
+| Create campaign | Done (Phase 1): the review step saves a draft through a server action and redirects to the campaign page. |
+| Campaign detail | Done (Phase 1): real goal, topics, questions, and settings, with edit and delete. Responses and Report tabs are honest placeholders until Phases 6 and 7. |
 | Connections page | Mockup: lists planned apps, nothing connects. |
 | Settings page | Mockup: language, max call length, calling hours; resets on reload. |
-| API | Hello-world Hono route only. |
-| Database | Drizzle + `bun:sqlite` are configured, but the schema is empty and there are no migrations. |
-| Version control | The folder is not a git repository. |
+| API | Done (Phase 1): campaigns CRUD and question replacement with zod validation, CORS, JSON errors, and service tests. |
+| Database | Done (Phase 1): `campaigns`, `questions`, `campaign_events` tables, first migration, seed script. |
+| Version control | Done (Phase 1): git initialized with a baseline commit. |
 | Calling, Discord, external apps, AI | Not started. |
 
-In short: the front of the product is designed and clickable, and nothing behind it exists yet. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
+Phase 1 is complete: campaigns are real end to end. Everything from question drafting onward is still to build. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
 
 ## Phase overview
 
 | # | Phase | What exists at the end | Depends on |
 |---|---|---|---|
-| 1 | Foundation: real campaigns end to end | Campaigns and questions are saved in SQLite through the API and shown on the dashboard. Git history begins. | — |
+| 1 | Foundation: real campaigns end to end (done 2026-09-13) | Campaigns and questions are saved in SQLite through the API and shown on the dashboard. Git history begins. | — |
 | 2 | Question drafting and campaign setup | Claude drafts a questionnaire from the goal; organizer edits, reorders, and sets question types and calling preferences. | 1 |
 | 3 | Contact lists | Excel upload, column mapping, validation of numbers and duplicates, extra context columns, opt-out list. | 1 |
 | 4 | Conversation engine | A provider-independent call agent that asks, clarifies, follows up, respects skips and stops, and records structured answers and transcripts. Testable in text without a phone. | 2, 3 |

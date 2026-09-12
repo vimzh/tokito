@@ -1,6 +1,6 @@
 # Phase 1 — Foundation: real campaigns end to end
 
-Status: not started. Plan written September 13, 2026.
+Status: complete, September 13, 2026. Plan written the same day.
 
 ## Why this phase first
 
@@ -169,4 +169,23 @@ Run all of these before calling the phase done, and record the results at the bo
 
 ## Completion note
 
-_Fill in when the phase ends: what changed, what was learned, what the next phase should know._
+**What changed.** All eight tasks were done as written, with these adjustments:
+
+- The web app reads API types through Hono RPC (`hc<AppType>`), as planned. Because that type graph reaches the API's `bun:sqlite` client, the web app carries a four-line ambient declaration in `src/types/bun-sqlite.d.ts` instead of adding Bun's globals to a Next.js app.
+- The question count on the list route uses a left join and `count()`; a correlated subquery rendered with unqualified column names in Drizzle and always returned 0.
+- The other agent added a report mockup (`components/surveys/survey-report.tsx`, `data/survey-report.ts`, `lib/survey-report.ts`) during this phase. Those files still compile because `data/surveys.ts` keeps the `Survey` type and `surveyContent` copy, but the sample rows are gone and the Report tab shows a placeholder until Phase 7 produces real reports. Phase 7 should either adapt that HTML export to the real report model or remove it.
+- The web dev server for this project already runs on port 4000 (a different project holds 3000). `.claude/launch.json` lets the web app take an assigned port.
+
+**Checks run.**
+
+| Check | Result |
+|---|---|
+| `bun run lint`, `bun run typecheck`, `bun run build` | Pass |
+| `bun test` in `apps/api` (6 service tests, in-memory database) | Pass |
+| `curl` POST `{}` → 400 with issues; GET unknown id → 404; health → ok | Pass |
+| Migrate and seed on the real database; second seed run inserts nothing | Pass |
+| `scripts/check-demo-auth.py` against the running web app | Pass |
+| HTTP session: Home lists the three seeded campaigns with links, no sample or preview text; detail shows goal, all questions, Draft badge, Edit and Delete; unknown id returns 404; create page has no preview notice | Pass |
+| Browser-driven create, edit, and delete (server actions) | Not run: the browser session needs the organizer to log in; the actions are covered by typecheck, build, and the API tests only |
+
+**What the next phase should know.** Server actions live in `src/actions/campaigns.ts` and revalidate `/home` and `/survey/[id]`. New copy goes in `src/data/campaign.ts`. Question `type` and `options` columns exist but the editor only handles text; Phase 2 builds the typed editor and should extend `PUT /api/campaigns/:id/questions` to accept type, options, and required.

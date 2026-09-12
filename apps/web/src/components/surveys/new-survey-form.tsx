@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useActionState, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { newSurveyContent as copy } from "@/data/new-survey";
+import { createCampaignAction } from "@/actions/campaigns";
 
 export function NewSurveyForm() {
   const [name, setName] = useState("");
@@ -19,6 +20,7 @@ export function NewSurveyForm() {
   const [additional, setAdditional] = useState("");
   const [review, setReview] = useState(false);
   const [error, setError] = useState(false);
+  const [state, formAction, pending] = useActionState(createCampaignAction, {});
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,7 +35,6 @@ export function NewSurveyForm() {
         <Button asChild variant="ghost" className="-ml-3"><Link href="/home"><ArrowLeft aria-hidden="true" />{copy.back}</Link></Button>
         <h1 className="text-3xl sm:text-4xl">{review ? copy.reviewTitle : copy.title}</h1>
         <p className="text-sm text-muted-foreground">{review ? copy.reviewNote : copy.description}</p>
-        <p className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">{copy.notice}</p>
       </header>
       {review ? (
         <section aria-label={copy.reviewTitle} className="space-y-6">
@@ -49,7 +50,19 @@ export function NewSurveyForm() {
               <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="mt-2 whitespace-pre-wrap break-words">{value}</dd></div>
             ))}
           </dl>
-          <Button variant="outline" onClick={() => setReview(false)}>{copy.edit}</Button>
+          <form action={formAction} className="space-y-4">
+            <input type="hidden" name="name" value={name.trim()} />
+            <input type="hidden" name="goal" value={goal.trim()} />
+            <input type="hidden" name="questionSource" value={source} />
+            <input type="hidden" name="conversationMode" value={approach} />
+            <input type="hidden" name="questions" value={source === "manual" ? questions : ""} />
+            <input type="hidden" name="additionalTopics" value={additional.trim()} />
+            {state.error && <p role="alert" className="text-sm text-destructive">{state.error}</p>}
+            <div className="flex flex-wrap gap-3">
+              <Button type="submit" disabled={pending}>{pending ? copy.saving : copy.save}</Button>
+              <Button type="button" variant="outline" disabled={pending} onClick={() => setReview(false)}>{copy.edit}</Button>
+            </div>
+          </form>
         </section>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-8">

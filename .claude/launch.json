@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "web", "runtimeExecutable": "bun", "runtimeArgs": ["run", "dev"], "port": 3000, "cwd": "apps/web", "autoPort": true },
+    { "name": "api", "runtimeExecutable": "bun", "runtimeArgs": ["run", "dev"], "port": 3002, "cwd": "apps/api", "autoPort": false }
+  ]
+}

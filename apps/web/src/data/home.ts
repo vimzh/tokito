@@ -3,13 +3,16 @@ import { navigationContent } from "@/data/navigation";
 export const homeContent = {
   title: "Home",
   description: "A clear view of your conversations, from the first call to the final report.",
-  preview: "Demo workspace · sample data",
+  create: "Create campaign",
   running: "Running now",
-  history: "Past surveys",
-  historyDescription: "Review completed outreach and open a survey to explore its results.",
-  progress: "responses collected",
-  view: "View survey",
-  table: { name: "Survey", date: "Created", targeted: "People targeted", reached: "People reached", completed: "Responses", status: "Status" },
+  all: "All campaigns",
+  allDescription: "Open a campaign to review its goal and questions.",
+  view: "View campaign",
+  table: { name: "Campaign", date: "Created", questions: "Questions", status: "Status" },
+  empty: {
+    title: "No campaigns yet",
+    description: "Describe what you want to learn and Tokito will help you ask it.",
+  },
   navigation: [
     { href: "/home", label: "Home" },
     { href: "/connections", label: "Connections" },
