@@ -6,8 +6,13 @@ const campaignsRoute = client.api.campaigns;
 const campaignRoute = campaignsRoute[":id"];
 const settingsRoute = client.api.settings;
 
-export type CampaignSummary = InferResponseType<typeof campaignsRoute.$get, 200>[number];
-export type Campaign = InferResponseType<typeof campaignRoute.$get, 200>;
+// Routes with a validator carry an extra untyped `{}` response member from the validation hook;
+// Hono's status filter cannot drop it, so response types exclude empty object members here.
+type NonEmpty<T> = T extends unknown ? (keyof T extends never ? never : T) : never;
+type Res<T, S extends 200 | 201> = NonEmpty<InferResponseType<T, S>>;
+
+export type CampaignSummary = Res<typeof campaignsRoute.$get, 200>[number];
+export type Campaign = Res<typeof campaignRoute.$get, 200>;
 export type CampaignStatus = Campaign["status"];
 export type Question = Campaign["questions"][number];
 export type QuestionType = Question["type"];
@@ -15,8 +20,8 @@ export type CreateCampaignInput = InferRequestType<typeof campaignsRoute.$post>[
 export type UpdateCampaignInput = InferRequestType<typeof campaignRoute.$patch>["json"];
 export type ReplaceQuestionsInput = InferRequestType<typeof campaignRoute.questions.$put>["json"];
 export type QuestionInput = ReplaceQuestionsInput["questions"][number];
-export type DraftResult = InferResponseType<typeof campaignRoute.questions.draft.$post, 200>;
-export type WorkspaceSettings = InferResponseType<typeof settingsRoute.$get, 200>;
+export type DraftResult = Res<typeof campaignRoute.questions.draft.$post, 200>;
+export type WorkspaceSettings = Res<typeof settingsRoute.$get, 200>;
 export type UpdateSettingsInput = InferRequestType<typeof settingsRoute.$put>["json"];
 
 export type ApiIssue = { path: string[]; message: string };
@@ -45,3 +50,31 @@ export const draftQuestions = (id: string) => campaignRoute.questions.draft.$pos
 export const deleteCampaign = (id: string) => campaignRoute.$delete({ param: { id } }).then((response) => unwrap<void>(response));
 export const getSettings = () => settingsRoute.$get().then((response) => unwrap<WorkspaceSettings>(response));
 export const updateSettings = (json: UpdateSettingsInput) => settingsRoute.$put({ json }).then((response) => unwrap<WorkspaceSettings>(response));
+
+// ---- Contacts and opt-outs (Phase 3) ----
+const contactsRoute = campaignRoute.contacts;
+const importRoute = contactsRoute.imports[":importId"];
+const contactRoute = contactsRoute[":contactId"];
+const optOutsRoute = client.api["opt-outs"];
+
+export type ContactList = Res<typeof contactsRoute.$get, 200>;
+export type Contact = ContactList["contacts"][number];
+export type ContactStatus = Contact["status"];
+export type ContactProblem = NonNullable<Contact["problem"]>;
+export type ImportPreview = Res<typeof contactsRoute.imports.$post, 201>;
+export type CommitImportInput = InferRequestType<typeof importRoute.commit.$post>["json"];
+export type ImportSummary = Res<typeof importRoute.commit.$post, 200>;
+export type UpdateContactInput = InferRequestType<typeof contactRoute.$patch>["json"];
+export type OptOut = Res<typeof optOutsRoute.$get, 200>[number];
+
+export const listContacts = (id: string) => contactsRoute.$get({ param: { id } }).then((response) => unwrap<ContactList>(response));
+export const uploadContacts = (id: string, file: File) =>
+  contactsRoute.imports.$post({ param: { id }, form: { file } }).then((response) => unwrap<ImportPreview>(response));
+export const commitImport = (id: string, importId: string, json: CommitImportInput) =>
+  importRoute.commit.$post({ param: { id, importId }, json }).then((response) => unwrap<ImportSummary>(response));
+export const updateContact = (id: string, contactId: string, json: UpdateContactInput) =>
+  contactRoute.$patch({ param: { id, contactId }, json }).then((response) => unwrap<Contact>(response));
+export const deleteContact = (id: string, contactId: string) => contactRoute.$delete({ param: { id, contactId } }).then((response) => unwrap<void>(response));
+export const listOptOuts = () => optOutsRoute.$get().then((response) => unwrap<OptOut[]>(response));
+export const addOptOut = (json: { phone: string; reason?: string }) => optOutsRoute.$post({ json }).then((response) => unwrap<OptOut>(response));
+export const removeOptOut = (phone: string) => optOutsRoute.remove.$post({ json: { phone } }).then((response) => unwrap<void>(response));

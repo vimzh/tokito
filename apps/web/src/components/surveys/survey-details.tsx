@@ -4,15 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CallingPreferences } from "@/components/campaigns/calling-preferences";
+import { ContactImport } from "@/components/campaigns/contact-import";
+import { ContactsTable } from "@/components/campaigns/contacts-table";
 import { CampaignEditor } from "@/components/campaigns/campaign-editor";
 import { DeleteCampaignButton } from "@/components/campaigns/delete-campaign-button";
 import { DraftQuestionsPanel } from "@/components/campaigns/draft-questions-panel";
 import { QuestionEditor } from "@/components/campaigns/question-editor";
 import { campaignContent as copy, campaignStatusLabels, preferencesContent } from "@/data/campaign";
 import { formatDate } from "@/lib/format";
-import type { Campaign } from "@/lib/api";
+import type { Campaign, ContactList } from "@/lib/api";
 
-export function SurveyDetails({ campaign }: { campaign: Campaign }) {
+export function SurveyDetails({ campaign, contacts }: { campaign: Campaign; contacts: ContactList }) {
   const language = preferencesContent.languages.find((item) => item.value === campaign.language)?.label ?? campaign.language;
   const mode = copy.conversationModes.find((item) => item.value === campaign.conversationMode)?.label;
   return (
@@ -26,7 +28,7 @@ export function SurveyDetails({ campaign }: { campaign: Campaign }) {
         <div className="flex gap-2"><CampaignEditor campaign={campaign} /><DeleteCampaignButton id={campaign.id} /></div>
       </header>
       <Tabs defaultValue="overview" className="gap-6">
-        <TabsList variant="line" className="gap-4"><TabsTrigger value="overview">{copy.overview}</TabsTrigger><TabsTrigger value="responses">{copy.responses}</TabsTrigger><TabsTrigger value="report">{copy.report}</TabsTrigger></TabsList>
+        <TabsList variant="line" className="gap-4"><TabsTrigger value="overview">{copy.overview}</TabsTrigger><TabsTrigger value="contacts">{copy.contacts} ({contacts.total})</TabsTrigger><TabsTrigger value="responses">{copy.responses}</TabsTrigger><TabsTrigger value="report">{copy.report}</TabsTrigger></TabsList>
         <TabsContent value="overview" className="space-y-8">
           <section className="max-w-3xl space-y-3"><h2 className="text-xl">{copy.goal}</h2><p className="whitespace-pre-wrap leading-7 text-muted-foreground">{campaign.goal}</p></section>
           <section className="max-w-3xl space-y-3"><h2 className="text-xl">{copy.context}</h2><p className="whitespace-pre-wrap leading-7 text-muted-foreground">{campaign.context || copy.noContext}</p></section>
@@ -46,6 +48,13 @@ export function SurveyDetails({ campaign }: { campaign: Campaign }) {
               <li>{campaign.clarificationsAllowed ? copy.clarificationsOn : copy.clarificationsOff}</li>
             </ul>
           </section>
+        </TabsContent>
+        <TabsContent value="contacts" className="space-y-6">
+          <section className="space-y-4">
+            <div><h2 className="text-xl">{copy.contacts}</h2><p className="mt-2 text-sm text-muted-foreground">{copy.contactsDescription}</p></div>
+            <ContactImport campaignId={campaign.id} />
+          </section>
+          {contacts.total > 0 ? <ContactsTable campaignId={campaign.id} list={contacts} /> : <p className="text-sm text-muted-foreground">{copy.contactsEmpty}</p>}
         </TabsContent>
         <TabsContent value="responses"><Empty className="border"><EmptyHeader><EmptyDescription>{copy.responsesEmpty}</EmptyDescription></EmptyHeader></Empty></TabsContent>
         <TabsContent value="report"><Empty className="border"><EmptyHeader><EmptyDescription>{copy.reportEmpty}</EmptyDescription></EmptyHeader></Empty></TabsContent>

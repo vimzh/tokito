@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
-import { ApiError, getCampaign, type Campaign } from "@/lib/api";
+import { ApiError, getCampaign, listContacts, type Campaign, type ContactList } from "@/lib/api";
 import { SurveyDetails } from "@/components/surveys/survey-details";
 
-async function loadCampaign(id: string): Promise<Campaign> {
+async function load(id: string): Promise<[Campaign, ContactList]> {
   try {
-    return await getCampaign(id);
+    return await Promise.all([getCampaign(id), listContacts(id)]);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) notFound();
     throw error;
@@ -13,5 +13,6 @@ async function loadCampaign(id: string): Promise<Campaign> {
 
 export default async function SurveyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <SurveyDetails campaign={await loadCampaign(id)} />;
+  const [campaign, contacts] = await load(id);
+  return <SurveyDetails campaign={campaign} contacts={contacts} />;
 }

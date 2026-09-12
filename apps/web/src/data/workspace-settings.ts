@@ -19,4 +19,15 @@ export const settingsContent = {
   save: "Save defaults",
   saving: "Saving…",
   saved: "Defaults saved. New campaigns will use them.",
+  optOuts: {
+    title: "Opt-out list",
+    description: "Numbers that must never be called. Matching contacts in every campaign are marked opted out.",
+    phone: "Phone number",
+    reason: "Reason (optional)",
+    add: "Add to opt-out list",
+    adding: "Adding…",
+    remove: "Remove",
+    empty: "No numbers on the list.",
+    added: "Added",
+  },
 };

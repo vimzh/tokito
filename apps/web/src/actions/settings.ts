@@ -19,6 +19,7 @@ export async function updateSettingsAction(_previous: SettingsState, formData: F
       callingHoursEnd: text(formData, "callingHoursEnd"),
       timezone: text(formData, "timezone"),
       maxAttempts: Number(text(formData, "maxAttempts")),
+      defaultCountry: text(formData, "defaultCountry"),
     });
   } catch (error) {
     if (error instanceof ApiError) return { error: error.message };

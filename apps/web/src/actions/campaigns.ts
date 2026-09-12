@@ -77,6 +77,7 @@ export async function updatePreferencesAction(id: string, _previous: ActionState
       callingHoursEnd: text(formData, "callingHoursEnd"),
       timezone: text(formData, "timezone"),
       maxAttempts: number(formData, "maxAttempts"),
+      defaultCountry: text(formData, "defaultCountry"),
       conversationMode: text(formData, "conversationMode") === "fixed" ? "fixed" : "dynamic",
       clarificationsAllowed: formData.get("clarificationsAllowed") === "on",
     });

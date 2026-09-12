@@ -10,10 +10,12 @@ export type PreferenceValues = {
   callingHoursEnd: string;
   timezone: string;
   maxAttempts: number;
+  defaultCountry: string;
 };
 
 export function PreferencesFields({ values, idPrefix }: { values: PreferenceValues; idPrefix: string }) {
   const id = (name: string) => `${idPrefix}-${name}`;
+  const countries = copy.countries.some((country) => country.value === values.defaultCountry) ? copy.countries : [{ value: values.defaultCountry, label: values.defaultCountry }, ...copy.countries];
   const timezones = copy.timezones.includes(values.timezone as (typeof copy.timezones)[number]) ? copy.timezones : [values.timezone, ...copy.timezones];
   return (
     <div className="grid gap-5 sm:grid-cols-2">
@@ -33,6 +35,12 @@ export function PreferencesFields({ values, idPrefix }: { values: PreferenceValu
         </NativeSelect>
       </div>
       <div className="space-y-2"><Label htmlFor={id("attempts")}>{copy.maxAttempts}</Label><Input id={id("attempts")} name="maxAttempts" type="number" min={1} max={5} required defaultValue={values.maxAttempts} /></div>
+      <div className="space-y-2">
+        <Label htmlFor={id("country")}>{copy.defaultCountry}</Label>
+        <NativeSelect id={id("country")} name="defaultCountry" defaultValue={values.defaultCountry} className="w-full">
+          {countries.map((country) => <NativeSelectOption key={country.value} value={country.value}>{country.label}</NativeSelectOption>)}
+        </NativeSelect>
+      </div>
     </div>
   );
 }

@@ -4,11 +4,12 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PreferencesFields } from "@/components/campaigns/preferences-fields";
+import { OptOutList } from "@/components/workspace/opt-out-list";
 import { updateSettingsAction } from "@/actions/settings";
 import { settingsContent as copy } from "@/data/workspace-settings";
-import type { WorkspaceSettings } from "@/lib/api";
+import type { OptOut, WorkspaceSettings } from "@/lib/api";
 
-export function SettingsForm({ settings }: { settings: WorkspaceSettings }) {
+export function SettingsForm({ settings, optOuts }: { settings: WorkspaceSettings; optOuts: OptOut[] }) {
   const [state, formAction, pending] = useActionState(updateSettingsAction, {});
   return (
     <div className="max-w-3xl space-y-8">
@@ -32,6 +33,7 @@ export function SettingsForm({ settings }: { settings: WorkspaceSettings }) {
           </form>
         </CardContent>
       </Card>
+      <OptOutList optOuts={optOuts} />
     </div>
   );
 }

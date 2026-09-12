@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    // Contact spreadsheets travel through a server action; the API caps uploads at 5 MB.
+    serverActions: { bodySizeLimit: "6mb" },
+  },
 };
 
 export default nextConfig;

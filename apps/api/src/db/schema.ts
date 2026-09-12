@@ -20,6 +20,7 @@ const callingPreferences = {
   callingHoursEnd: text('calling_hours_end').notNull().default('18:00'),
   timezone: text('timezone').notNull().default('Asia/Kolkata'),
   maxAttempts: integer('max_attempts').notNull().default(2),
+  defaultCountry: text('default_country').notNull().default('IN'),
 }
 
 export const workspaceSettings = sqliteTable('workspace_settings', {
@@ -76,7 +77,54 @@ export const campaignEvents = sqliteTable(
   (table) => [index('campaign_events_campaign').on(table.campaignId)],
 )
 
+export const contactStatuses = ['ready', 'invalid', 'duplicate', 'opted_out', 'excluded'] as const
+export const contactProblems = ['missing_phone', 'invalid_phone', 'duplicate_in_file', 'duplicate_existing', 'opted_out'] as const
+export type ContactStatus = (typeof contactStatuses)[number]
+export type ContactProblem = (typeof contactProblems)[number]
+
+export const contactImports = sqliteTable('contact_imports', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  fileName: text('file_name').notNull(),
+  headers: text('headers', { mode: 'json' }).$type<string[]>().notNull(),
+  rows: text('rows', { mode: 'json' }).$type<string[][]>().notNull(),
+  mapping: text('mapping', { mode: 'json' }).$type<{ nameColumn: number | null; phoneColumn: number; contextColumns: number[] }>(),
+  committedAt: integer('committed_at'),
+  createdAt: integer('created_at').notNull(),
+})
+
+export const contacts = sqliteTable(
+  'contacts',
+  {
+    id: text('id').primaryKey(),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    importId: text('import_id').references(() => contactImports.id, { onDelete: 'set null' }),
+    name: text('name'),
+    phoneRaw: text('phone_raw').notNull(),
+    phone: text('phone'),
+    status: text('status', { enum: contactStatuses }).notNull(),
+    problem: text('problem', { enum: contactProblems }),
+    context: text('context', { mode: 'json' }).$type<Record<string, string>>().notNull(),
+    createdAt: integer('created_at').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (table) => [index('contacts_campaign').on(table.campaignId), index('contacts_phone').on(table.phone)],
+)
+
+export const optOuts = sqliteTable('opt_outs', {
+  phone: text('phone').primaryKey(),
+  reason: text('reason'),
+  createdAt: integer('created_at').notNull(),
+})
+
 export type Campaign = typeof campaigns.$inferSelect
 export type Question = typeof questions.$inferSelect
 export type CampaignEvent = typeof campaignEvents.$inferSelect
 export type WorkspaceSettings = typeof workspaceSettings.$inferSelect
+export type Contact = typeof contacts.$inferSelect
+export type ContactImport = typeof contactImports.$inferSelect
+export type OptOut = typeof optOuts.$inferSelect

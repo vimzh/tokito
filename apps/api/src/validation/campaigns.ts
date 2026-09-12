@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isSupportedCountry } from 'libphonenumber-js'
 import { conversationModes, languages, questionSources, questionTypes } from '../db/schema'
 
 const trimmed = (max: number) => z.string().trim().min(1).max(max)
@@ -21,6 +22,7 @@ export const callingPreferencesSchema = z.object({
   callingHoursEnd: clockTime,
   timezone: z.string().refine(isTimezone, 'Unknown time zone.'),
   maxAttempts: z.number().int().min(1).max(5),
+  defaultCountry: z.string().length(2).toUpperCase().refine((value) => isSupportedCountry(value), 'Unknown country code.'),
 })
 
 const hoursInOrder = (data: { callingHoursStart?: string; callingHoursEnd?: string }) =>

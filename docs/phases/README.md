@@ -14,16 +14,16 @@ Detailed phase documents live next to this file (`phase-01.md`, `phase-02.md`, �
 | Workspace shell | Done: sidebar, navigation, profile card, Home / Connections / Settings pages. |
 | Home page | Done (Phase 1): lists real campaigns from the API with an empty state. |
 | Create campaign | Done (Phase 1): the review step saves a draft through a server action and redirects to the campaign page. |
-| Campaign detail | Done (Phases 1–2): goal, background, topics, a typed question editor with AI drafting, calling preferences, edit and delete. Responses and Report tabs are placeholders until Phases 6 and 7. |
+| Campaign detail | Done (Phases 1–3): goal, background, topics, a typed question editor with AI drafting, calling preferences, edit and delete, and a Contacts tab with upload, mapping, validation, and per-row fixes. Responses and Report tabs are placeholders until Phases 6 and 7. |
 | Connections page | Mockup: lists planned apps, nothing connects. |
-| Settings page | Done (Phase 2): workspace calling defaults saved through the API and copied into new campaigns. |
+| Settings page | Done (Phases 2–3): workspace calling defaults, default country, and the opt-out list. |
 | API | Done (Phase 1): campaigns CRUD and question replacement with zod validation, CORS, JSON errors, and service tests. |
 | Database | Done (Phase 1): `campaigns`, `questions`, `campaign_events` tables, first migration, seed script. |
 | Version control | Done (Phase 1): git initialized with a baseline commit. |
 | AI | Done (Phase 2): Strands Agents SDK with the OpenAI provider drafts questions; needs `OPENAI_API_KEY`. |
 | Calling, Discord, external apps | Not started. Calling provider decided: CALL-E. |
 
-Phases 1 and 2 are complete: campaigns, questions, drafting, and preferences are real. Contacts, calls, results, reports, Discord, and integrations remain. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
+Phases 1 to 3 are complete: campaigns, questions, drafting, preferences, and contact lists are real. Calls, results, reports, Discord, and integrations remain. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
 
 ## Phase overview
 
@@ -31,7 +31,7 @@ Phases 1 and 2 are complete: campaigns, questions, drafting, and preferences are
 |---|---|---|---|
 | 1 | Foundation: real campaigns end to end (done 2026-09-13) | Campaigns and questions are saved in SQLite through the API and shown on the dashboard. Git history begins. | — |
 | 2 | Question drafting and campaign setup (done 2026-09-13) | An OpenAI model, run through the Strands Agents SDK, drafts a questionnaire from the goal; organizer edits, reorders, and sets question types and calling preferences. | 1 |
-| 3 | Contact lists | Excel upload, column mapping, validation of numbers and duplicates, extra context columns, opt-out list. | 1 |
+| 3 | Contact lists (done 2026-09-13) | Excel upload, column mapping, validation of numbers and duplicates, extra context columns, opt-out list. | 1 |
 | 4 | Conversation engine | The layer that turns a campaign into CALL-E's task and result schema, plus a text simulator to exercise it, and the mapping from results and transcripts into answers. | 2, 3 |
 | 5 | Telephony and outreach control | Real outbound calls through CALL-E (heycall-e.com), webhook handling, call outcomes, retries, calling hours, callbacks, start/pause. | 4 |
 | 6 | Progress and results dashboard | Live per-contact status, transcripts, summaries, per-question answers, callback list, exports. | 5 |

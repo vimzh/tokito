@@ -1,6 +1,7 @@
 import { SettingsForm } from "@/components/workspace/settings-form";
-import { getSettings } from "@/lib/api";
+import { getSettings, listOptOuts } from "@/lib/api";
 
 export default async function SettingsPage() {
-  return <SettingsForm settings={await getSettings()} />;
+  const [settings, optOuts] = await Promise.all([getSettings(), listOptOuts()]);
+  return <SettingsForm settings={settings} optOuts={optOuts} />;
 }

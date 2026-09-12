@@ -16,7 +16,9 @@
     "@strands-agents/sdk": "^1.17.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.13.3",
+    "libphonenumber-js": "^1.13.13",
     "openai": "^6.45.0",
+    "xlsx": "^0.18.5",
     "zod": "^4.6.2"
   },
   "devDependencies": {
