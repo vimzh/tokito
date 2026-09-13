@@ -72,6 +72,7 @@ export function mapResult(structured: unknown, questions: CallQuestion[], questi
 }
 
 export function statusFromOutcome(outcome: CallOutcome): CallStatus {
+  if (outcome === 'no_conversation') return 'no_answer'
   if (outcome === 'declined' || outcome === 'wrong_person') return 'declined'
   if (outcome === 'callback_requested') return 'callback_requested'
   if (outcome === 'opted_out') return 'opted_out'

@@ -80,6 +80,7 @@ describe('result mapper', () => {
     expect(statusFromProvider({ taskStatus: 'completed', outcome: 'opted_out' })).toBe('opted_out')
     expect(statusFromProvider({ taskStatus: 'in_progress', attemptStatus: 'dialing' })).toBe('dialing')
     expect(statusFromProvider({ taskStatus: 'canceled' })).toBe('canceled')
+    expect(statusFromProvider({ taskStatus: 'completed', outcome: 'no_conversation' })).toBe('no_answer')
   })
 })
 

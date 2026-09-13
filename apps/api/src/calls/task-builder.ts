@@ -100,7 +100,7 @@ export function buildTask(campaign: TaskCampaign, questions: CallQuestion[], con
   lines.push('- If an early question shows the person has not had the experience later questions assume (for example, they have not tried the menu or did not attend), do not ask those questions as if they had; mark them not_asked and move to what still applies.')
   lines.push(
     campaign.conversationMode === 'dynamic'
-      ? '- When an answer is vague or matters to the purpose, ask one short follow-up for the reason, an example, or a detail. Never lead toward an answer, never suggest a verdict, and never ask again something the person already explained.'
+      ? '- After each answer to an open or rating question, if the person gave an opinion, a rating, or a one-word answer without a reason or an example, ask one short follow-up for the reason or an example before moving on (for instance what made it feel that way, which dish or moment, what would have made it better). Do this whenever the answer matters to the purpose; skip it only when they already explained. Never lead toward an answer, never suggest a verdict, and never ask again something the person already explained.'
       : '- Ask only the prepared questions, in order. Do not add follow-up questions.',
   )
   lines.push(
