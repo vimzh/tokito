@@ -76,8 +76,8 @@ describe('generate and ask', () => {
   }
 
   test('stores versions and returns the latest by default', async () => {
-    const first = await generateReport(db, campaignId, run)
-    const second = await generateReport(db, campaignId, run)
+    const first = await generateReport(db, campaignId, run, { mode: 'single' })
+    const second = await generateReport(db, campaignId, run, { mode: 'single' })
     expect([first.version, second.version]).toEqual([1, 2])
     const latest = getReport(db, campaignId)
     expect(latest.report?.version).toBe(2)
@@ -88,7 +88,7 @@ describe('generate and ask', () => {
 
   test('refuses without completed calls', async () => {
     const empty = createCampaign(db, { name: 'Empty', goal: 'g', questionSource: 'ai', conversationMode: 'dynamic' }).id
-    await expect(generateReport(db, empty, run)).rejects.toThrow('no completed calls')
+    await expect(generateReport(db, empty, run, { mode: 'single' })).rejects.toThrow('no completed calls')
   })
 
   test('ask resolves citations and keeps history; unanswerable questions say so', async () => {
@@ -99,5 +99,46 @@ describe('generate and ask', () => {
     const unknown = await askReport(db, campaignId, 'What colour is the menu?', run)
     expect(unknown.notEnoughEvidence).toBe(true)
     expect(listReportQuestions(db, campaignId).map((q) => q.question)).toEqual(['What colour is the menu?', 'Who found it expensive?'])
+  })
+})
+
+describe('multi-agent pipeline', () => {
+  test('runs one analyst per question with only its answers, synthesizes, and applies the reviewer', async () => {
+    const { runReportPipeline } = await import('./pipeline')
+    const seen: { stage: string; prompt: string; effort?: string }[] = []
+    const run: StructuredRun = async ({ schema, prompt, effort }) => {
+      const shape = (schema as { shape?: Record<string, unknown> }).shape ?? {}
+      if ('coverage_note' in shape) {
+        seen.push({ stage: 'analyst', prompt, effort })
+        const ids = [...prompt.matchAll(/^(e\d+) \|/gm)].map((m) => m[1]!)
+        return { output: schema.parse({ findings: ids.length ? [{ statement: `Finding for ${ids.join('+')}`, kind: 'problem', evidence_ids: ids }] : [], disagreement: null, requests: [], coverage_note: `${ids.length} answers` }), model: 'analyst-model' }
+      }
+      if ('headline' in shape) {
+        seen.push({ stage: 'synthesis', prompt, effort })
+        return { output: schema.parse({ headline: 'Everyone hates the prices.', themes: [{ title: 'Price', kind: 'problem', description: 'Expensive.', evidence_ids: ['e1', 'e2'] }, { title: 'Invented', kind: 'other', description: 'Made up.', evidence_ids: ['e2'] }], disagreements: [], requests: [], next_steps: [{ suggestion: 'Cut prices.', evidence_ids: ['e1'] }, { suggestion: 'Open a second branch.', evidence_ids: ['e1'] }] }), model: 'synth-model' }
+      }
+      seen.push({ stage: 'review', prompt, effort })
+      return { output: schema.parse({ headline_supported: false, headline_rewrite: 'One person found the prices high; another found them fair.', themes: [{ index: 0, supported: true, reason: 'ok', drop_evidence_ids: ['e2'] }, { index: 1, supported: false, reason: 'not in evidence', drop_evidence_ids: [] }], disagreements: [], requests: [], next_steps: [{ index: 0, supported: true, reason: 'ok' }, { index: 1, supported: false, reason: 'unrelated' }] }), model: 'review-model' }
+    }
+    const pack = buildEvidencePack(db, campaignId)
+    const result = await runReportPipeline(pack, run)
+    const analysts = seen.filter((s) => s.stage === 'analyst')
+    expect(analysts).toHaveLength(2)
+    expect(analysts.every((a) => a.effort === 'low')).toBe(true)
+    expect(analysts[0]?.prompt).toContain('e1 |')
+    expect(analysts[0]?.prompt).toContain('e2 |')
+    expect(analysts[0]?.prompt).not.toContain('e3 |')
+    expect(analysts[1]?.prompt).toContain('[declined]')
+    const synthesisPrompt = seen.find((s) => s.stage === 'synthesis')?.prompt ?? ''
+    expect(synthesisPrompt).toContain('Finding for e1+e2')
+    expect(synthesisPrompt).toContain('Finding for e3+e4')
+    expect(result.output.headline).toBe('One person found the prices high; another found them fair.')
+    expect(result.output.themes).toEqual([{ title: 'Price', kind: 'problem', description: 'Expensive.', evidence_ids: ['e1'] }])
+    expect(result.output.next_steps.map((s) => s.suggestion)).toEqual(['Cut prices.'])
+    expect(result.meta).toMatchObject({ analysts: 2, synthesisModel: 'synth-model', reviewerModel: 'review-model', review: { checked: 4, removed: 2, trimmedCitations: 1, headlineRewritten: true } })
+    const stored = await generateReport(db, campaignId, run)
+    expect(stored.promptVersion).toBe('report-v2-multiagent')
+    expect(stored.content.pipeline?.review.removed).toBe(2)
+    expect(stored.content.themes[0]?.quotes.map((q) => q.evidenceId)).toEqual(['e1'])
   })
 })

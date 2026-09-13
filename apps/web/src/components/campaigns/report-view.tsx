@@ -17,6 +17,7 @@ export function ReportView({ campaignId, report, versions }: { campaignId: strin
         <Badge variant="outline">{copy.aiSummary}</Badge>
         <p className="max-w-3xl text-lg leading-7">{content.headline}</p>
         <p className="text-sm text-muted-foreground">{copy.representativeness(content.participation.reached, content.responses.total, content.participation.people)}{content.responses.simulated > 0 ? ` ${copy.simulationsNote(content.responses.simulated)}` : ""}</p>
+        <p className="text-sm text-muted-foreground">{content.pipeline ? copy.pipeline(content.pipeline.analysts, content.pipeline.review.removed, content.pipeline.review.trimmedCitations, content.pipeline.review.headlineRewritten) : copy.singleAgent}</p>
         {content.droppedCitations > 0 && <p className="text-sm text-muted-foreground">{copy.dropped(content.droppedCitations)}</p>}
       </section>
       <section className="space-y-4">

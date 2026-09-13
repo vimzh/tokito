@@ -3,23 +3,29 @@ import { Agent, ModelError, ModelThrottledError, StructuredOutputError } from '@
 import { OpenAIModel } from '@strands-agents/sdk/models/openai'
 import type { MessageData } from '@strands-agents/sdk'
 import type { z } from 'zod'
-import { aiConfig, AiNotConfiguredError, AiRequestError } from './config'
+import { aiConfig, AiNotConfiguredError, AiRequestError, type ReasoningEffort } from './config'
 
-export type StructuredRun = <T extends z.ZodType>(args: { system: string; prompt: string; schema: T; history?: MessageData[] }) => Promise<{ output: z.output<T>; model: string }>
+export type StructuredRun = <T extends z.ZodType>(args: { system: string; prompt: string; schema: T; history?: MessageData[]; effort?: ReasoningEffort }) => Promise<{ output: z.output<T>; model: string }>
 
-export function createOpenAiModel() {
+export function createOpenAiModel(effort: ReasoningEffort = aiConfig.reasoningEffort) {
   if (!aiConfig.apiKey) throw new AiNotConfiguredError()
   return new OpenAIModel({
     modelId: aiConfig.model,
     apiKey: aiConfig.apiKey,
-    params: { reasoning: { effort: aiConfig.reasoningEffort } },
+    params: { reasoning: { effort } },
   })
 }
 
 // A fresh Agent per run keeps every request stateless; the agent would otherwise accumulate history.
 export function createStructuredRun(model = createOpenAiModel()): StructuredRun {
-  return async ({ system, prompt, schema, history }) => {
-    const agent = new Agent({ model, systemPrompt: system, structuredOutputSchema: schema, printer: false, messages: history ?? [] })
+  const byEffort = new Map<ReasoningEffort, OpenAIModel>()
+  const modelFor = (effort?: ReasoningEffort) => {
+    if (!effort || effort === aiConfig.reasoningEffort) return model
+    if (!byEffort.has(effort)) byEffort.set(effort, createOpenAiModel(effort))
+    return byEffort.get(effort)!
+  }
+  return async ({ system, prompt, schema, history, effort }) => {
+    const agent = new Agent({ model: modelFor(effort), systemPrompt: system, structuredOutputSchema: schema, printer: false, messages: history ?? [] })
     let result
     try {
       result = await agent.invoke(prompt)

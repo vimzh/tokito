@@ -5,6 +5,7 @@ import { campaignEvents, reports, type Report } from '../db/schema'
 import type { StructuredRun } from '../ai/agent'
 import { NotFoundError } from '../services/campaigns'
 import { buildEvidencePack, renderEvidence, type EvidenceItem, type EvidencePack } from './evidence'
+import { PIPELINE_PROMPT_VERSION, runReportPipeline, type PipelineMeta } from './pipeline'
 
 export const REPORT_PROMPT_VERSION = 'report-v1'
 
@@ -53,6 +54,7 @@ export type ReportContent = {
   responses: EvidencePack['results']['responses']
   questions: EvidencePack['results']['questions']
   droppedCitations: number
+  pipeline?: PipelineMeta
 }
 
 export const reportInstructions = `You write the findings section of a feedback report for the organizer of a phone campaign. You are given the goal, the questions, and an evidence list where every item has an id.
@@ -102,17 +104,31 @@ export function assembleReport(pack: EvidencePack, output: z.infer<typeof report
   return { headline: output.headline, themes, disagreements, requests, nextSteps, gaps, participation: pack.results.participation, responses: pack.results.responses, questions: pack.results.questions, droppedCitations: dropped }
 }
 
-export async function generateReport(db: Db, campaignId: string, run: StructuredRun) {
+// Single-agent generation, kept for comparison and as a fallback; the default path is the pipeline below.
+export async function generateReportSingleAgent(pack: EvidencePack, run: StructuredRun) {
+  const { output, model } = await run({ system: reportInstructions, prompt: renderEvidence(pack), schema: reportOutputSchema })
+  return { content: assembleReport(pack, output), model, promptVersion: REPORT_PROMPT_VERSION }
+}
+
+export async function generateReport(db: Db, campaignId: string, run: StructuredRun, options: { mode?: 'pipeline' | 'single' } = {}) {
   const pack = buildEvidencePack(db, campaignId)
   if (pack.results.responses.total === 0) throw new ReportError('There are no completed calls to report on yet.')
-  const { output, model } = await run({ system: reportInstructions, prompt: renderEvidence(pack), schema: reportOutputSchema })
-  const content = assembleReport(pack, output)
+  let content: ReportContent
+  let model: string
+  let promptVersion: string
+  if (options.mode === 'single') ({ content, model, promptVersion } = await generateReportSingleAgent(pack, run))
+  else {
+    const result = await runReportPipeline(pack, run)
+    content = { ...assembleReport(pack, result.output), pipeline: result.meta }
+    model = result.meta.synthesisModel
+    promptVersion = PIPELINE_PROMPT_VERSION
+  }
   const latest = db.select({ version: reports.version }).from(reports).where(eq(reports.campaignId, campaignId)).orderBy(desc(reports.version)).get()
   const now = Date.now()
-  const row = { id: id(), campaignId, version: (latest?.version ?? 0) + 1, model, promptVersion: REPORT_PROMPT_VERSION, content: content as unknown as Record<string, unknown>, createdAt: now }
+  const row = { id: id(), campaignId, version: (latest?.version ?? 0) + 1, model, promptVersion, content: content as unknown as Record<string, unknown>, createdAt: now }
   db.transaction((tx) => {
     tx.insert(reports).values(row).run()
-    tx.insert(campaignEvents).values({ id: id(), campaignId, type: 'report.generated', payload: { version: row.version, model, droppedCitations: content.droppedCitations }, createdAt: now }).run()
+    tx.insert(campaignEvents).values({ id: id(), campaignId, type: 'report.generated', payload: { version: row.version, model, promptVersion, droppedCitations: content.droppedCitations, review: content.pipeline?.review ?? null }, createdAt: now }).run()
   })
   return { ...row, content }
 }

@@ -51,3 +51,17 @@ An organizer generates a report from the completed calls and reads what people s
 | Browser click-through of Generate and Ask | Not run: needs a logged-in browser session |
 
 **What the next phase should know.** Discord (Phase 8) can call `POST /report`, `GET /report`, and `POST /report/ask` directly and render `headline`, theme titles with people counts, and quotes with call links to the dashboard. Notion (Phase 9) publishes `ReportContent`; keep quotes as quotes and keep the AI labels.
+
+
+## Addendum (September 13, 2026): multi-agent report pipeline
+
+At the user's request the report is now written by several specialized agents instead of one, in `src/reports/pipeline.ts`:
+
+1. **Analyst agents**, one per question with at least one recorded answer, run in parallel at low reasoning effort. Each sees only its question's answers and returns findings (with evidence ids), an optional disagreement, requests, and a coverage note.
+2. **Synthesis agent** receives the full evidence list plus every analyst's findings and produces the report structure (headline, cross-question themes, disagreements, requests, next steps), citing evidence ids.
+3. **Reviewer agent** checks the draft against the evidence: it marks themes, disagreements, requests, and next steps as supported or not, lists citations that do not support a theme, and rewrites a headline that claims too much. Code applies the verdicts (`applyReview`): unsupported items are removed, rejected citations trimmed, the headline replaced.
+4. The existing code-side validation (`assembleReport`) then resolves ids, counts distinct people, and merges the database-computed participation, per-question results, and gaps as before.
+
+The stored report carries `pipeline` metadata (number of analysts, models, and reviewer statistics) and `promptVersion = report-v2-multiagent`; the page shows a one-line account of what the reviewer removed. The single-agent path remains available as `generateReport(..., { mode: 'single' })` for comparison. Ask-the-report is unchanged (single agent over the same evidence).
+
+**Checks.** A pipeline test drives all three stages with a fake model: it asserts one analyst per question receiving only that question's answers, the synthesis prompt carrying the analysts' findings, the reviewer's verdicts removing an invented theme and an unrelated next step, trimming a weak citation, and rewriting an overreaching headline, and the stored report recording the statistics. `bun test` (59) passes. A live run on 2026-09-13 could not complete: the OpenAI organization's spend limit was reached (`enforced spend limit`). Rerun `generateReport` on the "New menu feedback" campaign once the limit is raised and record the timing and reviewer statistics here.

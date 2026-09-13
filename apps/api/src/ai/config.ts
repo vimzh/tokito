@@ -6,6 +6,8 @@ export const aiConfig = {
   reasoningEffort: 'medium' as const,
 }
 
+export type ReasoningEffort = 'low' | 'medium' | 'high'
+
 export class AiNotConfiguredError extends Error {
   constructor() {
     super('AI drafting is not configured. Set OPENAI_API_KEY for the API and restart it.')

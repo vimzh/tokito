@@ -20,7 +20,7 @@ Detailed phase documents live next to this file (`phase-01.md`, `phase-02.md`, â
 | API | Done (Phase 1): campaigns CRUD and question replacement with zod validation, CORS, JSON errors, and service tests. |
 | Database | Done (Phase 1): `campaigns`, `questions`, `campaign_events` tables, first migration, seed script. |
 | Version control | Done (Phase 1): git initialized with a baseline commit. |
-| AI | Done (Phases 2, 4, 7): Strands Agents SDK with the OpenAI provider drafts questions, runs the text call simulator, writes the report, and answers questions over the evidence; needs `OPENAI_API_KEY`. |
+| AI | Done (Phases 2, 4, 7): Strands Agents SDK with the OpenAI provider drafts questions, runs the text call simulator, writes the report through a multi-agent pipeline (analysts per question, synthesis, reviewer), and answers questions over the evidence; needs `OPENAI_API_KEY`. |
 | Calling | Done in code (Phase 5): CALL-E adapter, scheduler with calling hours, attempts, budget, webhooks, polling, callbacks, start/pause/stop. Needs `CALLE_API_KEY` and a public webhook URL; no live call yet. |
 | Discord | Done in code (Phase 8): `/tokito` commands, mention-driven agent with API tools, confirmation buttons, notifications, attribution. Needs a bot token to run. |
 | External apps | Done in code (Phase 9): Sheets contact import and results write-back, Calendar callback events, Notion report pages. Needs Google and Notion client ids. |
@@ -37,7 +37,7 @@ Phases 1 to 5 are complete in code: campaigns, questions, drafting, preferences,
 | 4 | Conversation layer (done 2026-09-13) | The layer that turns a campaign into CALL-E's task and result schema, plus a text simulator to exercise it, and the mapping from results and transcripts into answers. | 2, 3 |
 | 5 | Telephony and outreach control (code done 2026-09-13; live call pending) | Real outbound calls through CALL-E (heycall-e.com), webhook handling, call outcomes, retries, calling hours, callbacks, start/pause. | 4 |
 | 6 | Progress and results dashboard (done 2026-09-13) | Live per-contact status, transcripts, summaries, per-question answers, callback list, exports. | 5 |
-| 7 | Reports and asking questions of the data (done 2026-09-13) | Campaign-level report with counts, themes, supporting quotes, disagreements, gaps, labeled suggestions, and a Q&A box over the answers. | 6 |
+| 7 | Reports and asking questions of the data (done 2026-09-13; multi-agent pipeline added the same day) | Campaign-level report written by per-question analyst agents, a synthesis agent, and a reviewer agent; campaign-level report with counts, themes, supporting quotes, disagreements, gaps, labeled suggestions, and a Q&A box over the answers. | 6 |
 | 8 | Discord agent (code done 2026-09-13; live server pending) | Manage the same campaigns from Discord: create, review questions, upload contacts, start/pause, progress, answers, reports, notifications. | 7 |
 | 9 | External app connections (code done 2026-09-13; live accounts pending) | Google Sheets (contacts in, results out), Google Calendar (callbacks), Notion (published report), with real OAuth and visible failures. | 8 |
 | 10 | Reliability, trust, and demo | Test and evaluation checklist from `hackathon.md` executed and recorded, consent and retention controls, reliability brief, demo script, deployment. | 9 |

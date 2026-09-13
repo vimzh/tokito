@@ -346,6 +346,9 @@ export const campaignContent = {
     openCall: "Open call",
     simulation: "Text simulation",
     dropped: (count: number) => `${count} ${count === 1 ? "citation" : "citations"} from the model did not match stored answers and ${count === 1 ? "was" : "were"} dropped.`,
+    pipeline: (analysts: number, removed: number, trimmed: number, headlineRewritten: boolean) =>
+      `Written by ${analysts} analyst ${analysts === 1 ? "agent" : "agents"} (one per question), merged by a synthesis agent, and checked by a reviewer agent that removed ${removed} unsupported ${removed === 1 ? "claim" : "claims"}${trimmed > 0 ? ` and ${trimmed} weak ${trimmed === 1 ? "citation" : "citations"}` : ""}${headlineRewritten ? " and corrected the headline" : ""}.`,
+    singleAgent: "Written by a single agent from the evidence.",
     none: "None found in the answers.",
     ask: "Ask the report",
     askDescription: "Ask a question about what people said. Answers cite the stored answers they rest on and say when the evidence is not enough.",
