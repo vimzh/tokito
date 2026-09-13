@@ -149,6 +149,7 @@ export const calls = sqliteTable(
     idempotencyKey: text('idempotency_key'),
     scheduledAt: integer('scheduled_at'),
     lastPolledAt: integer('last_polled_at'),
+    calendarEventId: text('calendar_event_id'),
     attempt: integer('attempt').notNull().default(1),
     status: text('status', { enum: callStatuses }).notNull(),
     task: text('task').notNull(),
@@ -230,6 +231,7 @@ export const reports = sqliteTable(
     model: text('model').notNull(),
     promptVersion: text('prompt_version').notNull(),
     content: text('content', { mode: 'json' }).$type<Record<string, unknown>>().notNull(),
+    externalUrl: text('external_url'),
     createdAt: integer('created_at').notNull(),
   },
   (table) => [uniqueIndex('reports_campaign_version').on(table.campaignId, table.version)],
@@ -250,6 +252,41 @@ export const reportQuestions = sqliteTable(
   (table) => [index('report_questions_campaign').on(table.campaignId)],
 )
 
+export const connectionProviders = ['google', 'notion'] as const
+export const campaignConnectionKinds = ['sheets', 'calendar', 'notion'] as const
+export type ConnectionProvider = (typeof connectionProviders)[number]
+export type CampaignConnectionKind = (typeof campaignConnectionKinds)[number]
+
+export const connections = sqliteTable('connections', {
+  provider: text('provider', { enum: connectionProviders }).primaryKey(),
+  accessToken: text('access_token').notNull(),
+  refreshToken: text('refresh_token'),
+  expiresAt: integer('expires_at'),
+  scope: text('scope'),
+  accountLabel: text('account_label'),
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+})
+
+export const campaignConnections = sqliteTable(
+  'campaign_connections',
+  {
+    id: text('id').primaryKey(),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: campaignConnectionKinds }).notNull(),
+    config: text('config', { mode: 'json' }).$type<Record<string, string>>().notNull(),
+    enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
+    lastSyncAt: integer('last_sync_at'),
+    lastStatus: text('last_status', { enum: ['ok', 'failed'] }),
+    lastError: text('last_error'),
+    lastExternalUrl: text('last_external_url'),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (table) => [uniqueIndex('campaign_connections_campaign_kind').on(table.campaignId, table.kind)],
+)
+
 export type Campaign = typeof campaigns.$inferSelect
 export type Question = typeof questions.$inferSelect
 export type CampaignEvent = typeof campaignEvents.$inferSelect
@@ -262,3 +299,5 @@ export type CallTurn = typeof callTurns.$inferSelect
 export type Answer = typeof answers.$inferSelect
 export type Report = typeof reports.$inferSelect
 export type ReportQuestion = typeof reportQuestions.$inferSelect
+export type Connection = typeof connections.$inferSelect
+export type CampaignConnection = typeof campaignConnections.$inferSelect

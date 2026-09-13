@@ -3,6 +3,7 @@ import type { Db } from '../db'
 import { answers, calls, callTurns, campaignEvents, questions, type Call, type CallStatus } from '../db/schema'
 import { mapResult, statusFromOutcome, type MappedResult } from './result-mapper'
 import { addOptOut } from '../services/opt-outs'
+import { emitHook } from '../integrations/hooks'
 
 const id = () => crypto.randomUUID()
 
@@ -56,6 +57,7 @@ export function persistCallResult(
       .run()
     tx.insert(campaignEvents).values({ id: id(), campaignId: call.campaignId, type: input.eventType, payload: { callId: call.id, outcome: mapped.outcome, status }, createdAt: now }).run()
   })
+  void emitHook('call.terminal', { db, campaignId: call.campaignId, callId: call.id })
   return mapped
 }
 

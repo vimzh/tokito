@@ -7,6 +7,7 @@ import { contactRoutes } from './contacts'
 import { callRoutes } from './calls'
 import { outreachRoutes } from './outreach'
 import { reportRoutes } from './reports'
+import { campaignConnectionRoutes } from './campaign-connections'
 import { validationHook } from '../validation/hook'
 import { createCampaignSchema, replaceQuestionsSchema, updateCampaignSchema } from '../validation/campaigns'
 
@@ -34,3 +35,4 @@ export const campaignRoutes = new Hono()
   .route('/', callRoutes)
   .route('/', outreachRoutes)
   .route('/', reportRoutes)
+  .route('/', campaignConnectionRoutes)

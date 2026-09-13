@@ -33,6 +33,7 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. Tests:
 | `AUTH_SECRET` | Auth.js session secret. Generate with `bunx auth secret`. |
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Optional Google OAuth web client. |
 | `API_URL` | Base URL of the API, default `http://localhost:3002`. |
+| `API_PUBLIC_URL` | API base the browser can reach, used for the Connect links; defaults to `API_URL`. |
 
 `apps/discord/.env` (copy from `.env.example`): `DISCORD_TOKEN`, `DISCORD_APP_ID`, optional `DISCORD_GUILD_ID` for instant command registration, `API_URL`, `DASHBOARD_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL`.
 
@@ -49,6 +50,9 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. Tests:
 | `CALLE_BASE_URL` | CALL-E API base URL, default `https://api.heycall-e.com`. |
 | `CALLE_WEBHOOK_URL` | Public URL of this API's `/api/webhooks/calle` endpoint, sent with each call so CALL-E can post terminal events. Polling covers missed events. |
 | `OUTREACH_TICK_SECONDS` | How often the scheduler dials and polls, default 30. |
+| `API_PUBLIC_URL` | Base URL of this API as the browser and OAuth providers reach it, default `http://localhost:3002`. Redirect URIs are `<API_PUBLIC_URL>/api/connections/google/callback` and `…/notion/callback`. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth web client for Sheets and Calendar. |
+| `NOTION_CLIENT_ID`, `NOTION_CLIENT_SECRET` | Notion public integration for publishing reports. |
 
 ### API routes
 
@@ -72,6 +76,8 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. Tests:
 | `POST` | `/api/webhooks/calle` | CALL-E terminal events, idempotent by event id. |
 | `POST` | `/api/outreach/tick` | Run one scheduler pass by hand. |
 | `GET` | `/api/events` | Campaign event log across campaigns (`?after=<ms>`); `POST` records an activity entry from another surface, such as Discord. |
+| `GET` | `/api/connections` | Google and Notion connection status; `GET …/:provider/start` begins OAuth, `…/callback` completes it, `DELETE …/:provider` disconnects. |
+| `GET` | `/api/campaigns/:id/connections` | Per-campaign sheet, calendar, and Notion settings with last sync status; `PUT …/:kind`, `DELETE …/:kind`, `POST …/sheets/import`, `POST …/sheets/sync`, `POST …/notion/publish`. |
 | `GET` | `/api/opt-outs` | Opt-out list; `POST /api/opt-outs`, `POST /api/opt-outs/remove`. |
 | `GET` | `/api/settings` | Workspace calling defaults. |
 | `PUT` | `/api/settings` | Update workspace calling defaults. |

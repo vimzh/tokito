@@ -5,6 +5,11 @@ import { campaignRoutes } from './routes/campaigns'
 import { settingsRoutes } from './routes/settings'
 import { optOutRoutes } from './routes/opt-outs'
 import { eventRoutes } from './routes/events'
+import { connectionRoutes } from './routes/connections'
+import { IntegrationError } from './integrations/http'
+import { NotConnectedError, OAuthError } from './integrations/connections'
+import { ConnectionConfigError } from './integrations/campaign-connections'
+import { registerIntegrations } from './integrations/register'
 import { ImportStateError } from './services/contacts'
 import { InvalidPhoneError } from './services/opt-outs'
 import { SpreadsheetError } from './services/spreadsheet'
@@ -20,10 +25,11 @@ const app = new Hono()
   .use('/api/*', cors({ origin: process.env.WEB_ORIGIN ?? 'http://localhost:3000' }))
   .onError((error, c) => {
     if (error instanceof NotFoundError) return c.json({ error: { message: error.message } }, 404)
-    if (error instanceof SpreadsheetError || error instanceof ImportStateError || error instanceof InvalidPhoneError || error instanceof SimulationError || error instanceof OutreachError || error instanceof ReportError)
+    if (error instanceof SpreadsheetError || error instanceof ImportStateError || error instanceof InvalidPhoneError || error instanceof SimulationError || error instanceof OutreachError || error instanceof ReportError || error instanceof OAuthError || error instanceof ConnectionConfigError || error instanceof NotConnectedError)
       return c.json({ error: { message: error.message } }, 400)
     if (error instanceof AiNotConfiguredError || error instanceof ProviderNotConfiguredError) return c.json({ error: { message: error.message } }, 503)
     if (error instanceof ProviderError) return c.json({ error: { message: error.message, code: error.code } }, 502)
+    if (error instanceof IntegrationError) return c.json({ error: { message: `${error.provider}: ${error.message}` } }, 502)
     if (error instanceof AiRequestError) return c.json({ error: { message: error.message } }, 502)
     if (error instanceof HTTPException) return c.json({ error: { message: error.message } }, error.status)
     console.error(error)
@@ -35,10 +41,13 @@ const app = new Hono()
   .route('/api/settings', settingsRoutes)
   .route('/api/opt-outs', optOutRoutes)
   .route('/api/events', eventRoutes)
+  .route('/api/connections', connectionRoutes)
   .route('/api/webhooks', webhookRoutes)
   .route('/api/outreach', schedulerRoutes)
 
 export type AppType = typeof app
+
+registerIntegrations()
 
 // One scheduler loop per process; --hot reloads re-run this module, so clear the previous timer.
 const tickSeconds = Number(process.env.OUTREACH_TICK_SECONDS ?? 30)

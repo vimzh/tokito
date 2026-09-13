@@ -6,6 +6,7 @@ import { buildCallSpec } from './task-builder'
 import { statusFromProvider } from './result-mapper'
 import { persistCallResult, recordOptOutFromCall, type TranscriptTurn } from './persist'
 import { ProviderError, localeFor, type CallProvider, type ProviderTask } from './provider'
+import { emitHook } from '../integrations/hooks'
 
 const id = () => crypto.randomUUID()
 export const schedulerConfig = { maxActivePerCampaign: 3, retryDelayMinutes: 120, pollAfterMinutes: 2 }
@@ -126,6 +127,7 @@ export function scheduleCallback(db: Db, campaignId: string, callId: string, at:
     tx.update(calls).set({ callbackRequested: true, updatedAt: now }).where(eq(calls.id, callId)).run()
     tx.insert(campaignEvents).values({ id: id(), campaignId, type: 'callback.scheduled', payload: { fromCallId: callId, callId: row.id, at }, createdAt: now }).run()
   })
+  void emitHook('callback.scheduled', { db, campaignId, callId: row.id })
   return db.select().from(calls).where(eq(calls.id, row.id)).get()!
 }
 
@@ -142,6 +144,7 @@ function blankCall(campaignId: string, contactId: string, personName: string | n
     idempotencyKey: null as string | null,
     scheduledAt: null as number | null,
     lastPolledAt: null,
+    calendarEventId: null,
     attempt: 1,
     status: 'queued' as const,
     task,

@@ -1,14 +1,21 @@
-import { landingContent } from "@/data/landing";
 
 export const connectionsContent = {
   title: "Connections",
   description: "Bring your contacts in. Share what you learn.",
-  notice: "Preview only — these integrations are planned and no apps are connected.",
-  status: "Not connected",
-  action: "Explore connection",
-  dialogDescription: "This is a preview of a planned connection. Authorization is not available yet, and no account or data will be connected.",
-  close: "Got it",
-  items: landingContent.connections.items,
+  intro: "Connect an account once here, then choose per campaign which sheet or page to use.",
+  providers: {
+    google: { title: "Google", description: "Google Sheets as a contact source and a live results sheet; Google Calendar entries for callbacks." },
+    notion: { title: "Notion", description: "Publish each report as a page where your team keeps its documents." },
+  },
+  connected: (label: string | null) => (label ? `Connected as ${label}` : "Connected"),
+  notConnected: "Not connected",
+  notConfigured: "Not available: the API has no client id and secret for this provider.",
+  connect: "Connect",
+  disconnect: "Disconnect",
+  disconnecting: "Disconnecting…",
+  justConnected: (provider: string) => `${provider} connected.`,
+  connectFailed: (error: string) => `Connection failed: ${error}`,
+  planned: "Not available yet: Slack, HubSpot, Gmail, Linear.",
 };
 
 export const settingsContent = {

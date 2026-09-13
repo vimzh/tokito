@@ -7,6 +7,7 @@ import { AskReport } from "@/components/campaigns/ask-report";
 import { GenerateReportButton } from "@/components/campaigns/generate-report-button";
 import { ReportView } from "@/components/campaigns/report-view";
 import { CallScript } from "@/components/campaigns/call-script";
+import { CampaignConnections } from "@/components/campaigns/campaign-connections";
 import { CampaignMetrics } from "@/components/campaigns/campaign-metrics";
 import { ExportButtons } from "@/components/campaigns/export-buttons";
 import { LiveRefresh } from "@/components/campaigns/live-refresh";
@@ -22,9 +23,9 @@ import { OutreachPanel } from "@/components/campaigns/outreach-panel";
 import { QuestionEditor } from "@/components/campaigns/question-editor";
 import { campaignContent as copy, campaignStatusLabels, preferencesContent } from "@/data/campaign";
 import { formatDate } from "@/lib/format";
-import type { AskResult, CallSummary, Campaign, CampaignResults, ContactList, OutreachStatus, ReportResponse, TaskPreview } from "@/lib/api";
+import type { AskResult, CallSummary, Campaign, CampaignConnection, CampaignResults, ConnectionStatus, ContactList, OutreachStatus, ReportResponse, TaskPreview } from "@/lib/api";
 
-export function SurveyDetails({ campaign, contacts, calls, preview, outreach, results, report, questions }: { campaign: Campaign; contacts: ContactList; calls: CallSummary[]; preview: TaskPreview; outreach: OutreachStatus; results: CampaignResults; report: ReportResponse; questions: AskResult[] }) {
+export function SurveyDetails({ campaign, contacts, calls, preview, outreach, results, report, questions, connections, accounts }: { campaign: Campaign; contacts: ContactList; calls: CallSummary[]; preview: TaskPreview; outreach: OutreachStatus; results: CampaignResults; report: ReportResponse; questions: AskResult[]; connections: CampaignConnection[]; accounts: ConnectionStatus[] }) {
   const live = campaign.status === "running" || outreach.counts.active > 0 || outreach.counts.queued > 0;
   const readyContacts = contacts.contacts.filter((contact) => contact.status === "ready").map((contact) => ({ id: contact.id, name: contact.name, phone: contact.phone }));
   const language = preferencesContent.languages.find((item) => item.value === campaign.language)?.label ?? campaign.language;
@@ -56,6 +57,10 @@ export function SurveyDetails({ campaign, contacts, calls, preview, outreach, re
           <section className="space-y-3">
             <h2 className="text-xl">{copy.script.title}</h2>
             <CallScript preview={preview} />
+          </section>
+          <section className="space-y-4">
+            <div><h2 className="text-xl">{copy.connections.title}</h2><p className="mt-2 text-sm text-muted-foreground">{copy.connections.description}</p></div>
+            <CampaignConnections campaignId={campaign.id} connections={connections} accounts={accounts} hasReport={report.report !== null} />
           </section>
           <section className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl">{copy.settings}</h2><CallingPreferences campaign={campaign} /></div>

@@ -4,7 +4,7 @@ import { campaignEvents, campaigns, contactImports, contacts, optOuts, type Cont
 import type { CommitImportInput, UpdateContactInput } from '../validation/contacts'
 import { NotFoundError } from './campaigns'
 import { normalizePhone } from './phone'
-import { parseSpreadsheet, suggestMapping } from './spreadsheet'
+import { MAX_IMPORT_ROWS, parseSpreadsheet, SpreadsheetError, suggestMapping } from './spreadsheet'
 import { contactCallSummary } from '../calls/scheduler'
 
 const id = () => crypto.randomUUID()
@@ -40,6 +40,22 @@ function importPreview(row: typeof contactImports.$inferSelect) {
 export function createImport(db: Db, campaignId: string, fileName: string, data: ArrayBuffer | Uint8Array) {
   requireCampaign(db, campaignId)
   const { headers, rows } = parseSpreadsheet(data)
+  return storeImport(db, campaignId, fileName, headers, rows)
+}
+
+// Same import flow for rows that came from somewhere other than a file, such as a Google Sheet.
+export function createImportFromRows(db: Db, campaignId: string, sourceName: string, values: string[][]) {
+  requireCampaign(db, campaignId)
+  const [headerRow, ...body] = values.map((row) => row.map((cell) => cell.trim()))
+  if (!headerRow || headerRow.every((cell) => cell === '')) throw new SpreadsheetError('The first row must contain column headings.')
+  const headers = headerRow.map((cell, index) => cell || `Column ${index + 1}`)
+  const rows = body.filter((row) => row.some((cell) => cell !== '')).map((row) => headers.map((_, index) => row[index] ?? ''))
+  if (rows.length === 0) throw new SpreadsheetError('The sheet has headings but no rows.')
+  if (rows.length > MAX_IMPORT_ROWS) throw new SpreadsheetError(`The sheet has ${rows.length} rows; the limit is ${MAX_IMPORT_ROWS}.`)
+  return storeImport(db, campaignId, sourceName, headers, rows)
+}
+
+function storeImport(db: Db, campaignId: string, fileName: string, headers: string[], rows: string[][]) {
   const row = { id: id(), campaignId, fileName, headers, rows, createdAt: Date.now() }
   db.insert(contactImports).values(row).run()
   return importPreview({ ...row, mapping: null, committedAt: null })

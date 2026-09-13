@@ -140,3 +140,23 @@ export const getReport = (id: string, version?: number) =>
 export const generateReport = (id: string) => reportRoute.$post({ param: { id } }).then((response) => unwrap<Report>(response));
 export const askReport = (id: string, question: string) => reportRoute.ask.$post({ param: { id }, json: { question } }).then((response) => unwrap<AskResult>(response));
 export const listReportQuestions = (id: string) => reportRoute.questions.$get({ param: { id } }).then((response) => unwrap<AskResult[]>(response));
+
+// ---- External connections (Phase 9) ----
+const connectionsRoute = client.api.connections;
+const campaignConnectionsRoute = campaignRoute.connections;
+
+export type ConnectionStatus = Res<typeof connectionsRoute.$get, 200>[number];
+export type ConnectionProvider = ConnectionStatus["provider"];
+export type CampaignConnection = Res<typeof campaignConnectionsRoute.$get, 200>[number];
+export type CampaignConnectionKind = CampaignConnection["kind"];
+
+export const listConnections = () => connectionsRoute.$get().then((response) => unwrap<ConnectionStatus[]>(response));
+export const disconnectProvider = (provider: ConnectionProvider) => connectionsRoute[":provider"].$delete({ param: { provider } }).then((response) => unwrap<void>(response));
+export const listCampaignConnections = (id: string) => campaignConnectionsRoute.$get({ param: { id } }).then((response) => unwrap<CampaignConnection[]>(response));
+export const setCampaignConnection = (id: string, kind: CampaignConnectionKind, json: { url?: string; enabled?: boolean }) =>
+  campaignConnectionsRoute[":kind"].$put({ param: { id, kind }, json }).then((response) => unwrap<CampaignConnection>(response));
+export const removeCampaignConnection = (id: string, kind: CampaignConnectionKind) => campaignConnectionsRoute[":kind"].$delete({ param: { id, kind } }).then((response) => unwrap<void>(response));
+export const importFromSheet = (id: string) => campaignConnectionsRoute.sheets.import.$post({ param: { id } }).then((response) => unwrap<ImportPreview>(response));
+export const syncToSheet = (id: string) => campaignConnectionsRoute.sheets.sync.$post({ param: { id } }).then((response) => unwrap<{ url: string | null }>(response));
+export const publishToNotion = (id: string, version?: number) =>
+  campaignConnectionsRoute.notion.publish.$post({ param: { id }, json: version ? { version } : {} }).then((response) => unwrap<{ url: string }>(response));

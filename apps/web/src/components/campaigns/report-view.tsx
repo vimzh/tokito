@@ -12,7 +12,7 @@ export function ReportView({ campaignId, report, versions }: { campaignId: strin
   const content = report.content;
   return (
     <div className="space-y-8">
-      <p className="text-sm text-muted-foreground">{copy.generatedBy(report.version, report.model, formatDateTime(report.createdAt))}</p>
+      <p className="text-sm text-muted-foreground">{copy.generatedBy(report.version, report.model, formatDateTime(report.createdAt))}{report.externalUrl ? <> · <a href={report.externalUrl} target="_blank" rel="noreferrer" className="underline-offset-4 hover:underline">{campaignContent.connections.kinds.notion.title}</a></> : null}</p>
       <section className="space-y-3">
         <Badge variant="outline">{copy.aiSummary}</Badge>
         <p className="max-w-3xl text-lg leading-7">{content.headline}</p>

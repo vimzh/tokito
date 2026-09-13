@@ -100,6 +100,10 @@ export function eventMessage(event: EventRow): string | null {
     case 'outreach.completed': return `✅ **${name}** finished: nothing left to dial.${link}`
     case 'call.create_failed': return `⚠️ A call for **${name}** could not be placed (${String(payload.code ?? 'error')}).${link}`
     case 'report.generated': return `📄 Report v${String(payload.version ?? '')} is ready for **${name}**.${link}`
+    case 'integration.sheets.failed': return `⚠️ Google Sheets update failed for **${name}**: ${String(payload.error ?? 'unknown error')}.${link}`
+    case 'integration.calendar.failed': return `⚠️ Google Calendar update failed for **${name}**: ${String(payload.error ?? 'unknown error')}.${link}`
+    case 'integration.notion.failed': return `⚠️ Notion publish failed for **${name}**: ${String(payload.error ?? 'unknown error')}.${link}`
+    case 'integration.notion.ok': return `📝 Report published to Notion for **${name}**${payload.url ? `: <${String(payload.url)}>` : ''}.`
     case 'contacts.imported': {
       const counts = (payload.counts ?? {}) as Record<string, number>
       return `📇 Contacts imported into **${name}**: ${counts.ready ?? 0} ready, ${counts.invalid ?? 0} invalid, ${counts.duplicate ?? 0} duplicates.${link}`
