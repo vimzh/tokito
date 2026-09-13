@@ -1,0 +1,1115 @@
+{
+  "startedAt": 1789295379044,
+  "responsesPerScenario": 80,
+  "cheapModel": "gpt-5.4-nano",
+  "mainModel": "gpt-5.5",
+  "scenarios": [
+    {
+      "key": "restaurant",
+      "name": "New menu feedback",
+      "who": "Restaurant owner",
+      "goal": "We changed our menu. I want input on the new dishes, the choices available, and the prices. Find out what customers like and what we should improve.",
+      "questions": [
+        {
+          "text": "Since last month, have you ordered from or eaten from our new menu?",
+          "type": "choice",
+          "options": [
+            "Yes",
+            "No",
+            "Not sure"
+          ],
+          "required": true
+        },
+        {
+          "text": "Which of the new main dishes did you try, and what did you think of them?",
+          "type": "open",
+          "options": null,
+          "required": true
+        },
+        {
+          "text": "What, if anything, did you especially like about the new menu?",
+          "type": "open",
+          "options": null,
+          "required": true
+        },
+        {
+          "text": "What, if anything, would you improve about the new menu?",
+          "type": "open",
+          "options": null,
+          "required": true
+        },
+        {
+          "text": "How did the portion sizes feel to you?",
+          "type": "choice",
+          "options": [
+            "Too small",
+            "About right",
+            "Too large",
+            "It depended on the dish",
+            "Not sure"
+          ],
+          "required": true
+        },
+        {
+          "text": "What do you think about the vegetarian choices on the new menu?",
+          "type": "open",
+          "options": null,
+          "required": true
+        },
+        {
+          "text": "On a scale of 1 to 5, how fair do the new prices feel for the food and portions you received?",
+          "type": "rating",
+          "options": null,
+          "required": true
+        },
+        {
+          "text": "Are there any dishes from the old menu that you miss, or anything else you would like us to know?",
+          "type": "open",
+          "options": null,
+          "required": false
+        }
+      ],
+      "questionJudge": {
+        "relevance": 5,
+        "not_leading": 5,
+        "screening": 5,
+        "spoken": 5,
+        "length": 5,
+        "issues": [
+          "Q2 assumes the respondent tried one or more new main dishes; respondents who used the new menu but only ordered older items, sides, drinks, or desserts may not know how to answer.",
+          "Q6 is relevant but broad; it may not distinguish between vegetarian customers, non-vegetarian customers noticing variety, and people who did not look at vegetarian choices.",
+          "Q7 asks about fairness of prices but only from those who received food and portions; it may be less answerable for someone who only browsed the menu or does not remember prices."
+        ],
+        "improvements": [
+          "Add interviewer guidance after Q1: if No or Not sure, ask whether they have looked at the new menu, then skip dish/portion/price experience questions as appropriate.",
+          "Revise Q2 to: “Which dishes from the new menu, if any, did you try? What did you think of them?”",
+          "Consider adding a closed follow-up on choice variety: “Did the menu have enough choices for you and your group? Yes / No / Not sure. What was missing?”",
+          "For Q6, ask: “Did you or anyone in your group look for vegetarian options? If yes, what did you think of the vegetarian choices?”",
+          "For Q7, allow “Not sure / did not notice prices” and consider a follow-up: “What makes you say that?”"
+        ]
+      },
+      "simulations": [
+        {
+          "persona": {
+            "name": "Priya",
+            "mode": "dynamic",
+            "card": "a regular who tried the new menu twice, liked the paneer tikka pasta, thought the prices felt steep and gives short, vague answers unless asked why"
+          },
+          "transcript": [
+            {
+              "speaker": "assistant",
+              "text": "Hi Priya, this is Tokito, an AI assistant calling for the organizer of New menu feedback. We’d like to hear your views, it should take just a few minutes, and I’ll take notes so the organizer can read what you said. Is now a good time?"
+            },
+            {
+              "speaker": "person",
+              "text": "Sure, I can spare a few minutes."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Thank you. Since last month, have you ordered from or eaten from our new menu: yes, no, or not sure?"
+            },
+            {
+              "speaker": "person",
+              "text": "yes"
+            },
+            {
+              "speaker": "assistant",
+              "text": "Which of the new main dishes did you try, and what did you think of them?"
+            },
+            {
+              "speaker": "person",
+              "text": "paneer tikka pasta; really liked it, though prices felt steep."
+            },
+            {
+              "speaker": "assistant",
+              "text": "What did you like about the paneer tikka pasta?"
+            },
+            {
+              "speaker": "person",
+              "text": "The paneer tikka flavor was bold and the pasta tasted great."
+            },
+            {
+              "speaker": "assistant",
+              "text": "What, if anything, did you especially like about the new menu overall?"
+            },
+            {
+              "speaker": "person",
+              "text": "Loved the paneer tikka pasta; standout flavor overall."
+            },
+            {
+              "speaker": "assistant",
+              "text": "What, if anything, would you improve about the new menu?"
+            },
+            {
+              "speaker": "person",
+              "text": "I’d improve the prices; they felt steep overall."
+            },
+            {
+              "speaker": "assistant",
+              "text": "How did the portion sizes feel to you: too small, about right, too large, it depended on the dish, or not sure?"
+            },
+            {
+              "speaker": "person",
+              "text": "Varied by dish; mostly right."
+            },
+            {
+              "speaker": "assistant",
+              "text": "What do you think about the vegetarian choices on the new menu?"
+            },
+            {
+              "speaker": "person",
+              "text": "Vegetarian choices felt solid, especially the paneer dishes."
+            },
+            {
+              "speaker": "assistant",
+              "text": "On a scale of 1 to 5, how fair do the new prices feel for the food and portions you received? Please give a number from 1 to 5."
+            },
+            {
+              "speaker": "person",
+              "text": "2 out of 5."
+            },
+            {
+              "speaker": "assistant",
+              "text": "What made the prices feel like a 2 out of 5 for you?"
+            },
+            {
+              "speaker": "person",
+              "text": "It felt too expensive for the portions and overall value."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Are there any dishes from the old menu that you miss, or anything else you would like us to know?"
+            },
+            {
+              "speaker": "person",
+              "text": "Just keep the paneer tikka pasta coming, but lower overall prices."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Thank you for your time, Priya. The organizer will read your answers, and I’ll pass along your feedback. Goodbye."
+            }
+          ],
+          "counts": {
+            "opening": 1,
+            "prepared_question": 8,
+            "follow_up": 2,
+            "clarification": 0,
+            "closing": 1,
+            "other": 0
+          },
+          "ended": true,
+          "outcome": "completed",
+          "status": "completed",
+          "answers": [
+            {
+              "q": "Since last month, have you ordered from or eaten from our new menu?",
+              "status": "answered",
+              "value": "Yes",
+              "notes": null
+            },
+            {
+              "q": "Which of the new main dishes did you try, and what did you think of them?",
+              "status": "answered",
+              "value": "paneer tikka pasta; really liked it, though prices felt steep.",
+              "notes": "The paneer tikka flavor was bold and the pasta tasted great."
+            },
+            {
+              "q": "What, if anything, did you especially like about the new menu?",
+              "status": "answered",
+              "value": "Loved the paneer tikka pasta; standout flavor overall.",
+              "notes": null
+            },
+            {
+              "q": "What, if anything, would you improve about the new menu?",
+              "status": "answered",
+              "value": "I’d improve the prices; they felt steep overall.",
+              "notes": null
+            },
+            {
+              "q": "How did the portion sizes feel to you?",
+              "status": "answered",
+              "value": "It depended on the dish",
+              "notes": "Varied by dish; mostly right."
+            },
+            {
+              "q": "What do you think about the vegetarian choices on the new menu?",
+              "status": "answered",
+              "value": "Vegetarian choices felt solid, especially the paneer dishes.",
+              "notes": null
+            },
+            {
+              "q": "On a scale of 1 to 5, how fair do the new prices feel for the food and portions you received?",
+              "status": "answered",
+              "value": "2",
+              "notes": "It felt too expensive for the portions and overall value."
+            },
+            {
+              "q": "Are there any dishes from the old menu that you miss, or anything else you would like us to know?",
+              "status": "answered",
+              "value": "Just keep the paneer tikka pasta coming, but lower overall prices.",
+              "notes": null
+            }
+          ],
+          "callback": null,
+          "optOut": false,
+          "summary": "Priya said she had tried the new menu and liked the paneer tikka pasta, especially its bold paneer tikka flavor. She felt prices were steep, rating price fairness 2 out of 5 because it felt too expensive for the portions and overall value. She said vegetarian choices felt solid, especially paneer dishes, and asked to keep the paneer tikka pasta while lowering overall prices."
+        },
+        {
+          "persona": {
+            "name": "Rahul",
+            "mode": "dynamic",
+            "card": "a customer who has NOT visited since the new menu launched; polite, busy, will answer only what applies"
+          },
+          "transcript": [
+            {
+              "speaker": "assistant",
+              "text": "Hello Rahul, this is Tokito, an AI assistant calling for the organizer of New menu feedback. We’d like to hear your views, the call takes a few minutes, and I’ll take notes so the organizer can read what you said. Is now a good time?"
+            },
+            {
+              "speaker": "person",
+              "text": "Sure—go ahead, I can spare a couple minutes."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Thank you. Since last month, have you ordered from or eaten from our new menu? Yes, no, or not sure?"
+            },
+            {
+              "speaker": "person",
+              "text": "No"
+            },
+            {
+              "speaker": "assistant",
+              "text": "Thanks. Since you have not tried it yet, I’ll skip the questions about dishes and portions. Have you seen the new vegetarian choices, and if so, what do you think about them?"
+            },
+            {
+              "speaker": "person",
+              "text": "I haven't seen the vegetarian choices yet."
+            },
+            {
+              "speaker": "assistant",
+              "text": "No problem. Are there any dishes from the old menu that you miss, or anything else you would like the organizer to know?"
+            },
+            {
+              "speaker": "person",
+              "text": "Nothing in particular—I’m not sure yet."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Thank you for your time, Rahul. The organizer will read your answers, and goodbye."
+            }
+          ],
+          "counts": {
+            "opening": 1,
+            "prepared_question": 2,
+            "follow_up": 1,
+            "clarification": 0,
+            "closing": 1,
+            "other": 0
+          },
+          "ended": true,
+          "outcome": "completed",
+          "status": "completed",
+          "answers": [
+            {
+              "q": "Since last month, have you ordered from or eaten from our new menu?",
+              "status": "answered",
+              "value": "No",
+              "notes": null
+            },
+            {
+              "q": "Which of the new main dishes did you try, and what did you think of them?",
+              "status": "not_asked",
+              "value": null,
+              "notes": null
+            },
+            {
+              "q": "What, if anything, did you especially like about the new menu?",
+              "status": "not_asked",
+              "value": null,
+              "notes": null
+            },
+            {
+              "q": "What, if anything, would you improve about the new menu?",
+              "status": "not_asked",
+              "value": null,
+              "notes": null
+            },
+            {
+              "q": "How did the portion sizes feel to you?",
+              "status": "not_asked",
+              "value": null,
+              "notes": null
+            },
+            {
+              "q": "What do you think about the vegetarian choices on the new menu?",
+              "status": "unknown",
+              "value": null,
+              "notes": "I haven't seen the vegetarian choices yet."
+            },
+            {
+              "q": "On a scale of 1 to 5, how fair do the new prices feel for the food and portions you received?",
+              "status": "not_asked",
+              "value": null,
+              "notes": null
+            },
+            {
+              "q": "Are there any dishes from the old menu that you miss, or anything else you would like us to know?",
+              "status": "answered",
+              "value": "Nothing in particular—I’m not sure yet.",
+              "notes": null
+            }
+          ],
+          "callback": null,
+          "optOut": false,
+          "summary": "Rahul said he has not ordered from or eaten from the new menu since last month. He said he has not seen the vegetarian choices yet and had nothing in particular to add about old menu dishes or other feedback, saying he was not sure yet."
+        },
+        {
+          "persona": {
+            "name": "Sunita",
+            "mode": "fixed",
+            "card": "a vegetarian customer who tried the new menu once, misses the old dal makhani, found portions fine, and answers directly"
+          },
+          "transcript": [
+            {
+              "speaker": "assistant",
+              "text": "Hello, is this Sunita? I’m Tokito, an AI assistant calling for the organizer of New Menu Feedback. We’d like to hear your views, and this will take just a few minutes. I’ll take notes so the organizer can read what you said. Is now a good time?"
+            },
+            {
+              "speaker": "person",
+              "text": "I’m Sunita—yes, now works; I’ll share my feedback."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Thank you. Since last month, have you ordered from or eaten from our new menu? You can say yes, no, or not sure."
+            },
+            {
+              "speaker": "person",
+              "text": "Yes, I ate from the new menu last month."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Which of the new main dishes did you try, and what did you think of them?"
+            },
+            {
+              "speaker": "person",
+              "text": "I missed the old dal makhani; tried it once and portions were fine."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Thank you. What, if anything, did you especially like about the new menu?"
+            },
+            {
+              "speaker": "person",
+              "text": "I missed the old dal makhani, but portions were fine."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Thank you. What, if anything, would you improve about the new menu?"
+            },
+            {
+              "speaker": "person",
+              "text": "I missed the old dal makhani; improve by bringing it back."
+            },
+            {
+              "speaker": "assistant",
+              "text": "How did the portion sizes feel to you? You can say too small, about right, too large, it depended on the dish, or not sure."
+            },
+            {
+              "speaker": "person",
+              "text": "They felt about right; portions were fine."
+            },
+            {
+              "speaker": "assistant",
+              "text": "What do you think about the vegetarian choices on the new menu?"
+            },
+            {
+              "speaker": "person",
+              "text": "Vegetarian choices were good, though I missed dal makhani."
+            },
+            {
+              "speaker": "assistant",
+              "text": "On a scale of 1 to 5, how fair do the new prices feel for the food and portions you received? Please give a number from 1 to 5."
+            },
+            {
+              "speaker": "person",
+              "text": "4"
+            },
+            {
+              "speaker": "assistant",
+              "text": "Are there any dishes from the old menu that you miss, or anything else you would like us to know?"
+            },
+            {
+              "speaker": "person",
+              "text": "I miss the old dal makhani most; portions and vegetarian options were good."
+            },
+            {
+              "speaker": "assistant",
+              "text": "Thank you for your time, Sunita. The organizer will read your answers. Goodbye."
+            }
+          ],
+          "counts": {
+            "opening": 1,
+            "prepared_question": 8,
+            "follow_up": 0,
+            "clarification": 0,
+            "closing": 1,
+            "other": 0
+          },
+          "ended": true,
+          "outcome": "completed",
+          "status": "completed",
+          "answers": [
+            {
+              "q": "Since last month, have you ordered from or eaten from our new menu?",
+              "status": "answered",
+              "value": "Yes",
+              "notes": "I ate from the new menu last month."
+            },
+            {
+              "q": "Which of the new main dishes did you try, and what did you think of them?",
+              "status": "answered",
+              "value": "I missed the old dal makhani; tried it once and portions were fine.",
+              "notes": null
+            },
+            {
+              "q": "What, if anything, did you especially like about the new menu?",
+              "status": "answered",
+              "value": "I missed the old dal makhani, but portions were fine.",
+              "notes": null
+            },
+            {
+              "q": "What, if anything, would you improve about the new menu?",
+              "status": "answered",
+              "value": "I missed the old dal makhani; improve by bringing it back.",
+              "notes": null
+            },
+            {
+              "q": "How did the portion sizes feel to you?",
+              "status": "answered",
+              "value": "About right",
+              "notes": "They felt about right; portions were fine."
+            },
+            {
+              "q": "What do you think about the vegetarian choices on the new menu?",
+              "status": "answered",
+              "value": "Vegetarian choices were good, though I missed dal makhani.",
+              "notes": null
+            },
+            {
+              "q": "On a scale of 1 to 5, how fair do the new prices feel for the food and portions you received?",
+              "status": "answered",
+              "value": "4",
+              "notes": null
+            },
+            {
+              "q": "Are there any dishes from the old menu that you miss, or anything else you would like us to know?",
+              "status": "answered",
+              "value": "I miss the old dal makhani most; portions and vegetarian options were good.",
+              "notes": null
+            }
+          ],
+          "callback": null,
+          "optOut": false,
+          "summary": "Sunita said she ate from the new menu last month and felt the portions were about right. She said the vegetarian choices were good and rated the new prices 4 out of 5 for fairness. She repeatedly said she missed the old dal makhani and wanted it brought back."
+        }
+      ],
+      "bulk": {
+        "inserted": 80,
+        "outcomes": {
+          "completed": 38,
+          "partial": 17,
+          "no_conversation": 7,
+          "callback_requested": 8,
+          "declined": 5,
+          "opted_out": 5
+        }
+      },
+      "results": {
+        "participation": {
+          "people": 80,
+          "ready": 80,
+          "called": 80,
+          "reached": 73,
+          "completed": 55,
+          "callbacks": 8,
+          "declined": 5,
+          "optedOut": 5,
+          "unreachable": 0
+        },
+        "responses": {
+          "total": 58,
+          "simulated": 3
+        },
+        "questions": [
+          {
+            "text": "Since last month, have you ordered from or eaten from our new menu?",
+            "type": "choice",
+            "statusCounts": {
+              "answered": 58,
+              "skipped": 0,
+              "declined": 0,
+              "unknown": 0,
+              "not_asked": 0,
+              "missing": 0
+            },
+            "rating": null,
+            "choice": {
+              "totals": [
+                {
+                  "option": "Yes",
+                  "count": 51
+                },
+                {
+                  "option": "No",
+                  "count": 2
+                },
+                {
+                  "option": "Not sure",
+                  "count": 5
+                }
+              ],
+              "other": 0
+            }
+          },
+          {
+            "text": "Which of the new main dishes did you try, and what did you think of them?",
+            "type": "open",
+            "statusCounts": {
+              "answered": 54,
+              "skipped": 1,
+              "declined": 1,
+              "unknown": 0,
+              "not_asked": 2,
+              "missing": 0
+            },
+            "rating": null,
+            "choice": null
+          },
+          {
+            "text": "What, if anything, did you especially like about the new menu?",
+            "type": "open",
+            "statusCounts": {
+              "answered": 51,
+              "skipped": 1,
+              "declined": 0,
+              "unknown": 0,
+              "not_asked": 6,
+              "missing": 0
+            },
+            "rating": null,
+            "choice": null
+          },
+          {
+            "text": "What, if anything, would you improve about the new menu?",
+            "type": "open",
+            "statusCounts": {
+              "answered": 55,
+              "skipped": 0,
+              "declined": 0,
+              "unknown": 0,
+              "not_asked": 3,
+              "missing": 0
+            },
+            "rating": null,
+            "choice": null
+          },
+          {
+            "text": "How did the portion sizes feel to you?",
+            "type": "choice",
+            "statusCounts": {
+              "answered": 52,
+              "skipped": 0,
+              "declined": 2,
+              "unknown": 1,
+              "not_asked": 3,
+              "missing": 0
+            },
+            "rating": null,
+            "choice": {
+              "totals": [
+                {
+                  "option": "Too small",
+                  "count": 15
+                },
+                {
+                  "option": "About right",
+                  "count": 24
+                },
+                {
+                  "option": "Too large",
+                  "count": 0
+                },
+                {
+                  "option": "It depended on the dish",
+                  "count": 11
+                },
+                {
+                  "option": "Not sure",
+                  "count": 2
+                }
+              ],
+              "other": 0
+            }
+          },
+          {
+            "text": "What do you think about the vegetarian choices on the new menu?",
+            "type": "open",
+            "statusCounts": {
+              "answered": 34,
+              "skipped": 5,
+              "declined": 2,
+              "unknown": 1,
+              "not_asked": 16,
+              "missing": 0
+            },
+            "rating": null,
+            "choice": null
+          },
+          {
+            "text": "On a scale of 1 to 5, how fair do the new prices feel for the food and portions you received?",
+            "type": "rating",
+            "statusCounts": {
+              "answered": 43,
+              "skipped": 1,
+              "declined": 1,
+              "unknown": 1,
+              "not_asked": 12,
+              "missing": 0
+            },
+            "rating": {
+              "average": 2.9,
+              "distribution": {
+                "1": 2,
+                "2": 13,
+                "3": 13,
+                "4": 14,
+                "5": 0
+              }
+            },
+            "choice": null
+          },
+          {
+            "text": "Are there any dishes from the old menu that you miss, or anything else you would like us to know?",
+            "type": "open",
+            "statusCounts": {
+              "answered": 24,
+              "skipped": 6,
+              "declined": 0,
+              "unknown": 0,
+              "not_asked": 28,
+              "missing": 0
+            },
+            "rating": null,
+            "choice": null
+          }
+        ]
+      },
+      "report": {
+        "version": 1,
+        "seconds": 95.579,
+        "headline": "Most usable respondents had tried the new menu, so the feedback is mostly based on real ordering or dining experience, while a small set of uncertain answers and text simulations should be treated as context rather than customer evidence. Overall, people liked the stronger flavors, dal makhani, and rogan josh, but the clearest improvement areas are vegetarian variety, portion-to-price value, and execution consistency on paneer tikka pasta and some gravies.",
+        "pipeline": {
+          "analysts": 8,
+          "synthesisModel": "gpt-5.5",
+          "reviewerModel": "gpt-5.5",
+          "review": {
+            "checked": 25,
+            "removed": 1,
+            "trimmedCitations": 0,
+            "headlineRewritten": false
+          }
+        },
+        "droppedCitations": 0,
+        "themes": [
+          {
+            "title": "Bolder flavors, dal makhani, and rogan josh are the strongest positives",
+            "kind": "positive",
+            "peopleCount": 19,
+            "description": "Across dish feedback and liked-menu answers, people repeatedly praised richer, deeper, fresher flavors. Dal makhani was described as rich, creamy, comforting, thick, consistent, or slow-cooked, while rogan josh earned praise for tender meat, aroma, depth, smokiness, and spice.",
+            "quotes": [
+              {
+                "person": "Ananya Kulkarni",
+                "value": "Paneer tikka pasta—I liked the smoky flavor, but it felt heavy. Also tried dal makhani; it tasted rich and comforting.",
+                "status": "answered"
+              },
+              {
+                "person": "Ramesh Iyer",
+                "value": "Mutton rogan josh and the new biryani-style main. The rogan josh was excellent—thick gravy, proper spices.",
+                "status": "answered"
+              },
+              {
+                "person": "Ayesha Khan",
+                "value": "Paneer tikka pasta and the dal makhani",
+                "status": "answered"
+              }
+            ]
+          },
+          {
+            "title": "Portions and prices often do not feel aligned",
+            "kind": "problem",
+            "peopleCount": 21,
+            "description": "A major cross-question concern is value: many people asked for bigger or more filling portions, especially because prices feel higher or portions feel small for the price. Portion feedback was not uniform, but pasta, mutton pieces, and higher-priced mains were repeatedly singled out as needing better quantity or value.",
+            "quotes": [
+              {
+                "person": "Ananya Kulkarni",
+                "value": "Reduce oil in the pasta a bit, and make portions slightly bigger for the price. Veg choices are okay, but I wish there were one more vegetarian option.",
+                "status": "answered"
+              },
+              {
+                "person": "Carlos Rodrigues",
+                "value": "Portions could be bigger. The chicken sauce felt a touch salty.",
+                "status": "answered"
+              },
+              {
+                "person": "Daniel Smith",
+                "value": "Portion could be more.",
+                "status": "answered"
+              }
+            ]
+          },
+          {
+            "title": "Vegetarian choice feels reduced and less useful for families or mixed groups",
+            "kind": "problem",
+            "peopleCount": 28,
+            "description": "Many respondents said the vegetarian menu is okay or good in parts, but narrower than before. People specifically asked for more vegetarian mains, pure-veg choices, thali-friendly gravies, non-dal or non-paneer options, lighter dishes, and replacements for removed items because families, all-veg visitors, and friends end up with fewer choices or repeated dishes.",
+            "quotes": [
+              {
+                "person": "Ananya Kulkarni",
+                "value": "Reduce oil in the pasta a bit, and make portions slightly bigger for the price. Veg choices are okay, but I wish there were one more vegetarian option.",
+                "status": "answered"
+              },
+              {
+                "person": "Priya Patil",
+                "value": "Make the pasta less spicy and reduce the oil. Add one more vegetarian main so we have options.",
+                "status": "answered"
+              },
+              {
+                "person": "Gaurav Rao",
+                "value": "Add back at least one vegetarian main for families—thali-friendly gravies.",
+                "status": "answered"
+              }
+            ]
+          },
+          {
+            "title": "Paneer tikka pasta has appeal, but needs tuning",
+            "kind": "problem",
+            "peopleCount": 19,
+            "description": "Paneer tikka pasta was liked for smoky, creamy, spicy, tangy, or paneer flavor, and some people enjoyed the Indian-fusion idea. The same dish also drew repeated improvement requests: make it less heavy or oily, adjust sauce thickness and seasoning, improve texture, and add more paneer or vegetables so it feels worth the price.",
+            "quotes": [
+              {
+                "person": "Ananya Kulkarni",
+                "value": "Paneer tikka pasta—I liked the smoky flavor, but it felt heavy. Also tried dal makhani; it tasted rich and comforting.",
+                "status": "answered"
+              },
+              {
+                "person": "Priya Patil",
+                "value": "Paneer tikka pasta—the kid liked it. We also tried dal makhani; it was tasty but a bit heavy.",
+                "status": "answered"
+              },
+              {
+                "person": "Ayesha Khan",
+                "value": "Paneer tikka pasta and the dal makhani",
+                "status": "answered"
+              }
+            ]
+          },
+          {
+            "title": "Execution consistency matters across gravies, sauces, spice, and salt",
+            "kind": "problem",
+            "peopleCount": 13,
+            "description": "Beyond portion size, customers want more consistent cooking and seasoning. They mentioned thin or watery gravies, saltiness, spice-level variation, sauce quantity, seasoning inconsistency, and chicken mains that felt less successful than rogan josh.",
+            "quotes": [
+              {
+                "person": "Ahmed Shaikh",
+                "value": "Dal makhani. It tasted good, but it came a little less thick than I expected.",
+                "status": "answered"
+              },
+              {
+                "person": "Miguel Fernandes",
+                "value": "Mutton rogan josh and a new chicken dish. Rogan josh had deep flavor and tender meat. The chicken gravy was okay but felt a bit watery compared to the rogan josh.",
+                "status": "answered"
+              },
+              {
+                "person": "Mikhail Petrov",
+                "value": "paneer tikka pasta and a chicken main (butter-chicken-like twist)",
+                "status": "answered"
+              }
+            ]
+          },
+          {
+            "title": "Menu clarity, packaging, service, and thali format are useful strengths to keep building on",
+            "kind": "positive",
+            "peopleCount": 14,
+            "description": "Several people liked that the menu looked cleaner, was easier to read, had clearer names or descriptions, or made choices easier. Others appreciated neat packaging, quick service, hot/fresh delivery, convenient thali combinations, kids’ portions, and group-friendly variety.",
+            "quotes": [
+              {
+                "person": "Priya Patil",
+                "value": "Convenient thali combinations, and the kids’ portion actually looked like food.",
+                "status": "answered"
+              },
+              {
+                "person": "Riya Nair",
+                "value": "Dal makhani is still consistent, and the pasta isn’t bland. Also, the packaging is neat for delivery.",
+                "status": "answered"
+              },
+              {
+                "person": "Mikhail Petrov",
+                "value": "good char taste; good travel packaging",
+                "status": "answered"
+              }
+            ]
+          },
+          {
+            "title": "Old-menu misses mainly reinforce the vegetarian and portion concerns",
+            "kind": "problem",
+            "peopleCount": 16,
+            "description": "When old-menu feedback was captured, people most often missed vegetarian or paneer items such as mixed veg curry, paneer curry, butter paneer, veg korma, veg thali-style mains, and other filling vegetarian dishes. A smaller set missed old mutton curry portion sizes or asked not to shrink portions while prices rise.",
+            "quotes": [
+              {
+                "person": "Ananya Kulkarni",
+                "value": "I miss the old veg kebab platter; please keep portions consistent.",
+                "status": "answered"
+              },
+              {
+                "person": "Ramesh Iyer",
+                "value": "I miss the earlier paneer starter, and please keep consistency in rogan josh.",
+                "status": "answered"
+              },
+              {
+                "person": "Priya Patil",
+                "value": "I miss the mixed veg curry from before.",
+                "status": "answered"
+              }
+            ]
+          }
+        ],
+        "disagreements": [
+          {
+            "topic": "Whether portions and prices are acceptable",
+            "sides": [
+              {
+                "position": "Portions or prices felt about right or fair, especially for some dishes such as dal makhani.",
+                "peopleCount": 14
+              },
+              {
+                "position": "Portions felt too small or prices felt unfair, expensive, or not matched to the serving size.",
+                "peopleCount": 14
+              },
+              {
+                "position": "Portion value depended on the dish rather than being consistently good or bad.",
+                "peopleCount": 10
+              }
+            ]
+          },
+          {
+            "topic": "Paneer tikka pasta sauce and spice direction",
+            "sides": [
+              {
+                "position": "Make the pasta lighter, less oily or creamy, or less spicy.",
+                "peopleCount": 4
+              },
+              {
+                "position": "Add more spice or strengthen the tikka flavor, and in some cases thicken the sauce.",
+                "peopleCount": 4
+              }
+            ]
+          },
+          {
+            "topic": "Mutton rogan josh spice level",
+            "sides": [
+              {
+                "position": "Spice was higher than expected.",
+                "peopleCount": 1
+              },
+              {
+                "position": "Spice felt low or less than before.",
+                "peopleCount": 2
+              },
+              {
+                "position": "Spice was balanced, good, or not too fiery.",
+                "peopleCount": 4
+              }
+            ]
+          }
+        ],
+        "requests": [
+          "Add or bring back more vegetarian mains, including thali-friendly, pure-veg, non-dal, non-paneer, lighter, or diet-inclusive options.",
+          "Improve portion-to-price value by increasing portions, making dishes more filling, adding a side, or adjusting prices where portions remain similar.",
+          "Improve paneer tikka pasta by adding more paneer or vegetables, making it more filling, and adjusting heaviness, oil, creaminess, seasoning, texture, and sauce thickness.",
+          "Standardize gravies, sauces, seasoning, and salt levels, especially for rogan josh, chicken mains, dal makhani, and pasta.",
+          "Increase meat or gravy quantity in non-vegetarian mains, especially rogan josh and chicken dishes.",
+          "Clarify menu information such as what is included, portion changes, pricing, spice levels, descriptions, and vegetarian labeling.",
+          "Consider restoring specific missed old dishes or equivalents, including old paneer curry, butter paneer, mixed veg curry, veg thali options, veg korma, pav bhaji-style main, and old mutton curry portion size.",
+          "Keep current strengths such as dal makhani consistency and well-liked new flavors while making improvements."
+        ],
+        "gaps": [
+          {
+            "questionId": "086f2ac6-0e15-4228-be29-a8705b4dd3d6",
+            "questionText": "Which of the new main dishes did you try, and what did you think of them?",
+            "skipped": 1,
+            "declined": 1,
+            "unknown": 0,
+            "notAsked": 2,
+            "missing": 0
+          },
+          {
+            "questionId": "1b0161a1-59cc-48a8-badb-fb0a2e45dbf7",
+            "questionText": "What, if anything, did you especially like about the new menu?",
+            "skipped": 1,
+            "declined": 0,
+            "unknown": 0,
+            "notAsked": 6,
+            "missing": 0
+          },
+          {
+            "questionId": "917d29a5-d4e0-4740-a7aa-82610f1b5ba0",
+            "questionText": "What, if anything, would you improve about the new menu?",
+            "skipped": 0,
+            "declined": 0,
+            "unknown": 0,
+            "notAsked": 3,
+            "missing": 0
+          },
+          {
+            "questionId": "675dd4bc-5fd9-4405-a802-42e2dc6b4be1",
+            "questionText": "How did the portion sizes feel to you?",
+            "skipped": 0,
+            "declined": 2,
+            "unknown": 1,
+            "notAsked": 3,
+            "missing": 0
+          },
+          {
+            "questionId": "68a5804b-5d2a-4878-9beb-ee00f1d36b33",
+            "questionText": "What do you think about the vegetarian choices on the new menu?",
+            "skipped": 5,
+            "declined": 2,
+            "unknown": 1,
+            "notAsked": 16,
+            "missing": 0
+          },
+          {
+            "questionId": "bdbe0dea-d021-4958-a8dd-0a85b50abb8c",
+            "questionText": "On a scale of 1 to 5, how fair do the new prices feel for the food and portions you received?",
+            "skipped": 1,
+            "declined": 1,
+            "unknown": 1,
+            "notAsked": 12,
+            "missing": 0
+          },
+          {
+            "questionId": "d566e04c-f669-4fbc-9c60-d348af3807ca",
+            "questionText": "Are there any dishes from the old menu that you miss, or anything else you would like us to know?",
+            "skipped": 6,
+            "declined": 0,
+            "unknown": 0,
+            "notAsked": 28,
+            "missing": 0
+          }
+        ],
+        "nextSteps": [
+          {
+            "suggestion": "Prioritize a value review: check actual portion weights and serving standards for the mains most often called small, then either increase portions, add an included side, or adjust pricing where the higher price is not matched by perceived quantity.",
+            "evidence": 24
+          },
+          {
+            "suggestion": "Restore or add vegetarian mains soon, with at least one filling thali-friendly option and one lighter or non-paneer/non-dal option, because reduced vegetarian variety is affecting families, all-veg visitors, and mixed groups.",
+            "evidence": 22
+          },
+          {
+            "suggestion": "Run a focused recipe test on paneer tikka pasta: increase paneer or vegetables, reduce heaviness where needed, tighten pasta texture, and decide a consistent sauce/spice profile before changing the menu description or price.",
+            "evidence": 21
+          },
+          {
+            "suggestion": "Set tighter kitchen standards for gravy thickness, salt, and spice consistency across rogan josh, dal makhani, chicken mains, and pasta sauces; include a check for meat-to-gravy ratio in rogan josh.",
+            "evidence": 17
+          },
+          {
+            "suggestion": "Improve menu communication by marking vegetarian items clearly, adding spice indicators, and stating what comes with each main or thali so customers understand value and can choose faster for families or kids.",
+            "evidence": 10
+          },
+          {
+            "suggestion": "Use old-menu misses to choose comeback or limited-time vegetarian items, especially paneer curry, butter paneer, mixed veg curry, veg thali-style options, veg korma, or a lighter veg curry.",
+            "evidence": 11
+          }
+        ],
+        "problems": [],
+        "judge": {
+          "faithfulness": 4,
+          "coverage": 5,
+          "usefulness": 5,
+          "honesty": 4,
+          "summary_quality": 4,
+          "issues": [
+            "Participation figures such as people=80, reached=73, callbacks/declines/opt-outs, and the note about “3 text simulations” are not supported by the raw answer block provided here. If they come from separate metadata, that should be explicit; otherwise they are an unsupported representativeness claim.",
+            "The headline phrase “text simulations should be treated as context rather than customer evidence” is not grounded in the visible raw answers, which are presented as 58 responses. This could unnecessarily undermine or mischaracterize the evidence.",
+            "Some theme quotes are very thin support for the surrounding interpretation because they quote only item names, e.g. “Paneer tikka pasta and the dal makhani” or “Mutton rogan josh,” while the raw answer parentheticals contain the actual sentiment. The descriptions are still generally supported by other quotes and raw answers, but quote selection could be stronger.",
+            "The detailed gap categories of skipped/declined/not asked are more specific than the raw provided, which only gives answered counts. They may be correct from collection metadata, but are not auditable from the supplied evidence.",
+            "The first positive theme combines dal makhani, rogan josh, and broader bolder flavors; this is faithful, but it slightly underplays that paneer tikka pasta also had a meaningful positive fan base despite its issues."
+          ],
+          "missed_patterns": [
+            "Several customers specifically liked delivery/takeout execution—packaging, food arriving hot/fresh, and speed. This is mentioned in one positive theme, but it could be more prominent if delivery is operationally important.",
+            "A recurring old-menu signal is not just “more vegetarian options” but specific nostalgia for old paneer curry/butter paneer/mixed veg/veg thali items; the report covers this well in old-menu misses and next steps.",
+            "Roti/rice/side inclusions came up in a few value comments, including extra bread/roti, rice portion, free side, and what is included. The report includes this under value/menu communication, but it could be called out as a concrete lever.",
+            "A few respondents found dal makhani unchanged or missed the old dal makhani, while many praised the new/current dal. The report captures the overall positive direction but does not dwell on this small split."
+          ],
+          "strengths": [
+            "The report accurately identifies the dominant improvement areas: vegetarian variety, portion-to-price value, paneer tikka pasta tuning, and consistency in gravies/salt/spice.",
+            "Theme descriptions are broadly faithful to the raw answers and avoid inventing major claims about dish performance.",
+            "Coverage is strong across all major questions: main dishes tried, liked elements, improvements, portions, vegetarian choices, price fairness, and old-menu misses.",
+            "Next steps are concrete and directly actionable: portion audits, vegetarian additions, recipe testing, kitchen standards, clearer menu labeling, and limited-time comeback items.",
+            "The disagreements section is useful because it shows portions/prices and pasta preferences are not one-directional, which prevents overcorrecting.",
+            "The report appropriately notes uncertainty/gaps in vegetarian-choice and old-menu questions, where fewer people answered."
+          ]
+        }
+      },
+      "asks": [
+        {
+          "question": "Which dishes got the most criticism and why?",
+          "answer": "Because Q2/Q4 were open-ended, this is a theme-based ranking rather than a formal vote tally. Paneer tikka pasta drew the most repeated criticism among respondents who commented: it was called heavy/oily/too creamy, short on paneer or vegetables, small or poor value for the price, and inconsistent on texture/seasoning/tikka flavour or sauce thickness [e59,e66,e70,e72,e74,e76,e85,e95,e97,e98,e99,e101,e103,e106,e111,e115,e116,e175,e178,e182,e184,e186,e188,e190,e215,e217,e222,e227,e228]. Mutton rogan josh was the next recurring criticized dish, mainly for too few meat pieces or small portions for the price, thin/inconsistent gravy, and salt/spice balance [e77,e78,e84,e86,e87,e93,e113,e177,e183,e194,e198,e202,e203,e209,e218,e229,e450,e461]. A smaller cluster concerned the unnamed/new chicken main, where people mentioned watery or salty sauce, underwhelming taste, and portion/sauce-thickness issues [e73,e80,e176,e189,e196]. Dal makhani had fewer dish-specific complaints—mostly thickness, heaviness, salt, quantity/value, or missing the older version—while many related complaints were broader: vegetarian choices felt too few, repetitive, or not filling enough [e62,e63,e88,e89,e111,e179,e187,e226,e227,e291,e293,e294,e298,e300,e301,e303,e310,e313,e321,e337,e343,e346,e348].",
+          "confidence": "high",
+          "notEnoughEvidence": false,
+          "citations": 73,
+          "seconds": 32.384
+        },
+        {
+          "question": "Are the price complaints about the price itself or the portion size?",
+          "answer": "The evidence shows both, but the recurring complaint is value-for-money: people often tie the higher prices to portions, meat/paneer quantity, sides, or consistency—e.g. asking for “portions slightly bigger for the price,” saying “prices went up but portions didn’t,” or that “portions don’t match the price.” There are also direct price complaints, with some respondents saying prices are too high, steep, or should be lowered. So the clearest action is to improve perceived value—larger or more consistent portions, more paneer/meat/side inclusion—while also reviewing a few items whose prices are seen as high on their own.",
+          "confidence": "high",
+          "notEnoughEvidence": false,
+          "citations": 15,
+          "seconds": 8.81
+        }
+      ],
+      "seconds": 571.41,
+      "usageSoFar": {
+        "gpt-5.5": {
+          "inputTokens": 173859,
+          "outputTokens": 26626,
+          "totalTokens": 200485,
+          "calls": 45
+        },
+        "gpt-5.4-nano": {
+          "inputTokens": 414246,
+          "outputTokens": 175940,
+          "totalTokens": 590186,
+          "calls": 35
+        }
+      }
+    }
+  ],
+  "usage": {
+    "gpt-5.5": {
+      "inputTokens": 173859,
+      "outputTokens": 26626,
+      "totalTokens": 200485,
+      "calls": 45
+    },
+    "gpt-5.4-nano": {
+      "inputTokens": 414246,
+      "outputTokens": 175940,
+      "totalTokens": 590186,
+      "calls": 35
+    }
+  }
+}
