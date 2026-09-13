@@ -27,9 +27,10 @@ export function buildReportBlocks(content: ReportContent, campaignId: string, da
   blocks.push(callout(`AI summary: ${content.headline}`))
   blocks.push(paragraph(`${content.responses.total} completed responses from ${content.participation.people} people in the list (${content.participation.reached} reached, ${content.participation.completed} completed, ${content.participation.callbacks} callbacks pending, ${content.participation.unreachable} unreachable, ${content.participation.optedOut} opted out).${content.responses.simulated ? ` ${content.responses.simulated} responses are text simulations.` : ''} The people who answered are not automatically representative of everyone.`))
   blocks.push(heading('What people said', 2))
+  blocks.push(paragraph('People counts are the people whose answers are cited under each finding, not everyone who may agree.'))
   if (content.themes.length === 0) blocks.push(paragraph('None found in the answers.'))
   for (const theme of content.themes) {
-    blocks.push(heading(`${theme.title} (${theme.kind}, ${theme.peopleCount} ${theme.peopleCount === 1 ? 'person' : 'people'})`, 3))
+    blocks.push(heading(`${theme.title} (${theme.kind}; cited from ${theme.peopleCount} ${theme.peopleCount === 1 ? 'person' : 'people'})`, 3))
     blocks.push(paragraph(`AI summary: ${theme.description}`))
     for (const quote of theme.quotes) blocks.push(quoteBlock(quote, dashboardUrl, campaignId))
   }

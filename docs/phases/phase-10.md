@@ -1,6 +1,6 @@
 # Phase 10 — Reliability, trust, and demo
 
-Status: in progress, started September 13, 2026.
+Status: complete, September 13, 2026.
 
 ## Outcome
 
@@ -24,4 +24,18 @@ The system is safe to run for a real campaign and ready to show: access to the A
 
 ## Completion note
 
-_Fill in when the phase ends._
+**What changed.** Tasks 1 to 6 as written, plus, at the user's request, an end-to-end evaluation harness (`apps/api/scripts/eval.ts`) that drafts questions with the real model, runs simulated calls with an LLM playing the person in dynamic and fixed modes, generates 80 synthetic responses per scenario through the real result mapper, generates the multi-agent report, asks two questions, and scores questions and reports with an LLM judge next to deterministic checks. Five scenarios: restaurant menu, society event, product onboarding, clinic front-desk team, nonprofit volunteers. Results in `docs/evaluation.md` and `docs/evaluation/`.
+
+**Fixes that came out of the evaluation.** Dynamic mode produced no follow-ups with eight questions until the call script's follow-up rule was strengthened; `no_conversation` outcomes were counted as completed responses; the synthesis agent over-fragmented themes, built themes from screening answers, and could skip a next step for the biggest problem; theme people counts were mislabeled. All fixed and re-verified.
+
+**Checks run.**
+
+| Check | Result |
+|---|---|
+| `bun run lint`, `bun run typecheck`, `bun run build` (web, API, Discord) | Pass |
+| `bun test`: 64 API tests (including app-level auth, validation, purge, retention, encryption) and 9 Discord tests | Pass |
+| Evaluation run over five scenarios (`docs/evaluation/run-2026-09-13-09-11.md`) | Pass: all deterministic checks; judge scores 4–5 with one 3 |
+| Every checklist item from `hackathon.md` recorded with its outcome | Done in `docs/evaluation.md`; live CALL-E, Discord, Google, and Notion checks remain not run |
+| Demo seed and script | `bun run db:demo`, `docs/demo.md` |
+
+**Still open.** Live runs with real credentials (CALL-E, Discord, Google, Notion); per-organizer accounts; the calls-versus-forms comparison the brief asks for.

@@ -72,7 +72,7 @@ export function reportMessage(campaignId: string, content: ReportContent, versio
   if (content.themes.length) {
     lines.push('', '**What people said**')
     for (const theme of content.themes.slice(0, 6)) {
-      lines.push(`• [${theme.kind}] **${theme.title}** — ${theme.peopleCount} ${theme.peopleCount === 1 ? 'person' : 'people'}. _${theme.description}_`)
+      lines.push(`• [${theme.kind}] **${theme.title}** — cited from ${theme.peopleCount} ${theme.peopleCount === 1 ? 'person' : 'people'}. _${theme.description}_`)
       const quote = theme.quotes.find((q) => q.value)
       if (quote) lines.push(`  > “${truncate(quote.value ?? '', 180)}” — ${quote.person ?? 'unnamed'} <${callUrl(campaignId, quote.callId)}>`)
     }

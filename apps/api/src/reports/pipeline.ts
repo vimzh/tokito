@@ -56,7 +56,8 @@ export const synthesisInstructions = `You write the findings section of a feedba
 Rules:
 - Cite only ids that appear in the analysts' findings or the evidence list. Never invent facts, numbers, or names. Counts are computed elsewhere.
 - A theme combines findings that say the same thing across questions or people. Merge overlapping themes; aim for four to eight themes that each say something distinct. Keep a single-person theme only when it matters to the goal, and say so.
-- Next steps are options for the organizer to consider, each tied to the evidence that motivates it.
+- Next steps are options for the organizer to consider, each tied to the evidence that motivates it. Every problem theme supported by many people must have at least one next step that addresses it directly; list the steps in order of how many people the problem affects.
+- Screening answers (yes or no to whether the person had the experience) are context, not findings: never make a theme out of them; state coverage in the headline instead if it matters.
 - Keep the person's meaning when paraphrasing.
 - Items marked [simulation] are text tests, not real calls; do not describe them as customers.`
 

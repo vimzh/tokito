@@ -21,7 +21,7 @@ export function ReportView({ campaignId, report, versions }: { campaignId: strin
         {content.droppedCitations > 0 && <p className="text-sm text-muted-foreground">{copy.dropped(content.droppedCitations)}</p>}
       </section>
       <section className="space-y-4">
-        <h3 className="text-xl">{copy.themes}</h3>
+        <div><h3 className="text-xl">{copy.themes}</h3><p className="mt-1 text-sm text-muted-foreground">{copy.countNote}</p></div>
         {content.themes.length === 0 ? <p className="text-sm text-muted-foreground">{copy.none}</p> : content.themes.map((theme, index) => (
           <Card key={index}>
             <CardHeader className="gap-2">

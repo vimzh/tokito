@@ -25,7 +25,7 @@ Detailed phase documents live next to this file (`phase-01.md`, `phase-02.md`, â
 | Discord | Done in code (Phase 8): `/tokito` commands, mention-driven agent with API tools, confirmation buttons, notifications, attribution. Needs a bot token to run. |
 | External apps | Done in code (Phase 9): Sheets contact import and results write-back, Calendar callback events, Notion report pages. Needs Google and Notion client ids. |
 
-Phases 1 to 5 are complete in code: campaigns, questions, drafting, preferences, contact lists, the CALL-E task builder, result mapping, a text simulator, and the outreach scheduler with CALL-E adapter, webhooks, and callbacks. Phases 6 and 7 add the results dashboard, exports, and the versioned report with ask-the-report. Phases 8 and 9 add the Discord bot and the Google Sheets, Calendar, and Notion connections in code. Live runs of calls, Discord, and the connections wait on a CALL-E key, a bot token, and OAuth client ids. Phase 10 remains. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
+Phases 1 to 5 are complete in code: campaigns, questions, drafting, preferences, contact lists, the CALL-E task builder, result mapping, a text simulator, and the outreach scheduler with CALL-E adapter, webhooks, and callbacks. Phases 6 and 7 add the results dashboard, exports, and the versioned report with ask-the-report. Phases 8 and 9 add the Discord bot and the Google Sheets, Calendar, and Notion connections in code. Phase 10 adds access control, encrypted tokens, deletion and retention, app-level tests, the evaluation record with a five-scenario end-to-end run, and the demo materials. Live runs of calls, Discord, and the connections still wait on a CALL-E key, a bot token, and OAuth client ids. The phases below start by making the existing screens real and then add the parts the brief calls for, roughly in the order an organizer experiences them.
 
 ## Phase overview
 
@@ -40,7 +40,7 @@ Phases 1 to 5 are complete in code: campaigns, questions, drafting, preferences,
 | 7 | Reports and asking questions of the data (done 2026-09-13; multi-agent pipeline added the same day) | Campaign-level report written by per-question analyst agents, a synthesis agent, and a reviewer agent; campaign-level report with counts, themes, supporting quotes, disagreements, gaps, labeled suggestions, and a Q&A box over the answers. | 6 |
 | 8 | Discord agent (code done 2026-09-13; live server pending) | Manage the same campaigns from Discord: create, review questions, upload contacts, start/pause, progress, answers, reports, notifications. | 7 |
 | 9 | External app connections (code done 2026-09-13; live accounts pending) | Google Sheets (contacts in, results out), Google Calendar (callbacks), Notion (published report), with real OAuth and visible failures. | 8 |
-| 10 | Reliability, trust, and demo | Test and evaluation checklist from `hackathon.md` executed and recorded, consent and retention controls, reliability brief, demo script, deployment. | 9 |
+| 10 | Reliability, trust, and demo (done 2026-09-13) | Test and evaluation checklist from `hackathon.md` executed and recorded, consent and retention controls, reliability brief, demo script, deployment. | 9 |
 
 ## Phase details
 
