@@ -3,6 +3,7 @@ import type { Db } from '../db'
 import { connections, type ConnectionProvider } from '../db/schema'
 import { googleScopes, integrationConfig, providerConfigured, redirectUri } from './config'
 import { IntegrationError, requestJson } from './http'
+import { decryptSecret, encryptSecret } from './crypto'
 
 export class NotConnectedError extends Error {
   constructor(provider: ConnectionProvider) {
@@ -73,7 +74,13 @@ export async function completeOAuth(db: Db, provider: ConnectionProvider, code: 
 
 function saveConnection(db: Db, input: { provider: ConnectionProvider; accessToken: string; refreshToken: string | null; expiresAt: number | null; scope: string | null; accountLabel: string | null }, now: number) {
   const existing = db.select().from(connections).where(eq(connections.provider, input.provider)).get()
-  const row = { ...input, refreshToken: input.refreshToken ?? existing?.refreshToken ?? null, createdAt: existing?.createdAt ?? now, updatedAt: now }
+  const row = {
+    ...input,
+    accessToken: encryptSecret(input.accessToken),
+    refreshToken: input.refreshToken ? encryptSecret(input.refreshToken) : (existing?.refreshToken ?? null),
+    createdAt: existing?.createdAt ?? now,
+    updatedAt: now,
+  }
   db.insert(connections).values(row).onConflictDoUpdate({ target: connections.provider, set: row }).run()
   return publicConnection(row)
 }
@@ -96,14 +103,14 @@ export function disconnect(db: Db, provider: ConnectionProvider) {
 export async function accessToken(db: Db, provider: ConnectionProvider, now = Date.now()): Promise<string> {
   const row = db.select().from(connections).where(eq(connections.provider, provider)).get()
   if (!row) throw new NotConnectedError(provider)
-  if (provider === 'notion' || !row.expiresAt || row.expiresAt - 60_000 > now) return row.accessToken
+  if (provider === 'notion' || !row.expiresAt || row.expiresAt - 60_000 > now) return decryptSecret(row.accessToken)
   if (!row.refreshToken) throw new IntegrationError('google', 'The Google connection expired and cannot be refreshed. Reconnect it on the Connections page.', 401)
   const { clientId, clientSecret } = integrationConfig.google
   const token = await requestJson<GoogleToken>('google', 'https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ refresh_token: row.refreshToken, client_id: clientId ?? '', client_secret: clientSecret ?? '', grant_type: 'refresh_token' }).toString(),
+    body: new URLSearchParams({ refresh_token: decryptSecret(row.refreshToken), client_id: clientId ?? '', client_secret: clientSecret ?? '', grant_type: 'refresh_token' }).toString(),
   })
-  db.update(connections).set({ accessToken: token.access_token, expiresAt: now + token.expires_in * 1000, updatedAt: now }).where(eq(connections.provider, 'google')).run()
+  db.update(connections).set({ accessToken: encryptSecret(token.access_token), expiresAt: now + token.expires_in * 1000, updatedAt: now }).where(eq(connections.provider, 'google')).run()
   return token.access_token
 }

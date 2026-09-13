@@ -7,6 +7,7 @@ import { statusFromProvider } from './result-mapper'
 import { persistCallResult, recordOptOutFromCall, type TranscriptTurn } from './persist'
 import { ProviderError, localeFor, type CallProvider, type ProviderTask } from './provider'
 import { emitHook } from '../integrations/hooks'
+import { applyRetention } from '../services/purge'
 
 const id = () => crypto.randomUUID()
 export const schedulerConfig = { maxActivePerCampaign: 3, retryDelayMinutes: 120, pollAfterMinutes: 2 }
@@ -214,7 +215,8 @@ async function dial(db: Db, provider: CallProvider, campaign: Campaign, call: Ca
 // One scheduler pass over every running campaign: dial what is due, then poll active calls.
 export async function tick(db: Db, provider: CallProvider, options: { now?: number; webhookUrl?: string } = {}) {
   const now = options.now ?? Date.now()
-  const result = { dialed: 0, failed: 0, polled: 0 }
+  const result = { dialed: 0, failed: 0, polled: 0, purged: 0 }
+  result.purged = applyRetention(db, now).length
   const running = db.select().from(campaigns).where(eq(campaigns.status, 'running')).all()
   for (const campaign of running) {
     const rows = campaignCalls(db, campaign.id)

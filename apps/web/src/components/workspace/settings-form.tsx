@@ -3,6 +3,8 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { PreferencesFields } from "@/components/campaigns/preferences-fields";
 import { OptOutList } from "@/components/workspace/opt-out-list";
 import { updateSettingsAction } from "@/actions/settings";
@@ -25,6 +27,11 @@ export function SettingsForm({ settings, optOuts }: { settings: WorkspaceSetting
         <CardContent>
           <form action={formAction} className="space-y-6">
             <PreferencesFields values={settings} idPrefix="settings" />
+            <div className="space-y-2">
+              <Label htmlFor="settings-retention">{copy.retention}</Label>
+              <p id="settings-retention-hint" className="text-sm text-muted-foreground">{copy.retentionHint}</p>
+              <Input id="settings-retention" name="retentionDays" type="number" min={1} max={3650} aria-describedby="settings-retention-hint" defaultValue={settings.retentionDays ?? ""} className="w-40" />
+            </div>
             {state.error && <p role="alert" className="text-sm text-destructive">{state.error}</p>}
             <div className="flex flex-wrap items-center gap-3">
               <Button type="submit" disabled={pending}>{pending ? copy.saving : copy.save}</Button>

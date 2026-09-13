@@ -1,5 +1,7 @@
 import { Hono } from 'hono'
+import { bearerAuth } from 'hono/bearer-auth'
 import { cors } from 'hono/cors'
+import { logger } from 'hono/logger'
 import { HTTPException } from 'hono/http-exception'
 import { campaignRoutes } from './routes/campaigns'
 import { settingsRoutes } from './routes/settings'
@@ -21,8 +23,17 @@ import { runScheduledTick, schedulerRoutes, webhookRoutes } from './routes/outre
 import { NotFoundError } from './services/campaigns'
 import { AiNotConfiguredError, AiRequestError } from './ai/config'
 
+// Routes that outside services or a browser redirect must reach without the workspace token.
+const publicPaths = [/^\/api\/health$/, /^\/api\/webhooks\//, /^\/api\/connections\/[a-z]+\/(start|callback)$/]
+const apiToken = process.env.API_TOKEN
+
 const app = new Hono()
+  .use(logger())
   .use('/api/*', cors({ origin: process.env.WEB_ORIGIN ?? 'http://localhost:3000' }))
+  .use('/api/*', async (c, next) => {
+    if (!apiToken || publicPaths.some((pattern) => pattern.test(c.req.path))) return next()
+    return bearerAuth({ token: apiToken })(c, next)
+  })
   .onError((error, c) => {
     if (error instanceof NotFoundError) return c.json({ error: { message: error.message } }, 404)
     if (error instanceof SpreadsheetError || error instanceof ImportStateError || error instanceof InvalidPhoneError || error instanceof SimulationError || error instanceof OutreachError || error instanceof ReportError || error instanceof OAuthError || error instanceof ConnectionConfigError || error instanceof NotConnectedError)
@@ -46,13 +57,14 @@ const app = new Hono()
   .route('/api/outreach', schedulerRoutes)
 
 export type AppType = typeof app
+export { app }
 
 registerIntegrations()
 
-// One scheduler loop per process; --hot reloads re-run this module, so clear the previous timer.
+// One scheduler loop per process (skipped under tests); --hot reloads re-run this module, so clear the previous timer.
 const tickSeconds = Number(process.env.OUTREACH_TICK_SECONDS ?? 30)
 const globalTimers = globalThis as typeof globalThis & { __tokitoTick?: ReturnType<typeof setInterval> }
 if (globalTimers.__tokitoTick) clearInterval(globalTimers.__tokitoTick)
-globalTimers.__tokitoTick = setInterval(() => void runScheduledTick(), Math.max(5, tickSeconds) * 1000)
+if (process.env.NODE_ENV !== 'test') globalTimers.__tokitoTick = setInterval(() => void runScheduledTick(), Math.max(5, tickSeconds) * 1000)
 
 export default { port: Number(process.env.PORT ?? 3002), fetch: app.fetch }

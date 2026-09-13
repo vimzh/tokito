@@ -34,6 +34,7 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. Tests:
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Optional Google OAuth web client. |
 | `API_URL` | Base URL of the API, default `http://localhost:3002`. |
 | `API_PUBLIC_URL` | API base the browser can reach, used for the Connect links; defaults to `API_URL`. |
+| `API_TOKEN` | Same value as the API's `API_TOKEN` when that is set. |
 
 `apps/discord/.env` (copy from `.env.example`): `DISCORD_TOKEN`, `DISCORD_APP_ID`, optional `DISCORD_GUILD_ID` for instant command registration, `API_URL`, `DASHBOARD_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL`.
 
@@ -46,6 +47,8 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. Tests:
 | `WEB_ORIGIN` | Origin allowed by CORS, default `http://localhost:3000`. |
 | `OPENAI_API_KEY` | OpenAI key used by the Strands Agents SDK for question drafting. Without it, drafting returns a clear "not configured" error. |
 | `OPENAI_MODEL` | OpenAI model id, default `gpt-5.5`. |
+| `API_TOKEN` | When set, every `/api` route except health, webhooks, and OAuth redirects requires `Authorization: Bearer`. |
+| `TOKEN_ENCRYPTION_KEY` | Encrypts stored Google and Notion tokens (AES-256-GCM). |
 | `CALLE_API_KEY` | CALL-E (heycall-e.com) API key for real phone calls. Without it, outreach cannot start. |
 | `CALLE_BASE_URL` | CALL-E API base URL, default `https://api.heycall-e.com`. |
 | `CALLE_WEBHOOK_URL` | Public URL of this API's `/api/webhooks/calle` endpoint, sent with each call so CALL-E can post terminal events. Polling covers missed events. |
@@ -82,10 +85,19 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. Tests:
 | `GET` | `/api/settings` | Workspace calling defaults. |
 | `PUT` | `/api/settings` | Update workspace calling defaults. |
 | `DELETE` | `/api/campaigns/:id` | Delete a campaign and its questions. |
+| `POST` | `/api/campaigns/:id/purge` | Delete collected data (contacts, imports, calls, transcripts, answers); keeps the campaign, questions, reports, and log. |
 
 Validation errors return `400` with `{ error: { message, issues } }`; unknown ids return `404`.
 
 Database commands in `apps/api`: `bun run db:generate` (new migration from schema changes), `bun run db:migrate`, `bun run db:seed`, `bun run db:studio`.
+
+## Running for real
+
+- Each app has `bun run start` (API and Discord) or `bun run build && bun run start` (web). Run them as three processes on one machine; the API needs a persistent disk for the SQLite file and a public URL for CALL-E webhooks and OAuth callbacks (`API_PUBLIC_URL`).
+- Set `API_TOKEN` on the API and give the same value to the web app and the bot, `TOKEN_ENCRYPTION_KEY` for stored Google and Notion tokens, and a retention period on the Settings page when collected data should not be kept.
+- Health: `GET /api/health`. Requests are logged to stdout. The scheduler runs inside the API process every `OUTREACH_TICK_SECONDS`.
+- Demo data: `cd apps/api && bun run db:demo` seeds a finished campaign with two text simulations. Evaluation: `bun run scripts/eval.ts` (see `docs/evaluation/`).
+- Documents: [system and reliability brief](docs/brief.md), [evaluation record](docs/evaluation.md), [demo script](docs/demo.md), [decisions](docs/decisions.md).
 
 ## Demo login
 

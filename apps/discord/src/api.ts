@@ -21,8 +21,8 @@ async function unwrap<T>(response: MinimalResponse): Promise<T> {
 }
 
 // The same typed client the dashboard uses, so Discord and the web see identical state.
-export function createApi(baseUrl: string, fetchImpl: FetchLike = fetch) {
-  const client = hc<AppType>(baseUrl, { fetch: fetchImpl as typeof fetch })
+export function createApi(baseUrl: string, fetchImpl: FetchLike = fetch, token = process.env.API_TOKEN) {
+  const client = hc<AppType>(baseUrl, { fetch: fetchImpl as typeof fetch, headers: (): Record<string, string> => (token ? { Authorization: `Bearer ${token}` } : {}) })
   const campaignsRoute = client.api.campaigns
   const campaign = campaignsRoute[':id']
   type CampaignSummary = Res<typeof campaignsRoute.$get, 200>[number]

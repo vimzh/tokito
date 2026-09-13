@@ -23,6 +23,8 @@ export const settingsContent = {
   description: "Defaults for the campaigns you create.",
   section: "Calling defaults",
   sectionDescription: "New campaigns start with these preferences. Each campaign can change its own afterwards.",
+  retention: "Delete collected data after (days)",
+  retentionHint: "Applies to completed campaigns: contacts, transcripts, and answers are deleted this many days after the campaign ends. Leave empty to keep data until you delete it yourself. Reports and counts stay.",
   save: "Save defaults",
   saving: "Saving…",
   saved: "Defaults saved. New campaigns will use them.",

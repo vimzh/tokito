@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { ApiError, createCampaign, deleteCampaign, draftQuestions, replaceQuestions, updateCampaign, type DraftResult, type ReplaceQuestionsInput } from "@/lib/api";
+import { ApiError, createCampaign, deleteCampaign, draftQuestions, purgeCampaign, replaceQuestions, updateCampaign, type DraftResult, type ReplaceQuestionsInput } from "@/lib/api";
 import { splitLines } from "@/lib/format";
 import { campaignContent } from "@/data/campaign";
 
@@ -125,4 +125,16 @@ export async function deleteCampaignAction(id: string): Promise<ActionState> {
   }
   revalidatePath("/home");
   redirect("/home");
+}
+
+export async function purgeCampaignAction(id: string): Promise<ActionState> {
+  await requireSession();
+  try {
+    await purgeCampaign(id);
+  } catch (error) {
+    return errorState(error);
+  }
+  revalidatePath("/home");
+  revalidatePath(`/survey/${id}`);
+  return {};
 }

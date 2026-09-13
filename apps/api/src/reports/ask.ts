@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import type { Db } from '../db'
 import { reportQuestions } from '../db/schema'
@@ -36,7 +36,7 @@ export function listReportQuestions(db: Db, campaignId: string): AskResult[] {
     .select()
     .from(reportQuestions)
     .where(eq(reportQuestions.campaignId, campaignId))
-    .orderBy(desc(reportQuestions.createdAt))
+    .orderBy(desc(reportQuestions.createdAt), desc(sql`${reportQuestions}.rowid`))
     .all()
     .map((row) => row.answer as unknown as AskResult)
 }

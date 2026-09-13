@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { db } from '../db'
 import * as service from '../services/campaigns'
 import { defaultDrafter } from '../ai/draft-questions'
+import { purgeCampaignData } from '../services/purge'
 import { contactRoutes } from './contacts'
 import { callRoutes } from './calls'
 import { outreachRoutes } from './outreach'
@@ -31,6 +32,7 @@ export const campaignRoutes = new Hono()
     service.deleteCampaign(db, c.req.param('id'))
     return c.body(null, 204)
   })
+  .post('/:id/purge', (c) => c.json(purgeCampaignData(db, c.req.param('id'), 'manual'), 200))
   .route('/', contactRoutes)
   .route('/', callRoutes)
   .route('/', outreachRoutes)

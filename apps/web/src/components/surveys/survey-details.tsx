@@ -19,6 +19,7 @@ import { ContactsTable } from "@/components/campaigns/contacts-table";
 import { CampaignEditor } from "@/components/campaigns/campaign-editor";
 import { DeleteCampaignButton } from "@/components/campaigns/delete-campaign-button";
 import { DraftQuestionsPanel } from "@/components/campaigns/draft-questions-panel";
+import { PurgeCampaignButton } from "@/components/campaigns/purge-campaign-button";
 import { OutreachPanel } from "@/components/campaigns/outreach-panel";
 import { QuestionEditor } from "@/components/campaigns/question-editor";
 import { campaignContent as copy, campaignStatusLabels, preferencesContent } from "@/data/campaign";
@@ -37,8 +38,9 @@ export function SurveyDetails({ campaign, contacts, calls, preview, outreach, re
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-3"><Badge variant="secondary">{campaignStatusLabels[campaign.status]}</Badge><span className="text-sm text-muted-foreground">{copy.created} {formatDate(campaign.createdAt)}</span></div>
           <h1 className="text-3xl sm:text-4xl">{campaign.name}</h1>
+          {campaign.purgedAt && <p className="text-sm text-muted-foreground">{copy.purgedAt(formatDate(campaign.purgedAt))}</p>}
         </div>
-        <div className="flex flex-wrap gap-2"><TestCallDialog campaignId={campaign.id} contacts={readyContacts} disabled={campaign.questions.length === 0} /><CampaignEditor campaign={campaign} /><DeleteCampaignButton id={campaign.id} /></div>
+        <div className="flex flex-wrap gap-2"><TestCallDialog campaignId={campaign.id} contacts={readyContacts} disabled={campaign.questions.length === 0} /><CampaignEditor campaign={campaign} />{!campaign.purgedAt && (contacts.total > 0 || calls.length > 0) && <PurgeCampaignButton id={campaign.id} />}<DeleteCampaignButton id={campaign.id} /></div>
       </header>
       <LiveRefresh active={live} />
       <CampaignMetrics results={results} live={live} />

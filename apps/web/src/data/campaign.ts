@@ -80,6 +80,12 @@ export const campaignContent = {
   deleteDescription: "This removes the campaign and its questions. This cannot be undone.",
   deleteConfirm: "Delete campaign",
   deleting: "Deleting…",
+  purge: "Delete collected data",
+  purgeTitle: "Delete this campaign's collected data?",
+  purgeDescription: "Contacts, transcripts, and answers are deleted. The campaign, its questions, its reports, and the activity log stay. This cannot be undone.",
+  purgeConfirm: "Delete data",
+  purging: "Deleting…",
+  purgedAt: (when: string) => `Collected data deleted on ${when}.`,
   editor: {
     question: "Question",
     type: "Answer type",

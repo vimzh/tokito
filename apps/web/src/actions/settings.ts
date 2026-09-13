@@ -20,6 +20,7 @@ export async function updateSettingsAction(_previous: SettingsState, formData: F
       timezone: text(formData, "timezone"),
       maxAttempts: Number(text(formData, "maxAttempts")),
       defaultCountry: text(formData, "defaultCountry"),
+      retentionDays: text(formData, "retentionDays") ? Number(text(formData, "retentionDays")) : null,
     });
   } catch (error) {
     if (error instanceof ApiError) return { error: error.message };

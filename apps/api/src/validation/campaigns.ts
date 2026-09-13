@@ -81,7 +81,7 @@ export const replaceQuestionsSchema = z.object({
   draft: z.object({ model: z.string().max(100), promptVersion: z.string().max(100) }).optional(),
 })
 
-export const updateSettingsSchema = callingPreferencesSchema.partial().extend({ discordChannelId: z.string().trim().max(64).nullable().optional() }).refine(hoursInOrder, hoursMessage)
+export const updateSettingsSchema = callingPreferencesSchema.partial().extend({ discordChannelId: z.string().trim().max(64).nullable().optional(), retentionDays: z.number().int().min(1).max(3650).nullable().optional() }).refine(hoursInOrder, hoursMessage)
 
 export type QuestionInput = z.infer<typeof questionInputSchema>
 export type CreateCampaignInput = z.infer<typeof createCampaignSchema>

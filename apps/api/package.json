@@ -9,7 +9,9 @@
     "db:studio": "drizzle-kit studio",
     "typecheck": "tsc --noEmit",
     "db:seed": "bun run src/db/seed.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "db:demo": "bun run src/db/demo.ts",
+    "start": "bun run src/index.ts"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.9.1",

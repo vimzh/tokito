@@ -27,6 +27,7 @@ export const workspaceSettings = sqliteTable('workspace_settings', {
   id: text('id').primaryKey(),
   ...callingPreferences,
   discordChannelId: text('discord_channel_id'),
+  retentionDays: integer('retention_days'),
   updatedAt: integer('updated_at').notNull(),
 })
 
@@ -47,6 +48,7 @@ export const campaigns = sqliteTable('campaigns', {
   outreachStartedAt: integer('outreach_started_at'),
   outreachPausedAt: integer('outreach_paused_at'),
   outreachStoppedAt: integer('outreach_stopped_at'),
+  purgedAt: integer('purged_at'),
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
 })

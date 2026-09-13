@@ -1,7 +1,7 @@
 import { hc, type InferRequestType, type InferResponseType } from "hono/client";
 import type { AppType } from "api/src/index";
 
-const client = hc<AppType>(process.env.API_URL ?? "http://localhost:3002");
+const client = hc<AppType>(process.env.API_URL ?? "http://localhost:3002", { headers: (): Record<string, string> => (process.env.API_TOKEN ? { Authorization: `Bearer ${process.env.API_TOKEN}` } : {}) });
 const campaignsRoute = client.api.campaigns;
 const campaignRoute = campaignsRoute[":id"];
 const settingsRoute = client.api.settings;
@@ -48,6 +48,7 @@ export const replaceQuestions = (id: string, json: ReplaceQuestionsInput) =>
   campaignRoute.questions.$put({ param: { id }, json }).then((response) => unwrap<Campaign>(response));
 export const draftQuestions = (id: string) => campaignRoute.questions.draft.$post({ param: { id } }).then((response) => unwrap<DraftResult>(response));
 export const deleteCampaign = (id: string) => campaignRoute.$delete({ param: { id } }).then((response) => unwrap<void>(response));
+export const purgeCampaign = (id: string) => campaignRoute.purge.$post({ param: { id } }).then((response) => unwrap<{ contacts: number; imports: number; calls: number }>(response));
 export const getSettings = () => settingsRoute.$get().then((response) => unwrap<WorkspaceSettings>(response));
 export const updateSettings = (json: UpdateSettingsInput) => settingsRoute.$put({ json }).then((response) => unwrap<WorkspaceSettings>(response));
 
