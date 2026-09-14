@@ -28,11 +28,9 @@ Tokito turns that follow-up work into a campaign. The organizer explains what th
 5. **Builds a report that can be checked.** Per-question analyst agents feed a synthesis agent, then a reviewer removes unsupported findings. Quotes link back to the stored call and answer.
 6. **Works across the team’s tools.** The web dashboard and Discord bot use the same API. Google Sheets can supply contacts and receive results, Google Calendar can track callbacks, and Notion can receive a published report.
 
-<!-- README-HACK:GRAPH
-type: product-flow
-brief: Show an organizer describing a feedback goal, reviewing drafted questions, importing a validated contact list, testing or starting calls, respondents answering or declining, and the organizer receiving a traceable report. Mark organizer confirmation before outreach and keep missing answers visible.
-placement: after "What Tokito does"
--->
+<p align="center">
+  <img src="docs/graphs/tokito-product-flow.svg" alt="Tokito product flow from a small team&#x27;s feedback goal through reviewed questions, validated contacts, confirmed CALL-E outreach, stored outcomes, and an evidence-backed report" width="1100" />
+</p>
 
 ## Built for evidence, not polished guesses
 

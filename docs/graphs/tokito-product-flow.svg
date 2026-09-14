@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title description" data-layout-version="cloudy-native-v2" data-spec-sha256="ef60d0df4a152769ad4072971944427a2abd8a99f0c696123b5394264a47e256">
+  <title id="title">From unanswered forms to useful conversations</title>
+  <desc id="description">Tokito product flow from a small team&#x27;s feedback goal through reviewed questions, validated contacts, confirmed CALL-E outreach, stored outcomes, and an evidence-backed report.</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#2563eb"/></marker>
+    <marker id="arrow-violet" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#7c3aed"/></marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#16a34a"/></marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#d97706"/></marker>
+    <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#0f766e"/></marker>
+    <marker id="arrow-rose" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#e11d48"/></marker>
+    <marker id="arrow-slate" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#57534e"/></marker>
+    <style>
+      text { font-family: "Comic Sans MS", "Segoe Print", cursive; }
+      .title { font-size: 36px; fill: #292524; }
+      .subtitle { font-size: 17px; fill: #78716c; }
+      .zone-label { font-size: 14px; letter-spacing: 1px; }
+      .node-title { font-size: 20px; fill: #292524; }
+      .node-body { font-size: 15px; fill: #44403c; }
+      .node-note { font-size: 13px; fill: #57534e; }
+      .edge-label { font-size: 13px; fill: #57534e; paint-order: stroke; stroke: #fffdf8; stroke-width: 4px; stroke-linejoin: round; }
+      .footer { font-size: 13px; fill: #57534e; }
+      .arrow { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#fffdf8"/>
+  <text x="54" y="62" class="title">From unanswered forms to useful conversations</text>
+  <text x="54" y="94" class="subtitle">A small team sets the goal, Tokito runs the campaign, and every finding stays tied to what people said</text>
+  <rect data-zone-id="setup" x="42.0" y="130" width="390.7" height="690" rx="28" fill="#eff6ff" stroke="#93c5fd" stroke-width="2" stroke-dasharray="8 8"/>
+  <text x="62.0" y="160" class="zone-label" fill="#1e40af">1 · THE TEAM SETS THE QUESTION</text>
+  <rect data-zone-id="campaign" x="460.7" y="130" width="514.1" height="690" rx="28" fill="#faf5ff" stroke="#c4b5fd" stroke-width="2" stroke-dasharray="8 8"/>
+  <text x="480.7" y="160" class="zone-label" fill="#5b21b6">2 · TOKITO RUNS THE CAMPAIGN</text>
+  <rect data-zone-id="evidence" x="1002.8" y="130" width="555.2" height="690" rx="28" fill="#f0fdf4" stroke="#86efac" stroke-width="2" stroke-dasharray="8 8"/>
+  <text x="1022.8" y="160" class="zone-label" fill="#166534">3 · FEEDBACK BECOMES EVIDENCE</text>
+  <path class="arrow" data-edge="goal--questions" d="M237.4 337.5 V342.0" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <path class="arrow" data-edge="questions--contacts" d="M402.7 408.0 H446.7 V258.0 H490.7" stroke="#7c3aed" marker-end="url(#arrow-violet)"/>
+  <path class="arrow" data-edge="contacts--confirm" d="M717.7 326.0 V351.0" stroke="#d97706" marker-end="url(#arrow-amber)"/>
+  <path class="arrow" data-edge="confirm--conversation" d="M717.7 465.0 V490.0" stroke="#0f766e" marker-end="url(#arrow-teal)"/>
+  <path class="arrow" data-edge="conversation--outcomes" d="M944.8 558.0 H988.8 V258.0 H1032.8" stroke="#16a34a" marker-end="url(#arrow-green)"/>
+  <path class="arrow" data-edge="outcomes--report" d="M1280.4 326.0 V352.0" stroke="#16a34a" marker-end="url(#arrow-green)"/>
+  <path class="arrow" data-edge="report--decision" d="M1280.4 464.0 V501.0" stroke="#16a34a" marker-end="url(#arrow-green)"/>
+  <rect class="node" data-node-id="goal" data-status="external" x="72.0" y="178.5" width="330.7" height="159.0" rx="22" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="237.4" y="213.5" text-anchor="middle" class="node-title">Describe what you need to</text>
+  <text x="237.4" y="239.5" text-anchor="middle" class="node-title">learn</text>
+  <text x="237.4" y="270.5" text-anchor="middle" class="node-body">feedback goal · useful background</text>
+  <text x="237.4" y="300.5" text-anchor="middle" class="node-note">Start with the decision, not a blank</text>
+  <text x="237.4" y="319.5" text-anchor="middle" class="node-note">form</text>
+  <rect class="node" data-node-id="questions" data-status="implemented" x="72.0" y="342.0" width="330.7" height="132.0" rx="22" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="237.4" y="377.0" text-anchor="middle" class="node-title">Review four drafted</text>
+  <text x="237.4" y="403.0" text-anchor="middle" class="node-title">questions</text>
+  <text x="237.4" y="434.0" text-anchor="middle" class="node-body">open · rating · choice</text>
+  <text x="237.4" y="456.0" text-anchor="middle" class="node-body">edit before anything is sent</text>
+  <rect class="node" data-node-id="contacts" data-status="implemented" x="490.7" y="190.0" width="454.1" height="136.0" rx="22" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+  <text x="717.7" y="225.0" text-anchor="middle" class="node-title">Bring a call list</text>
+  <text x="717.7" y="256.0" text-anchor="middle" class="node-body">Excel · CSV · Google Sheets</text>
+  <text x="717.7" y="278.0" text-anchor="middle" class="node-body">invalid · duplicate · opted out</text>
+  <text x="717.7" y="308.0" text-anchor="middle" class="node-note">Problems stay visible before outreach</text>
+  <rect class="node" data-node-id="confirm" data-status="implemented" x="490.7" y="351.0" width="454.1" height="114.0" rx="22" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="717.7" y="386.0" text-anchor="middle" class="node-title">Confirm before calling</text>
+  <text x="717.7" y="417.0" text-anchor="middle" class="node-body">hours · attempts · budget</text>
+  <text x="717.7" y="447.0" text-anchor="middle" class="node-note">The team keeps control of outreach</text>
+  <rect class="node" data-node-id="conversation" data-status="external" x="490.7" y="490.0" width="454.1" height="136.0" rx="22" fill="#ccfbf1" stroke="#0f766e" stroke-width="2"/>
+  <text x="717.7" y="525.0" text-anchor="middle" class="node-title">CALL-E holds the conversation</text>
+  <text x="717.7" y="556.0" text-anchor="middle" class="node-body">prepared questions · relevant follow-ups</text>
+  <text x="717.7" y="578.0" text-anchor="middle" class="node-body">fixed mode stays on script</text>
+  <text x="717.7" y="608.0" text-anchor="middle" class="node-note">Live calls require provider credentials</text>
+  <rect class="node" data-node-id="outcomes" data-status="implemented" x="1032.8" y="190.0" width="495.2" height="136.0" rx="22" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="1280.4" y="225.0" text-anchor="middle" class="node-title">Keep every outcome honest</text>
+  <text x="1280.4" y="256.0" text-anchor="middle" class="node-body">answered · skipped · declined</text>
+  <text x="1280.4" y="278.0" text-anchor="middle" class="node-body">callback · opt-out · not asked</text>
+  <text x="1280.4" y="308.0" text-anchor="middle" class="node-note">SQLite preserves answers and gaps</text>
+  <rect class="node" data-node-id="report" data-status="implemented" x="1032.8" y="352.0" width="495.2" height="112.0" rx="22" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="1280.4" y="387.0" text-anchor="middle" class="node-title">Build a report you can check</text>
+  <text x="1280.4" y="418.0" text-anchor="middle" class="node-body">analysts → synthesis → reviewer</text>
+  <text x="1280.4" y="440.0" text-anchor="middle" class="node-body">every quote links to its answer</text>
+  <rect class="node" data-node-id="decision" data-status="external" x="1032.8" y="501.0" width="495.2" height="114.0" rx="22" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="1280.4" y="536.0" text-anchor="middle" class="node-title">See what needs to change</text>
+  <text x="1280.4" y="567.0" text-anchor="middle" class="node-body">themes · disagreements · next steps</text>
+  <text x="1280.4" y="597.0" text-anchor="middle" class="node-note">The small team makes the decision</text>
+  <rect x="54" y="844" width="1492" height="36" rx="14" fill="#f5f5f4" stroke="#d6d3d1"/>
+  <text x="800" y="868" text-anchor="middle" class="footer">The team controls outreach. Tokito keeps missing answers visible.</text>
+</svg>

@@ -1,0 +1,118 @@
+{
+  "title": "From unanswered forms to useful conversations",
+  "subtitle": "A small team sets the goal, Tokito runs the campaign, and every finding stays tied to what people said",
+  "description": "Tokito product flow from a small team's feedback goal through reviewed questions, validated contacts, confirmed CALL-E outreach, stored outcomes, and an evidence-backed report.",
+  "footer": "The team controls outreach. Tokito keeps missing answers visible.",
+  "zones": [
+    { "id": "setup", "label": "1 · THE TEAM SETS THE QUESTION", "tone": "blue", "width": 0.95 },
+    { "id": "campaign", "label": "2 · TOKITO RUNS THE CAMPAIGN", "tone": "violet", "width": 1.25 },
+    { "id": "evidence", "label": "3 · FEEDBACK BECOMES EVIDENCE", "tone": "green", "width": 1.35 }
+  ],
+  "nodes": [
+    {
+      "id": "goal",
+      "zone": "setup",
+      "title": "Describe what you need to learn",
+      "body": ["feedback goal · useful background"],
+      "note": "Start with the decision, not a blank form",
+      "status": "external",
+      "size": "standard",
+      "row": 1,
+      "span": 2,
+      "evidence": ["docs/idea.md", "apps/api/src/services/campaigns.ts"]
+    },
+    {
+      "id": "questions",
+      "zone": "setup",
+      "title": "Review four drafted questions",
+      "body": ["open · rating · choice", "edit before anything is sent"],
+      "status": "implemented",
+      "size": "standard",
+      "row": 2,
+      "span": 2,
+      "evidence": ["apps/api/src/ai/draft-questions.ts", "apps/api/src/services/campaigns.ts"]
+    },
+    {
+      "id": "contacts",
+      "zone": "campaign",
+      "title": "Bring a call list",
+      "body": ["Excel · CSV · Google Sheets", "invalid · duplicate · opted out"],
+      "note": "Problems stay visible before outreach",
+      "status": "implemented",
+      "size": "wide",
+      "row": 1,
+      "span": 2,
+      "evidence": ["apps/api/src/services/contacts.ts", "apps/api/src/services/spreadsheet.ts"]
+    },
+    {
+      "id": "confirm",
+      "zone": "campaign",
+      "title": "Confirm before calling",
+      "body": ["hours · attempts · budget"],
+      "note": "The team keeps control of outreach",
+      "tone": "amber",
+      "status": "implemented",
+      "size": "standard",
+      "row": 2,
+      "span": 2,
+      "evidence": ["apps/api/src/calls/scheduler.ts", "apps/discord/src/confirmations.ts"]
+    },
+    {
+      "id": "conversation",
+      "zone": "campaign",
+      "title": "CALL-E holds the conversation",
+      "body": ["prepared questions · relevant follow-ups", "fixed mode stays on script"],
+      "note": "Live calls require provider credentials",
+      "tone": "teal",
+      "status": "external",
+      "size": "wide",
+      "row": 3,
+      "span": 2,
+      "evidence": ["apps/api/src/calls/provider.ts", "apps/api/src/calls/task-builder.ts"]
+    },
+    {
+      "id": "outcomes",
+      "zone": "evidence",
+      "title": "Keep every outcome honest",
+      "body": ["answered · skipped · declined", "callback · opt-out · not asked"],
+      "note": "SQLite preserves answers and gaps",
+      "status": "implemented",
+      "size": "wide",
+      "row": 1,
+      "span": 2,
+      "evidence": ["apps/api/src/calls/persist.ts", "apps/api/src/db/schema.ts"]
+    },
+    {
+      "id": "report",
+      "zone": "evidence",
+      "title": "Build a report you can check",
+      "body": ["analysts → synthesis → reviewer", "every quote links to its answer"],
+      "status": "implemented",
+      "size": "wide",
+      "row": 2,
+      "span": 2,
+      "evidence": ["apps/api/src/reports/pipeline.ts", "apps/api/src/reports/generate.ts", "apps/api/src/reports/evidence.ts"]
+    },
+    {
+      "id": "decision",
+      "zone": "evidence",
+      "title": "See what needs to change",
+      "body": ["themes · disagreements · next steps"],
+      "note": "The small team makes the decision",
+      "status": "external",
+      "size": "standard",
+      "row": 3,
+      "span": 2,
+      "evidence": ["docs/idea.md", "apps/web/src/components/campaigns/report-view.tsx"]
+    }
+  ],
+  "edges": [
+    { "from": "goal", "to": "questions", "tone": "blue", "route": "vertical" },
+    { "from": "questions", "to": "contacts", "tone": "violet", "route": "orthogonal" },
+    { "from": "contacts", "to": "confirm", "tone": "amber", "route": "vertical" },
+    { "from": "confirm", "to": "conversation", "tone": "teal", "route": "vertical" },
+    { "from": "conversation", "to": "outcomes", "tone": "green", "route": "orthogonal" },
+    { "from": "outcomes", "to": "report", "tone": "green", "route": "vertical" },
+    { "from": "report", "to": "decision", "tone": "green", "route": "vertical" }
+  ]
+}
