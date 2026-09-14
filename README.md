@@ -1,112 +1,107 @@
-# Tokito
+<p align="center">
+  <img src="apps/web/src/app/icon.svg" alt="Tokito logo" width="96" height="96" />
+</p>
 
-Google Forms, but people answer your questions over a phone call. Product brief: [docs/idea.md](docs/idea.md). Build plan: [docs/phases/README.md](docs/phases/README.md).
+<h1 align="center">Tokito</h1>
 
-## Development
+<p align="center"><strong>Google Forms, but people answer over a phone call.</strong></p>
+
+<p align="center">Tokito helps organizers turn a feedback goal and contact list into guided conversations, traceable findings, and evidence-backed next steps.</p>
+
+<!-- README-HACK:NEEDS-OWNER key="demo-video" instruction="Add the final public two-minute demo video URL here." -->
+<!-- README-HACK:NEEDS-OWNER key="live-demo" instruction="Add the public Tokito deployment URL here." -->
+
+<p align="center"><a href="https://github.com/vimzh/tokito">GitHub repository</a></p>
+
+## Why Tokito
+
+Forms are easy to send and easy to ignore. Society organizers still end up chasing members one by one, helping people through unclear questions, and manually combining partial answers into something useful.
+
+Tokito turns that follow-up work into a campaign. The organizer explains what they need to learn, reviews the questions, imports the people to contact, and keeps control over when outreach starts. Respondents can answer naturally, ask for clarification, decline a question, request a callback, or opt out. Tokito keeps those outcomes visible instead of filling the gaps with guesses.
+
+## What Tokito does
+
+1. **Starts from the goal.** The organizer describes the decision or feedback they need, then reviews and edits four AI-drafted open, rating, or choice questions.
+2. **Checks the contact list.** Tokito imports Excel or CSV files with `name` and `phone` columns, normalizes phone numbers, and surfaces invalid, duplicate, excluded, and opted-out rows before outreach.
+3. **Runs the conversation.** A built-in text simulator provides a credential-free demo path. With CALL-E configured, the scheduler can place calls within campaign limits, retry missed calls, and ingest transcripts and structured answers.
+4. **Preserves what happened.** Answer states such as skipped, declined, unknown, and not asked remain explicit. Callback requests and opt-outs flow into the campaign state.
+5. **Builds a report that can be checked.** Per-question analyst agents feed a synthesis agent, then a reviewer removes unsupported findings. Quotes link back to the stored call and answer.
+6. **Works across the team’s tools.** The web dashboard and Discord bot use the same API. Google Sheets can supply contacts and receive results, Google Calendar can track callbacks, and Notion can receive a published report.
+
+<!-- README-HACK:GRAPH
+type: product-flow
+brief: Show an organizer describing a feedback goal, reviewing drafted questions, importing a validated contact list, testing or starting calls, respondents answering or declining, and the organizer receiving a traceable report. Mark organizer confirmation before outreach and keep missing answers visible.
+placement: after "What Tokito does"
+-->
+
+## Built for evidence, not polished guesses
+
+Tokito separates deterministic facts from generated interpretation. Participation counts and answer status totals come from SQLite. Report agents receive evidence identifiers, generated citations are resolved in code, and unsupported items can be removed before the report is stored.
+
+The current suite passes **75 tests** across the API and Discord bot. It covers contact validation, idempotent webhooks, retry limits, opt-outs, callbacks, exports, report citations, integration failures, Discord confirmations, and the shared API contract. Synthetic end-to-end evaluations also exercise dynamic follow-up questions, refusals, screening, callbacks, opt-outs, and questions that the evidence cannot answer.
+
+## How it is built
+
+Tokito is a Bun workspace with three applications:
+
+- **Next.js 16 and React 19** provide the authenticated campaign dashboard.
+- **Hono on Bun** owns campaigns, scheduling, integrations, reporting, and a local SQLite database accessed through Drizzle ORM.
+- **discord.js and Strands Agents** provide slash commands and a conversational Discord agent, with confirmation buttons before state-changing actions.
+
+The API builds a campaign-specific task and result schema for CALL-E. Terminal call events update transcripts and answers, then trigger connected-app work such as Sheets sync and Calendar callback updates. The dashboard and Discord bot read the same stored state. OpenAI models, orchestrated through Strands, handle question drafting, simulated conversations, report analysis, synthesis, review, and report Q&A.
+
+<!-- README-HACK:GRAPH
+type: architecture
+brief: Show the Next.js dashboard and Discord bot calling one Hono API; the API using SQLite through Drizzle, OpenAI through Strands, and CALL-E for calls; CALL-E returning webhooks; and the API syncing Google Sheets, Google Calendar, and Notion. Distinguish tested local/fake-network paths from external services that still need a live credentialed run.
+placement: after "How it is built"
+-->
+
+## What works today
+
+The web, API, Discord command handling, text-call simulation, exports, report pipeline, CALL-E adapter, and Google/Notion integration paths are implemented. The external paths have automated coverage against fake providers and networks.
+
+No live CALL-E call, Discord server session, Google account, or Notion account has been exercised in the recorded evaluation. The dashboard currently uses one shared demo login rather than per-organizer accounts. Tokito stores transcripts, not call audio, and region-specific consent requirements must be confirmed before real outreach.
+
+## Built with
+
+Bun, TypeScript, Next.js, React, Hono, SQLite, Drizzle ORM, Strands Agents SDK, OpenAI, CALL-E, Discord, Google Sheets, Google Calendar, and Notion.
+
+## Run locally
+
+Requires [Bun](https://bun.com/docs/installation).
 
 ```bash
 bun run setup
 bun run dev
 ```
 
-`bun run setup` installs dependencies, creates the env files, runs database migrations, and seeds three draft campaigns.
+Open the web app at <http://localhost:3000>. The API runs at <http://localhost:3002>.
 
-- Web (Next.js): http://localhost:3000
-- API (Hono): http://localhost:3002
+`bun run setup` installs dependencies, creates local environment files, applies SQLite migrations, and seeds three draft campaigns. AI drafting and the external services require their corresponding credentials, but the core campaign UI and seeded data can run locally without them.
 
-Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. Tests: `cd apps/api && bun test` and `cd apps/discord && bun test`.
+Run the automated checks with:
 
-## Apps
+```bash
+bun run lint
+bun run typecheck
+bun run build
+cd apps/api && bun test
+cd ../discord && bun test
+```
 
-| App | Path | Notes |
-|---|---|---|
-| Web | `apps/web` | Next.js 16 app with shadcn/ui. Server components and server actions call the API through a typed Hono RPC client in `src/lib/api.ts`. |
-| API | `apps/api` | Hono on Bun with SQLite through `bun:sqlite` and Drizzle. Schema in `src/db/schema.ts`, routes in `src/routes`, logic in `src/services`, calling in `src/calls`, reports in `src/reports`. |
-| Discord bot | `apps/discord` | discord.js bot with `/tokito` slash commands and a mention-driven Strands agent whose tools call the API. Run with `cd apps/discord && bun run dev:bot` after `bun run register`; it exits at once when `DISCORD_TOKEN` is unset. |
+For the prepared demo campaign and text simulations:
 
-### Environment
+```bash
+cd apps/api
+bun run db:demo
+```
 
-`apps/web/.env.local` (copied from `.env.example`):
+See the [two-minute demo script](docs/demo.md), [system and reliability brief](docs/brief.md), and [evaluation record](docs/evaluation.md) for the intended walkthrough and its verified boundaries.
 
-| Variable | Purpose |
-|---|---|
-| `AUTH_SECRET` | Auth.js session secret. Generate with `bunx auth secret`. |
-| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Optional Google OAuth web client. |
-| `API_URL` | Base URL of the API, default `http://localhost:3002`. |
-| `API_PUBLIC_URL` | API base the browser can reach, used for the Connect links; defaults to `API_URL`. |
-| `API_TOKEN` | Same value as the API's `API_TOKEN` when that is set. |
+## What's next
 
-`apps/discord/.env` (copy from `.env.example`): `DISCORD_TOKEN`, `DISCORD_APP_ID`, optional `DISCORD_GUILD_ID` for instant command registration, `API_URL`, `DASHBOARD_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL`.
-
-`apps/api/.env` (copied from `.env.example`):
-
-| Variable | Purpose |
-|---|---|
-| `DB_FILE_NAME` | SQLite file, default `local.db`. |
-| `PORT` | API port, default `3002`. |
-| `WEB_ORIGIN` | Origin allowed by CORS, default `http://localhost:3000`. |
-| `OPENAI_API_KEY` | OpenAI key used by the Strands Agents SDK for question drafting. Without it, drafting returns a clear "not configured" error. |
-| `OPENAI_MODEL` | OpenAI model id, default `gpt-5.5`. |
-| `API_TOKEN` | When set, every `/api` route except health, webhooks, and OAuth redirects requires `Authorization: Bearer`. |
-| `TOKEN_ENCRYPTION_KEY` | Encrypts stored Google and Notion tokens (AES-256-GCM). |
-| `CALLE_API_KEY` | CALL-E (heycall-e.com) API key for real phone calls. Without it, outreach cannot start. |
-| `CALLE_BASE_URL` | CALL-E API base URL, default `https://api.heycall-e.com`. |
-| `CALLE_WEBHOOK_URL` | Public URL of this API's `/api/webhooks/calle` endpoint, sent with each call so CALL-E can post terminal events. Polling covers missed events. |
-| `OUTREACH_TICK_SECONDS` | How often the scheduler dials and polls, default 30. |
-| `API_PUBLIC_URL` | Base URL of this API as the browser and OAuth providers reach it, default `http://localhost:3002`. Redirect URIs are `<API_PUBLIC_URL>/api/connections/google/callback` and `…/notion/callback`. |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth web client for Sheets and Calendar. |
-| `NOTION_CLIENT_ID`, `NOTION_CLIENT_SECRET` | Notion public integration for publishing reports. |
-
-### API routes
-
-| Method | Path | Purpose |
-|---|---|---|
-| `GET` | `/api/health` | Liveness check. |
-| `GET` | `/api/campaigns` | List campaigns with question counts. |
-| `POST` | `/api/campaigns` | Create a draft campaign, optionally with questions. |
-| `GET` | `/api/campaigns/:id` | Campaign with ordered questions. |
-| `PATCH` | `/api/campaigns/:id` | Update name, goal, context, topics, or conversation mode. |
-| `PUT` | `/api/campaigns/:id/questions` | Replace the ordered question list (text, type, options, required). |
-| `POST` | `/api/campaigns/:id/questions/draft` | Draft questions with the AI agent; returns a proposal without saving. |
-| `GET` | `/api/campaigns/:id/contacts` | Contacts with status, problem, and last-call summary; `POST …/imports` accepts exact `name,phone` files, with `PATCH`/`DELETE …/:contactId` for row fixes. |
-| `GET` | `/api/campaigns/:id/task-preview` | The CALL-E task text and result schema for this campaign. |
-| `GET` | `/api/campaigns/:id/calls` | Calls with answers; `GET …/:callId` adds the transcript. `POST …/:callId/callback` schedules a callback. |
-| `POST` | `/api/campaigns/:id/simulations` | Start a text simulation; `POST …/:callId/turns` sends the person's line. |
-| `GET` | `/api/campaigns/:id/results` | Participation counts and per-question aggregates with every answer linked to its call. |
-| `GET` | `/api/campaigns/:id/export` | `kind=answers|calls`, `format=csv|xlsx`; the web app proxies it at `/survey/:id/export` behind the session. |
-| `GET` | `/api/campaigns/:id/report` | Latest report and version list (`?version=n`); `POST` generates a new version through the multi-agent pipeline (analysts per question → synthesis → reviewer); `POST …/ask` answers a question with citations; `GET …/questions` lists earlier questions. |
-| `GET` | `/api/campaigns/:id/outreach` | Readiness, reasons, and counts; `POST …/start`, `…/pause`, `…/stop`. |
-| `POST` | `/api/webhooks/calle` | CALL-E terminal events, idempotent by event id. |
-| `POST` | `/api/outreach/tick` | Run one scheduler pass by hand. |
-| `GET` | `/api/events` | Campaign event log across campaigns (`?after=<ms>`); `POST` records an activity entry from another surface, such as Discord. |
-| `GET` | `/api/connections` | Google and Notion connection status; `GET …/:provider/start` begins OAuth, `…/callback` completes it, `DELETE …/:provider` disconnects. |
-| `GET` | `/api/campaigns/:id/connections` | Per-campaign sheet, calendar, and Notion settings with last sync status; `PUT …/:kind`, `DELETE …/:kind`, `POST …/sheets/import`, `POST …/sheets/sync`, `POST …/notion/publish`. |
-| `GET` | `/api/opt-outs` | Opt-out list; `POST /api/opt-outs`, `POST /api/opt-outs/remove`. |
-| `GET` | `/api/settings` | Workspace calling defaults. |
-| `PUT` | `/api/settings` | Update workspace calling defaults. |
-| `DELETE` | `/api/campaigns/:id` | Delete a campaign and its questions. |
-| `POST` | `/api/campaigns/:id/purge` | Delete collected data (contacts, imports, calls, transcripts, answers); keeps the campaign, questions, reports, and log. |
-
-Validation errors return `400` with `{ error: { message, issues } }`; unknown ids return `404`.
-
-Database commands in `apps/api`: `bun run db:generate` (new migration from schema changes), `bun run db:migrate`, `bun run db:seed`, `bun run db:studio`.
-
-## Running for real
-
-- Each app has `bun run start` (API and Discord) or `bun run build && bun run start` (web). Run them as three processes on one machine; the API needs a persistent disk for the SQLite file and a public URL for CALL-E webhooks and OAuth callbacks (`API_PUBLIC_URL`).
-- Set `API_TOKEN` on the API and give the same value to the web app and the bot, `TOKEN_ENCRYPTION_KEY` for stored Google and Notion tokens, and a retention period on the Settings page when collected data should not be kept.
-- Health: `GET /api/health`. Requests are logged to stdout. The scheduler runs inside the API process every `OUTREACH_TICK_SECONDS`.
-- Demo data: `cd apps/api && bun run db:demo` seeds a finished campaign with two text simulations. Evaluation: `bun run scripts/eval.ts` (see `docs/evaluation/`).
-- Documents: [system and reliability brief](docs/brief.md), [evaluation record](docs/evaluation.md), [demo script](docs/demo.md), [decisions](docs/decisions.md).
-
-## Demo login
-
-Click **Login** on the landing page and use `demo@theategmail.com` / `demo1234`.
-The dialog displays these public demo credentials. Auth.js stores the one-day JWT
-session in an HTTP-only cookie; workspace routes require a session. This is a shared demo
-account, not a private account system. With the frontend running, verify the flow using
-`python3 scripts/check-demo-auth.py http://localhost:3000`.
-
-## Optional Google OAuth
-
-Add a Google OAuth web client to `apps/web/.env.local` and register `http://localhost:3000/api/auth/callback/google` as the local authorized redirect URI in Google Cloud.
+- Run a consenting live CALL-E campaign and verify the full webhook path against real calls.
+- Exercise Discord, Google Sheets, Calendar, and Notion with real accounts and record the results.
+- Replace the shared demo login with per-organizer accounts and workspaces.
+- Test whether phone conversations improve useful response collection for the society use case instead of assuming they outperform forms.
+- Confirm regional consent, calling, retention, and data-handling requirements before broader outreach.
