@@ -3,12 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { ApiError, createCampaign, deleteCampaign, draftQuestions, purgeCampaign, replaceQuestions, updateCampaign, type DraftResult, type ReplaceQuestionsInput } from "@/lib/api";
+import { ApiError, createCampaign, deleteCampaign, draftQuestions, purgeCampaign, redraftQuestion, replaceQuestions, updateCampaign, type DraftResult, type RedraftQuestionInput, type RedraftQuestionResult, type ReplaceQuestionsInput } from "@/lib/api";
 import { splitLines } from "@/lib/format";
 import { campaignContent } from "@/data/campaign";
 
 export type ActionState = { error?: string };
 export type DraftState = { draft?: DraftResult; error?: string };
+export type RedraftState = { draft?: RedraftQuestionResult; error?: string };
 
 async function requireSession() {
   if (!(await auth())?.user) throw new Error("Unauthorized");
@@ -111,6 +112,15 @@ export async function draftQuestionsAction(id: string): Promise<DraftState> {
   await requireSession();
   try {
     return { draft: await draftQuestions(id) };
+  } catch (error) {
+    return errorState(error);
+  }
+}
+
+export async function redraftQuestionAction(id: string, input: RedraftQuestionInput): Promise<RedraftState> {
+  await requireSession();
+  try {
+    return { draft: await redraftQuestion(id, input) };
   } catch (error) {
     return errorState(error);
   }

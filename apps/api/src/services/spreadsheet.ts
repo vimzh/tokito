@@ -9,6 +9,12 @@ export class SpreadsheetError extends Error {
   }
 }
 
+export function requireContactColumns(headers: string[]) {
+  if (headers.length !== 2 || headers[0]?.toLowerCase() !== 'name' || headers[1]?.toLowerCase() !== 'phone') {
+    throw new SpreadsheetError('Use exactly two columns in this order: name, phone.')
+  }
+}
+
 function cellToString(value: unknown): string {
   if (value === null || value === undefined) return ''
   if (typeof value === 'number') return Number.isInteger(value) ? String(value) : value.toString()
@@ -35,14 +41,4 @@ export function parseSpreadsheet(data: ArrayBuffer | Uint8Array): { headers: str
   if (rows.length === 0) throw new SpreadsheetError('The file has headings but no rows.')
   if (rows.length > MAX_IMPORT_ROWS) throw new SpreadsheetError(`The file has ${rows.length} rows; the limit is ${MAX_IMPORT_ROWS}.`)
   return { headers, rows }
-}
-
-const nameHeader = /\b(name|full ?name|first ?name|contact)\b/i
-const phoneHeader = /(phone|mobile|cell|tel|number|whatsapp)/i
-
-export function suggestMapping(headers: string[]) {
-  const phoneColumn = headers.findIndex((header) => phoneHeader.test(header))
-  const nameColumn = headers.findIndex((header, index) => index !== phoneColumn && nameHeader.test(header))
-  const contextColumns = headers.map((_, index) => index).filter((index) => index !== phoneColumn && index !== nameColumn)
-  return { nameColumn: nameColumn === -1 ? null : nameColumn, phoneColumn: phoneColumn === -1 ? null : phoneColumn, contextColumns }
 }

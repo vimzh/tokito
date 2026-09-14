@@ -73,7 +73,6 @@ function ConnectionCard({ campaignId, kind, row, account, hasReport }: { campaig
         {pending && <p className="text-sm text-muted-foreground">{copy.working}</p>}
         {result.error && <p role="alert" className="text-sm text-destructive">{result.error}</p>}
         {result.message && <p className="text-sm text-muted-foreground">{result.message}</p>}
-        {result.preview && <p className="text-sm text-muted-foreground">{copy.imported(result.preview.rowCount)}</p>}
         {row && (
           <p className="text-xs text-muted-foreground">
             {row.lastSyncAt ? copy.lastAt(formatDateTime(row.lastSyncAt)) : copy.never}

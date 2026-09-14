@@ -57,12 +57,11 @@ export function statusMessage(campaign: Campaign, outreach: OutreachStatus, resu
   return lines.join('\n')
 }
 
-export function importMessage(summary: ImportSummary, mapping: { nameColumn: number | null; phoneColumn: number; contextColumns: number[] }, headers: string[]) {
+export function importMessage(summary: ImportSummary) {
   const c = summary.counts
   return [
     `Imported **${summary.fileName}**: ${summary.total} rows.`,
     `Ready to call ${c.ready} · Invalid ${c.invalid} · Duplicates ${c.duplicate} · Opted out ${c.opted_out}`,
-    `Columns used: phone = "${headers[mapping.phoneColumn]}"${mapping.nameColumn === null ? '' : `, name = "${headers[mapping.nameColumn]}"`}${mapping.contextColumns.length ? `, context = ${mapping.contextColumns.map((i) => `"${headers[i]}"`).join(', ')}` : ''}.`,
     c.invalid + c.duplicate + c.opted_out > 0 ? 'Rows with problems are listed on the Contacts tab of the dashboard.' : '',
   ].filter(Boolean).join('\n')
 }

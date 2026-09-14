@@ -37,7 +37,7 @@ beforeEach(() => {
     ],
   }).questions.map((q) => q.id)
   const preview = createImport(db, campaignId, 'c.csv', new TextEncoder().encode('Name,Phone\nAsha,9876543210\nRavi,9876543211\nMeera,9876543212\nDev,9876543213\n'))
-  commitImport(db, campaignId, preview.id, { nameColumn: 0, phoneColumn: 1, contextColumns: [] })
+  commitImport(db, campaignId, preview.id)
   contactIds = listContacts(db, campaignId).contacts.map((c) => c.id)
   const t = Date.UTC(2026, 8, 14, 7, 0)
   // Asha: an early completed call, then a later completed callback: only the latest counts.

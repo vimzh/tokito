@@ -19,7 +19,7 @@ beforeEach(() => {
   campaignId = createCampaign(db, { name: 'Menu', goal: 'What do customers think of the new menu?', questionSource: 'manual', conversationMode: 'dynamic', questions: ['x'] }).id
   const qids = replaceQuestions(db, campaignId, { questions: [{ text: 'What did you think of the prices?', type: 'open', options: [], required: true, source: 'manual' }, { text: 'Rate the portions', type: 'rating', options: [], required: true, source: 'manual' }] }).questions.map((q) => q.id)
   const preview = createImport(db, campaignId, 'c.csv', new TextEncoder().encode('Name,Phone\nAsha,9876543210\nRavi,9876543211\n'))
-  commitImport(db, campaignId, preview.id, { nameColumn: 0, phoneColumn: 1, contextColumns: [] })
+  commitImport(db, campaignId, preview.id)
   const [asha, ravi] = listContacts(db, campaignId).contacts
   const t = Date.UTC(2026, 8, 14, 7, 0)
   const add = (contactId: string, rows: [status: 'answered' | 'declined', value: string | null, num?: number][]) => {

@@ -5,8 +5,8 @@ Tokito is Google Forms for phone calls. An organizer describes what they want to
 ## What the organizer asks for and what the agent completes
 
 1. **Describe the goal** on the dashboard or in Discord. Tokito creates a draft campaign.
-2. **Draft questions.** A Strands agent (OpenAI model) proposes 4–8 questions with types (open, rating, choice), including a screening question when the goal assumes an experience. Nothing is saved until the organizer accepts; the editor allows edits, reordering, and per-question options.
-3. **Upload contacts** from Excel, CSV, or a Google Sheet. The organizer confirms the name and phone columns; every row is kept with a status (ready, invalid, duplicate, opted out) and a reason.
+2. **Draft questions.** A Strands agent (OpenAI model) proposes four questions with types (open, rating, choice), including a screening question when the goal assumes an experience. Nothing is saved until the organizer accepts; each proposal can be regenerated or deleted, and the editor allows edits, reordering, and per-question options.
+3. **Upload contacts** from Excel, CSV, or a Google Sheet using exactly two columns in this order: `name`, `phone`. Every row is kept with a status (ready, invalid, duplicate, opted out) and a reason.
 4. **Review the call script** and calling preferences (language, hours, time zone, attempts, budget, dynamic or fixed conversation, clarifications).
 5. **Start calling.** A scheduler dials ready contacts inside calling hours through CALL-E, retries within limits, and handles no-answer, decline, callback, and opt-out.
 6. **Read results**: per-contact status, transcripts beside answers, per-question aggregates, exports.

@@ -2,33 +2,42 @@ import { z } from 'zod'
 import { languages, questionTypes, type Campaign } from '../db/schema'
 import { createStructuredRun, type StructuredRun } from './agent'
 
-export const DRAFT_PROMPT_VERSION = 'draft-questions-v1'
+export const DRAFT_PROMPT_VERSION = 'draft-questions-v2'
+export const REDRAFT_PROMPT_VERSION = 'redraft-question-v1'
 
-export const draftOutputSchema = z.object({
-  questions: z
-    .array(
-      z.object({
-        text: z.string().describe('The question as it will be spoken on the phone.'),
-        type: z.enum(questionTypes).describe('open for free answers, rating for a 1 to 5 score, choice for a short list of options.'),
-        options: z.array(z.string()).describe('Answer options for choice questions. Empty for other types.'),
-        required: z.boolean().describe('False for optional wrap-up or nice-to-have questions.'),
-        purpose: z.string().describe('One sentence on why this question serves the goal.'),
-      }),
-    )
-    .min(4)
-    .max(8),
+export const draftedQuestionSchema = z.object({
+  text: z.string().describe('The question as it will be spoken on the phone.'),
+  type: z.enum(questionTypes).describe('open for free answers, rating for a 1 to 5 score, choice for a short list of options.'),
+  options: z.array(z.string()).describe('Answer options for choice questions. Empty for other types.'),
+  required: z.boolean().describe('False for optional wrap-up or nice-to-have questions.'),
+  purpose: z.string().describe('One sentence on why this question serves the goal.'),
 })
+export const draftOutputSchema = z.object({ questions: z.array(draftedQuestionSchema).length(4) })
+export const redraftInputSchema = z.object({
+  currentQuestion: z.object({
+    text: z.string().trim().min(1).max(500),
+    type: z.enum(questionTypes),
+    options: z.array(z.string().trim().min(1).max(120)).max(8),
+    required: z.boolean(),
+    purpose: z.string().trim().min(1).max(500),
+  }),
+  otherQuestions: z.array(z.string().trim().min(1).max(500)).max(7),
+})
+const redraftOutputSchema = z.object({ question: draftedQuestionSchema })
 
 export type DraftedQuestion = z.infer<typeof draftOutputSchema>['questions'][number]
 export type DraftInput = Pick<Campaign, 'goal' | 'context' | 'additionalTopics' | 'conversationMode' | 'language'>
 export type DraftResult = { questions: DraftedQuestion[]; model: string; promptVersion: string }
 export type Drafter = (input: DraftInput) => Promise<DraftResult>
+export type RedraftInput = DraftInput & z.infer<typeof redraftInputSchema>
+export type RedraftResult = { question: DraftedQuestion; model: string; promptVersion: string }
+export type Redrafter = (input: RedraftInput) => Promise<RedraftResult>
 
 const languageNames: Record<(typeof languages)[number], string> = { en: 'English', hi: 'Hindi' }
 
 export const draftInstructions = `You write short phone questionnaires for Tokito, a service that calls people on behalf of an organizer to collect feedback and information.
 
-Draft 4 to 8 questions from the organizer's goal and background. Rules:
+Draft exactly four questions from the organizer's goal and background. Rules:
 - Write in plain spoken language that sounds natural when read aloud on a phone call. One idea per question.
 - If the goal assumes an experience (tried a new menu, attended an event, used a feature), make the first question a screening question that checks whether the person actually had that experience, so people who did not are not asked as if they had.
 - Never lead. Do not presume an answer, suggest a verdict, or bundle praise or criticism into the question.
@@ -52,13 +61,28 @@ export function buildDraftPrompt(input: DraftInput) {
 export function createDrafter(run: StructuredRun): Drafter {
   return async (input) => {
     const { output, model } = await run({ system: draftInstructions, prompt: buildDraftPrompt(input), schema: draftOutputSchema })
-    const questions = output.questions.map((question) => ({
-      ...question,
-      text: question.text.trim(),
-      options: question.type === 'choice' ? question.options.map((option) => option.trim()).filter(Boolean) : [],
-    }))
+    const questions = output.questions.map(normalizeQuestion)
     return { questions, model, promptVersion: DRAFT_PROMPT_VERSION }
   }
 }
 
+const redraftInstructions = `You replace one proposed question in a short phone questionnaire for Tokito.
+
+Return one replacement that serves the organizer's goal and the same purpose as the current question. It must sound natural when spoken, must not duplicate the other questions, and must follow the requested language and conversation mode. Keep a screening or final open invitation in that role when the current question has it.`
+
+const normalizeQuestion = (question: DraftedQuestion): DraftedQuestion => ({
+  ...question,
+  text: question.text.trim(),
+  options: question.type === 'choice' ? question.options.map((option) => option.trim()).filter(Boolean) : [],
+})
+
+export function createRedrafter(run: StructuredRun): Redrafter {
+  return async (input) => {
+    const prompt = `${buildDraftPrompt(input)}\n\nCurrent question to replace:\n${JSON.stringify(input.currentQuestion)}\n\nOther questions:\n${input.otherQuestions.join('\n')}`
+    const { output, model } = await run({ system: redraftInstructions, prompt, schema: redraftOutputSchema })
+    return { question: normalizeQuestion(output.question), model, promptVersion: REDRAFT_PROMPT_VERSION }
+  }
+}
+
 export const defaultDrafter = (): Drafter => createDrafter(createStructuredRun())
+export const defaultRedrafter = (): Redrafter => createRedrafter(createStructuredRun())

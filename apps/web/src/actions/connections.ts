@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import { ApiError, disconnectProvider, importFromSheet, publishToNotion, removeCampaignConnection, setCampaignConnection, syncToSheet, type CampaignConnectionKind, type ConnectionProvider, type ImportPreview } from "@/lib/api";
+import { ApiError, disconnectProvider, importFromSheet, publishToNotion, removeCampaignConnection, setCampaignConnection, syncToSheet, type CampaignConnectionKind, type ConnectionProvider } from "@/lib/api";
 import { campaignContent } from "@/data/campaign";
 
-export type ConnectionState = { error?: string; message?: string; preview?: ImportPreview };
+export type ConnectionState = { error?: string; message?: string };
 
 async function requireSession() {
   if (!(await auth())?.user) throw new Error("Unauthorized");
@@ -55,9 +55,9 @@ export async function runConnectionAction(id: string, command: "sheet_import" | 
   await requireSession();
   try {
     if (command === "sheet_import") {
-      const preview = await importFromSheet(id);
+      const summary = await importFromSheet(id);
       revalidatePath(`/survey/${id}`);
-      return { preview };
+      return { message: campaignContent.connections.imported(summary.total) };
     }
     if (command === "sheet_sync") {
       const result = await syncToSheet(id);

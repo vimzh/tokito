@@ -47,7 +47,7 @@ The society experience is the original motivation. The restaurant scenario below
 ## How it works
 
 1. **Describe what you want input on.** Explain the change or decision in your own words and add useful background. Tokito drafts relevant questions for you to review or edit; writing your own questions is optional.
-2. **Upload the contact list.** Import an Excel file containing names and phone numbers. Review missing or invalid numbers and duplicates before starting. Extra columns can provide relevant context.
+2. **Upload the contact list.** Import an Excel or CSV file with exactly two columns in this order: `name`, `phone`. Review missing or invalid numbers and duplicates before starting.
 3. **Review the calls.** Check who will be called, what they will be asked, the language, calling hours, maximum call length, and limits on repeat attempts.
 4. **Start from Discord or the dashboard.** The AI assistant calls the selected people and explains who it is calling for and why.
 5. **Let people answer naturally.** The assistant asks the questions, repeats or explains them using the campaign organizer’s supplied context, and asks follow-up questions to understand reasons, examples, and details that matter to the campaign’s goal.
@@ -105,7 +105,7 @@ This is an illustrative scenario, not a claim that these calls or findings alrea
 - Generate a questionnaire from a plain-language request and supporting context.
 - Let the campaign organizer review, edit, add, or remove questions before outreach.
 - Support direct answers such as ratings or choices as well as open questions.
-- Import Excel files and let the organizer confirm which columns contain names and phone numbers.
+- Import Excel or CSV files that follow the fixed `name`, `phone` column order.
 - Show contact problems clearly before calling.
 - Let the organizer choose whether clarification questions are allowed and keep them within the questionnaire’s purpose.
 

@@ -88,7 +88,7 @@ export function SurveyDetails({ campaign, contacts, calls, preview, outreach, re
         </TabsContent>
         <TabsContent value="responses" className="space-y-6">
           <div><h2 className="text-xl">{copy.calls.title}</h2><p className="mt-2 text-sm text-muted-foreground">{copy.calls.description}</p></div>
-          <CallsList campaignId={campaign.id} calls={calls} />
+          <CallsList campaignId={campaign.id} calls={calls.filter((call) => call.status === "completed")} />
           <ExportButtons campaignId={campaign.id} />
         </TabsContent>
         <TabsContent value="report" className="space-y-8">

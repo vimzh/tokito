@@ -78,22 +78,18 @@ export function buildTools(ctx: ToolContext) {
     }),
     tool({
       name: 'import_contacts',
-      description: 'Import the spreadsheet the user attached to their message into a campaign. Uses the detected name and phone columns unless phoneColumn/nameColumn (zero-based) are given.',
-      inputSchema: z.object({ campaign: z.string(), attachmentName: z.string().optional(), phoneColumn: z.number().int().min(0).optional(), nameColumn: z.number().int().min(0).nullable().optional() }),
-      callback: async ({ campaign: ref, attachmentName, phoneColumn, nameColumn }) => {
+      description: 'Import the spreadsheet attached to the message. It must contain exactly two columns in this order: name, phone.',
+      inputSchema: z.object({ campaign: z.string(), attachmentName: z.string().optional() }),
+      callback: async ({ campaign: ref, attachmentName }) => {
         const summary = await resolveCampaign(api, ref)
         const attachment = ctx.attachments.find((a) => (attachmentName ? a.name === attachmentName : /\.(xlsx|xls|csv)$/i.test(a.name))) ?? ctx.attachments[0]
         if (!attachment) return 'No spreadsheet was attached to the message. Ask the user to attach an .xlsx, .xls, or .csv file.'
         const response = await (ctx.fetchImpl ?? fetch)(attachment.url)
         if (!response.ok) return `Could not download ${attachment.name} (${response.status}).`
         const file = new File([await response.arrayBuffer()], attachment.name)
-        const preview = await api.uploadContacts(summary.id, file)
-        const chosenPhone = phoneColumn ?? preview.suggestedMapping.phoneColumn
-        if (chosenPhone === null) return `I could not tell which column holds phone numbers in ${attachment.name}. Columns: ${preview.headers.map((h, i) => `${i}: ${h}`).join(', ')}. Ask the user which one, then call import_contacts again with phoneColumn.`
-        const mapping = { nameColumn: nameColumn === undefined ? preview.suggestedMapping.nameColumn : nameColumn, phoneColumn: chosenPhone, contextColumns: preview.suggestedMapping.contextColumns.filter((i) => i !== chosenPhone && i !== nameColumn) }
-        const result = await api.commitImport(summary.id, preview.id, mapping)
+        const result = await api.uploadContacts(summary.id, file)
         await api.recordActivity({ campaignId: summary.id, type: 'discord.action', payload: { action: 'import_contacts', file: attachment.name, actor: { source: 'discord', userId: ctx.userId, username: ctx.username } } }).catch(() => undefined)
-        return importMessage(result, mapping, preview.headers)
+        return importMessage(result)
       },
     }),
     tool({

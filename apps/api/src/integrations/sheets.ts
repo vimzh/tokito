@@ -1,6 +1,6 @@
 import type { Db } from '../db'
 import { buildExportRows } from '../calls/export'
-import { createImportFromRows } from '../services/contacts'
+import { commitImport, createImportFromRows } from '../services/contacts'
 import { accessToken } from './connections'
 import { getCampaignConnection, recordSync } from './campaign-connections'
 import { requestJson } from './http'
@@ -15,7 +15,7 @@ async function firstTabTitle(token: string, spreadsheetId: string) {
   return meta.sheets?.[0]?.properties?.title ?? 'Sheet1'
 }
 
-// Reads the first tab of the configured sheet and turns it into a pending import (mapping reviewed as usual).
+// Reads and imports the first tab using the same fixed name, phone column contract as file uploads.
 export async function importContactsFromSheet(db: Db, campaignId: string) {
   const connection = getCampaignConnection(db, campaignId, 'sheets')
   if (!connection?.config.spreadsheetId) throw new Error('No Google Sheet is configured for this campaign.')
@@ -26,8 +26,9 @@ export async function importContactsFromSheet(db: Db, campaignId: string) {
     const data = await requestJson<{ values?: string[][] }>('google', `${BASE}/${spreadsheetId}/values/${encodeURIComponent(tab)}?majorDimension=ROWS`, { headers: headers(token) })
     const values = (data.values ?? []).map((row) => row.map((cell) => String(cell ?? '')))
     const preview = createImportFromRows(db, campaignId, `${tab} (Google Sheet)`, values)
-    recordSync(db, campaignId, 'sheets', { ok: true, externalUrl: `https://docs.google.com/spreadsheets/d/${spreadsheetId}`, detail: { action: 'import', rows: preview.rowCount } })
-    return preview
+    const summary = commitImport(db, campaignId, preview.id)
+    recordSync(db, campaignId, 'sheets', { ok: true, externalUrl: `https://docs.google.com/spreadsheets/d/${spreadsheetId}`, detail: { action: 'import', rows: summary.total } })
+    return summary
   } catch (error) {
     recordSync(db, campaignId, 'sheets', { ok: false, error: error instanceof Error ? error.message : String(error), detail: { action: 'import' } })
     throw error

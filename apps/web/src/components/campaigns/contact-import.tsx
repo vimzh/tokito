@@ -7,28 +7,19 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ImportMapping } from "@/components/campaigns/import-mapping";
 import { uploadContactsAction, type UploadState } from "@/actions/contacts";
 import { campaignContent } from "@/data/campaign";
-import type { ImportPreview, ImportSummary } from "@/lib/api";
+import type { ImportSummary } from "@/lib/api";
 
 const copy = campaignContent.contactList;
 
 export function ContactImport({ campaignId }: { campaignId: string }) {
-  const [preview, setPreview] = useState<ImportPreview>();
   const [summary, setSummary] = useState<ImportSummary>();
   const [state, formAction, pending] = useActionState(async (previous: UploadState, formData: FormData) => {
     const result = await uploadContactsAction(campaignId, previous, formData);
-    if (result.preview) {
-      setSummary(undefined);
-      setPreview(result.preview);
-    }
+    if (result.summary) setSummary(result.summary);
     return result;
   }, {});
-
-  if (preview) {
-    return <ImportMapping campaignId={campaignId} preview={preview} onCancel={() => setPreview(undefined)} onDone={(result) => { setPreview(undefined); setSummary(result); }} />;
-  }
 
   return (
     <div className="space-y-4">
@@ -36,6 +27,7 @@ export function ContactImport({ campaignId }: { campaignId: string }) {
         <div className="space-y-2">
           <Label htmlFor="contacts-file">{copy.file}</Label>
           <Input id="contacts-file" name="file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required className="w-72" />
+          <p className="text-sm text-muted-foreground">{copy.format}</p>
         </div>
         <Button type="submit" disabled={pending}><Upload aria-hidden="true" />{pending ? copy.uploading : copy.upload}</Button>
         {state.error && <p role="alert" className="basis-full text-sm text-destructive">{state.error}</p>}
@@ -59,4 +51,3 @@ export function ContactImport({ campaignId }: { campaignId: string }) {
     </div>
   );
 }
-

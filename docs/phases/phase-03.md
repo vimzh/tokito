@@ -4,11 +4,11 @@ Status: complete, September 13, 2026.
 
 ## Outcome
 
-An organizer uploads an Excel or CSV file, confirms which columns hold names and phone numbers, keeps extra columns as per-person context, and leaves with a reviewed call list where every problem (missing number, invalid number, duplicate, opted out) is visible before anything is called. Re-uploading the same file never doubles anyone. A workspace opt-out list blocks numbers everywhere.
+An organizer uploads an Excel or CSV file with exactly two columns in the fixed order `name`, `phone`, and leaves with a reviewed call list where every problem (missing number, invalid number, duplicate, opted out) is visible before anything is called. Re-uploading the same file never doubles anyone. A workspace opt-out list blocks numbers everywhere.
 
 ## Design
 
-- **Two-step import.** Step 1 uploads the file; the API parses it with SheetJS, stores headers and rows on a `contact_imports` row, and returns a preview with a suggested column mapping. Step 2 commits the mapping; the API validates every row and creates `contacts`. Nothing is created until the organizer confirms the mapping.
+- **Rigid import.** Upload accepts only the exact `name`, `phone` header and column order. The API parses the file with SheetJS, validates every row, stores the import, and creates contacts in one request.
 - **Every row becomes a contact row**, including bad ones, with a `status` and a `problem`, so the organizer sees exactly what was skipped and why. Statuses: `ready`, `invalid`, `duplicate`, `opted_out`, `excluded`. Problems: `missing_phone`, `invalid_phone`, `duplicate_in_file`, `duplicate_existing`, `opted_out`.
 - **Numbers** are normalized to E.164 with `libphonenumber-js`, using the campaign's default country (new `default_country` preference on campaigns and workspace settings, default `IN`).
 - **Opt-outs** live in a workspace-level `opt_outs` table keyed by E.164 phone. Commits and edits check it; adding an opt-out marks matching contacts in every campaign `opted_out`.
@@ -19,7 +19,7 @@ An organizer uploads an Excel or CSV file, confirms which columns hold names and
 1. Schema (migration 0002): `contact_imports`, `contacts`, `opt_outs`, and `default_country` on campaigns and workspace settings.
 2. API: upload, preview, commit, list with counts, update, delete, opt-out list/add/remove. Row cap of 5,000 per file.
 3. Tests: parse a CSV with blanks, malformed numbers, and repeats; commit; re-commit the same file; opt-out blocking; fixing a number.
-4. Web: Contacts tab on the campaign page with upload, mapping, summary, counts by status, filters and search, per-row edit, exclude, and delete. Default country joins the preference fields. Opt-out list on the Settings page.
+4. Web: Contacts tab on the campaign page with the fixed-format upload, summary, counts by status, filters and search, per-row edit, exclude, and delete. Default country joins the preference fields. Opt-out list on the Settings page.
 
 ## Acceptance checks
 
@@ -43,9 +43,9 @@ An organizer uploads an Excel or CSV file, confirms which columns hold names and
 | Check | Result |
 |---|---|
 | `bun run lint`, `bun run typecheck`, `bun run build` | Pass |
-| `bun test` in `apps/api` (19 tests, including CSV parsing, mapping suggestion, classification of blanks, malformed, and repeated rows, re-import, opt-out blocking through edits, fixing and excluding) | Pass |
+| `bun test` in `apps/api` (including fixed-column CSV parsing, rejection of swapped or extra columns, classification of blanks, malformed and repeated rows, re-import, opt-out blocking through edits, fixing and excluding) | Pass |
 | Live upload and commit of a 5-row CSV through the running API: 2 ready, 2 invalid, 1 duplicate, each with its problem | Pass |
 | HTTP session: campaign page shows the Contacts tab with the count and carries the contact rows; Settings shows the opt-out list and default country; empty campaign shows the empty note | Pass |
-| Browser-driven upload, mapping, edit, exclude, remove, and opt-out add or remove | Not run: needs a logged-in browser session |
+| Browser-driven upload, edit, exclude, remove, and opt-out add or remove | Not run: needs a logged-in browser session |
 
-**What the next phase should know.** `contacts.status = 'ready'` is the only state Phase 5 may dial. `contacts.context` is a flat string map keyed by the chosen column headings; the Phase 4 task builder can pass it to CALL-E as per-recipient context. The `campaign_events` log records each import with its counts.
+**What the next phase should know.** `contacts.status = 'ready'` is the only state Phase 5 may dial. The `campaign_events` log records each import with its counts.

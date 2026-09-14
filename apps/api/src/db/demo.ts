@@ -25,8 +25,8 @@ if (db.select({ id: campaigns.id }).from(campaigns).where(eq(campaigns.name, NAM
       { text: 'What would you like us to organize next?', type: 'open', options: [], required: false, source: 'manual' },
     ],
   }).questions
-  const preview = createImport(db, campaign.id, 'members.csv', new TextEncoder().encode('Name,Phone,Year\nAsha Verma,9876543210,2nd year\nRavi Menon,+91 98765 43211,3rd year\nMeera Iyer,9876543212,1st year\nDev Patel,,2nd year\nAsha Verma,09876543210,2nd year\n'))
-  commitImport(db, campaign.id, preview.id, { nameColumn: 0, phoneColumn: 1, contextColumns: [2] })
+  const preview = createImport(db, campaign.id, 'members.csv', new TextEncoder().encode('name,phone\nAsha Verma,9876543210\nRavi Menon,+91 98765 43211\nMeera Iyer,9876543212\nDev Patel,\nAsha Verma,09876543210\n'))
+  commitImport(db, campaign.id, preview.id)
   const [asha, ravi] = listContacts(db, campaign.id).contacts
   const now = Date.now()
   const sim = (contactId: string, personName: string, turns: [speaker: 'assistant' | 'person', text: string][], values: [status: 'answered' | 'skipped' | 'declined', value: string | null, num?: number, notes?: string][], summary: string) => {

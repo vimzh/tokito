@@ -27,8 +27,7 @@ function fakeApi() {
     if (url.pathname === '/api/campaigns/c1/outreach/start') return json({ id: 'c1', status: 'running' })
     if (url.pathname === '/api/campaigns/c1/outreach/pause') return json({ id: 'c1', status: 'paused' })
     if (url.pathname === '/api/campaigns/c1/questions' && method === 'PUT') return json({ id: 'c1', questions: (body as { questions: unknown[] }).questions })
-    if (url.pathname === '/api/campaigns/c1/contacts/imports' && method === 'POST') return json({ id: 'imp1', campaignId: 'c1', fileName: 'contacts.csv', headers: ['Name', 'Mobile', 'Visit'], preview: [], rowCount: 5, suggestedMapping: { nameColumn: 0, phoneColumn: 1, contextColumns: [2] }, mapping: null, committedAt: null }, 201)
-    if (url.pathname === '/api/campaigns/c1/contacts/imports/imp1/commit') return json({ importId: 'imp1', fileName: 'contacts.csv', total: 5, counts: { ready: 2, invalid: 2, duplicate: 1, opted_out: 0, excluded: 0 } })
+    if (url.pathname === '/api/campaigns/c1/contacts/imports' && method === 'POST') return json({ importId: 'imp1', fileName: 'contacts.csv', total: 5, counts: { ready: 2, invalid: 2, duplicate: 1, opted_out: 0, excluded: 0 } }, 201)
     if (url.pathname === '/api/settings' && method === 'GET') return json(settings)
     if (url.pathname === '/api/settings' && method === 'PUT') { settings = { ...settings, ...(body as object) }; return json(settings) }
     if (url.pathname === '/api/events' && method === 'GET') return json([
@@ -97,7 +96,7 @@ describe('agent tools', () => {
     const { api, fetchImpl, calls } = fakeApi()
     const attachmentFetch: FetchLike = async (input, init) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
-      if (url.startsWith('https://cdn.discord/')) return new Response('Name,Mobile,Visit\nAsha,9876543210,Tue\n')
+      if (url.startsWith('https://cdn.discord/')) return new Response('name,phone\nAsha,9876543210\n')
       return fetchImpl(input, init)
     }
     const context: ToolContext = { api, confirmations: new Confirmations(), userId: 'u1', username: 'asha', channelId: 'ch', attachments: [], fetchImpl: attachmentFetch, created: [], ...overrides }
@@ -108,12 +107,12 @@ describe('agent tools', () => {
     return found.invoke(input as never)
   }
 
-  test('import_contacts downloads the attachment, uploads it, commits the suggested mapping, and reports the same counts as the web', async () => {
+  test('import_contacts downloads and imports an exact name, phone attachment', async () => {
     const context = ctx({ attachments: [{ name: 'contacts.csv', url: 'https://cdn.discord/contacts.csv' }] }) as ToolContext & { calls: { path: string; body?: unknown }[] }
     const result = await invoke(context, 'import_contacts', { campaign: 'menu' })
     expect(String(result)).toContain('Ready to call 2 · Invalid 2 · Duplicates 1')
     expect(context.calls.find((c) => c.path === '/api/campaigns/c1/contacts/imports')?.body).toEqual({ file: 'contacts.csv' })
-    expect(context.calls.find((c) => c.path.endsWith('/commit'))?.body).toEqual({ nameColumn: 0, phoneColumn: 1, contextColumns: [2] })
+    expect(context.calls.some((c) => c.path.endsWith('/commit'))).toBe(false)
   })
 
   test('change_outreach and set_questions only create pending confirmations', async () => {
@@ -153,6 +152,6 @@ describe('notifications and formatting', () => {
     const parts = chunk(Array.from({ length: 300 }, (_, i) => `line ${i} ${'x'.repeat(20)}`).join('\n'))
     expect(parts.length).toBeGreaterThan(1)
     expect(parts.every((p) => p.length <= 2000)).toBe(true)
-    expect(importMessage({ importId: 'i', fileName: 'f.csv', total: 1, counts: { ready: 1, invalid: 0, duplicate: 0, opted_out: 0, excluded: 0 } }, { nameColumn: null, phoneColumn: 0, contextColumns: [] }, ['Phone'])).toContain('phone = "Phone"')
+    expect(importMessage({ importId: 'i', fileName: 'f.csv', total: 1, counts: { ready: 1, invalid: 0, duplicate: 0, opted_out: 0, excluded: 0 } })).toContain('Ready to call 1')
   })
 })

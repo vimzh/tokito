@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { buildDraftPrompt, createDrafter, DRAFT_PROMPT_VERSION, type DraftInput } from './draft-questions'
+import { buildDraftPrompt, createDrafter, createRedrafter, DRAFT_PROMPT_VERSION, REDRAFT_PROMPT_VERSION, type DraftedQuestion, type DraftInput } from './draft-questions'
 import type { StructuredRun } from './agent'
 
 const input: DraftInput = {
@@ -17,7 +17,7 @@ const output = {
     { text: 'How would you rate the portion sizes from 1 to 5?', type: 'rating', options: [], required: true, purpose: 'Portions.' },
     { text: 'Anything else?', type: 'open', options: [], required: false, purpose: 'Wrap-up.' },
   ],
-}
+} satisfies { questions: DraftedQuestion[] }
 
 describe('draft prompt', () => {
   test('includes goal, background, topics, mode, and language', () => {
@@ -50,5 +50,27 @@ describe('drafter', () => {
   test('propagates failures from the run', async () => {
     const run: StructuredRun = async () => { throw new Error('boom') }
     await expect(createDrafter(run)(input)).rejects.toThrow('boom')
+  })
+})
+
+describe('single-question redrafter', () => {
+  test('includes the current and remaining questions, then normalizes the replacement', async () => {
+    const calls: unknown[] = []
+    const run: StructuredRun = async (args) => {
+      calls.push(args)
+      return {
+        output: args.schema.parse({ question: { ...output.questions[1], text: ' What felt fairly priced? ', options: ['stray'] } }),
+        model: 'gpt-test',
+      }
+    }
+    const result = await createRedrafter(run)({
+      ...input,
+      currentQuestion: output.questions[1],
+      otherQuestions: [output.questions[0].text, output.questions[2].text, output.questions[3].text],
+    })
+    const prompt = (calls[0] as { prompt: string }).prompt
+    expect(prompt).toContain(output.questions[1].text)
+    expect(prompt).toContain(output.questions[0].text)
+    expect(result).toMatchObject({ question: { text: 'What felt fairly priced?', options: [] }, model: 'gpt-test', promptVersion: REDRAFT_PROMPT_VERSION })
   })
 })

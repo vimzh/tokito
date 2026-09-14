@@ -68,7 +68,7 @@ Run checks with `bun run lint`, `bun run typecheck`, and `bun run build`. Tests:
 | `PATCH` | `/api/campaigns/:id` | Update name, goal, context, topics, or conversation mode. |
 | `PUT` | `/api/campaigns/:id/questions` | Replace the ordered question list (text, type, options, required). |
 | `POST` | `/api/campaigns/:id/questions/draft` | Draft questions with the AI agent; returns a proposal without saving. |
-| `GET` | `/api/campaigns/:id/contacts` | Contacts with status, problem, and last-call summary; `POST …/imports`, `POST …/imports/:importId/commit`, `PATCH`/`DELETE …/:contactId`. |
+| `GET` | `/api/campaigns/:id/contacts` | Contacts with status, problem, and last-call summary; `POST …/imports` accepts exact `name,phone` files, with `PATCH`/`DELETE …/:contactId` for row fixes. |
 | `GET` | `/api/campaigns/:id/task-preview` | The CALL-E task text and result schema for this campaign. |
 | `GET` | `/api/campaigns/:id/calls` | Calls with answers; `GET …/:callId` adds the transcript. `POST …/:callId/callback` schedules a callback. |
 | `POST` | `/api/campaigns/:id/simulations` | Start a text simulation; `POST …/:callId/turns` sends the person's line. |

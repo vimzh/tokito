@@ -100,9 +100,8 @@ describe('Google Sheets', () => {
       if (req.url.includes('/values/Members?')) return { body: { values: [['Name', 'Phone'], ['Asha', '9876543210'], ['', '']] } }
       return null
     })
-    const preview = await importContactsFromSheet(db, campaignId)
-    expect(preview).toMatchObject({ fileName: 'Members (Google Sheet)', headers: ['Name', 'Phone'], rowCount: 1, suggestedMapping: { nameColumn: 0, phoneColumn: 1 } })
-    const summary = commitImport(db, campaignId, preview.id, preview.suggestedMapping as { nameColumn: number | null; phoneColumn: number; contextColumns: number[] })
+    const summary = await importContactsFromSheet(db, campaignId)
+    expect(summary).toMatchObject({ fileName: 'Members (Google Sheet)', total: 1 })
     expect(summary.counts.ready).toBe(1)
     expect(getCampaignConnection(db, campaignId, 'sheets')).toMatchObject({ lastStatus: 'ok', lastExternalUrl: 'https://docs.google.com/spreadsheets/d/sheet-1' })
   })
@@ -130,7 +129,7 @@ describe('Google Calendar', () => {
   test('a scheduled callback creates an event and the terminal call updates it', async () => {
     setCampaignConnection(db, campaignId, 'calendar', { config: {} })
     const preview = createImport(db, campaignId, 'c.csv', new TextEncoder().encode('Name,Phone\nAsha,9876543210\n'))
-    commitImport(db, campaignId, preview.id, { nameColumn: 0, phoneColumn: 1, contextColumns: [] })
+    commitImport(db, campaignId, preview.id)
     const contact = listContacts(db, campaignId).contacts[0]!
     const source = crypto.randomUUID()
     db.insert(calls).values({ id: source, campaignId, contactId: contact.id, provider: 'calle', providerCallId: 'p1', attempt: 1, status: 'callback_requested', task: 't', resultSchema: {}, questionMap: {}, callbackRequested: true, callbackTime: 'tomorrow', createdAt: 1, updatedAt: 1 }).run()

@@ -1,10 +1,10 @@
 import { and, asc, eq, inArray, ne, sql } from 'drizzle-orm'
 import type { Db } from '../db'
 import { campaignEvents, campaigns, contactImports, contacts, optOuts, type ContactProblem, type ContactStatus } from '../db/schema'
-import type { CommitImportInput, UpdateContactInput } from '../validation/contacts'
+import type { UpdateContactInput } from '../validation/contacts'
 import { NotFoundError } from './campaigns'
 import { normalizePhone } from './phone'
-import { MAX_IMPORT_ROWS, parseSpreadsheet, SpreadsheetError, suggestMapping } from './spreadsheet'
+import { MAX_IMPORT_ROWS, parseSpreadsheet, requireContactColumns, SpreadsheetError } from './spreadsheet'
 import { contactCallSummary } from '../calls/scheduler'
 
 const id = () => crypto.randomUUID()
@@ -31,7 +31,6 @@ function importPreview(row: typeof contactImports.$inferSelect) {
     headers: row.headers,
     preview: row.rows.slice(0, PREVIEW_ROWS),
     rowCount: row.rows.length,
-    suggestedMapping: suggestMapping(row.headers),
     mapping: row.mapping ?? null,
     committedAt: row.committedAt ?? null,
   }
@@ -40,6 +39,7 @@ function importPreview(row: typeof contactImports.$inferSelect) {
 export function createImport(db: Db, campaignId: string, fileName: string, data: ArrayBuffer | Uint8Array) {
   requireCampaign(db, campaignId)
   const { headers, rows } = parseSpreadsheet(data)
+  requireContactColumns(headers)
   return storeImport(db, campaignId, fileName, headers, rows)
 }
 
@@ -49,6 +49,7 @@ export function createImportFromRows(db: Db, campaignId: string, sourceName: str
   const [headerRow, ...body] = values.map((row) => row.map((cell) => cell.trim()))
   if (!headerRow || headerRow.every((cell) => cell === '')) throw new SpreadsheetError('The first row must contain column headings.')
   const headers = headerRow.map((cell, index) => cell || `Column ${index + 1}`)
+  requireContactColumns(headers)
   const rows = body.filter((row) => row.some((cell) => cell !== '')).map((row) => headers.map((_, index) => row[index] ?? ''))
   if (rows.length === 0) throw new SpreadsheetError('The sheet has headings but no rows.')
   if (rows.length > MAX_IMPORT_ROWS) throw new SpreadsheetError(`The sheet has ${rows.length} rows; the limit is ${MAX_IMPORT_ROWS}.`)
@@ -84,13 +85,11 @@ function classify(db: Db, campaignId: string, phoneRaw: string, defaultCountry: 
   return { phone, status: 'ready', problem: null }
 }
 
-export function commitImport(db: Db, campaignId: string, importId: string, mapping: CommitImportInput) {
+export function commitImport(db: Db, campaignId: string, importId: string) {
   const campaign = requireCampaign(db, campaignId)
   const row = getImport(db, campaignId, importId)
   if (row.committedAt) throw new ImportStateError('This file has already been imported.')
-  const columnCount = row.headers.length
-  const columns = [mapping.phoneColumn, ...(mapping.nameColumn === null ? [] : [mapping.nameColumn]), ...mapping.contextColumns]
-  if (columns.some((column) => column >= columnCount)) throw new ImportStateError('The mapping refers to a column that is not in the file.')
+  const mapping = { nameColumn: 0, phoneColumn: 1, contextColumns: [] }
   const now = Date.now()
   const seen = new Set<string>()
   const counts: Record<ContactStatus, number> = { ready: 0, invalid: 0, duplicate: 0, opted_out: 0, excluded: 0 }
@@ -100,17 +99,16 @@ export function commitImport(db: Db, campaignId: string, importId: string, mappi
       const result = classify(tx as unknown as Db, campaignId, phoneRaw, campaign.defaultCountry, seen)
       if (result.status === 'ready' && result.phone) seen.add(result.phone)
       counts[result.status] += 1
-      const context = Object.fromEntries(mapping.contextColumns.map((column) => [row.headers[column] ?? `Column ${column + 1}`, cells[column] ?? '']))
       return {
         id: id(),
         campaignId,
         importId,
-        name: mapping.nameColumn === null ? null : cells[mapping.nameColumn] || null,
+        name: cells[mapping.nameColumn] || null,
         phoneRaw,
         phone: result.phone,
         status: result.status,
         problem: result.problem,
-        context,
+        context: {},
         createdAt: now,
         updatedAt: now,
       }

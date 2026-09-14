@@ -14,7 +14,7 @@ Detailed phase documents live next to this file (`phase-01.md`, `phase-02.md`, �
 | Workspace shell | Done: sidebar, navigation, profile card, Home / Connections / Settings pages. |
 | Home page | Done (Phases 1 and 6): real campaigns with contacts, responses, and progress for running campaigns. |
 | Create campaign | Done (Phase 1): the review step saves a draft through a server action and redirects to the campaign page. |
-| Campaign detail | Done (Phases 1–3): goal, background, topics, a typed question editor with AI drafting, calling preferences, edit and delete, a Contacts tab with upload, mapping, validation, and per-row fixes, a Call script preview, a Test a call dialog, a metrics row with live refresh, an Answers tab with per-question aggregates and quotes linked to calls, a Responses tab with the calls list and CSV/XLSX exports, a transcript page, and a Report tab with a versioned AI report (themes, disagreements, requests, gaps, labeled suggestions, every quote linked to its call) and a question box with citations. |
+| Campaign detail | Done (Phases 1–3): goal, background, topics, a typed question editor with AI drafting, calling preferences, edit and delete, a Contacts tab with fixed `name`, `phone` upload, validation, and per-row fixes, a Call script preview, a Test a call dialog, a metrics row with live refresh, an Answers tab with per-question aggregates and quotes linked to calls, a Responses tab with the calls list and CSV/XLSX exports, a transcript page, and a Report tab with a versioned AI report (themes, disagreements, requests, gaps, labeled suggestions, every quote linked to its call) and a question box with citations. |
 | Connections page | Done in code (Phase 9): real OAuth status and Connect/Disconnect for Google and Notion; per-campaign sheet, calendar, and Notion settings on the campaign page with sync status and visible failures. |
 | Settings page | Done (Phases 2–3): workspace calling defaults, default country, and the opt-out list. |
 | API | Done (Phase 1): campaigns CRUD and question replacement with zod validation, CORS, JSON errors, and service tests. |
@@ -33,7 +33,7 @@ Phases 1 to 5 are complete in code: campaigns, questions, drafting, preferences,
 |---|---|---|---|
 | 1 | Foundation: real campaigns end to end (done 2026-09-13) | Campaigns and questions are saved in SQLite through the API and shown on the dashboard. Git history begins. | — |
 | 2 | Question drafting and campaign setup (done 2026-09-13) | An OpenAI model, run through the Strands Agents SDK, drafts a questionnaire from the goal; organizer edits, reorders, and sets question types and calling preferences. | 1 |
-| 3 | Contact lists (done 2026-09-13) | Excel upload, column mapping, validation of numbers and duplicates, extra context columns, opt-out list. | 1 |
+| 3 | Contact lists (done 2026-09-13) | Excel or CSV upload with fixed `name`, `phone` columns, validation of numbers and duplicates, opt-out list. | 1 |
 | 4 | Conversation layer (done 2026-09-13) | The layer that turns a campaign into CALL-E's task and result schema, plus a text simulator to exercise it, and the mapping from results and transcripts into answers. | 2, 3 |
 | 5 | Telephony and outreach control (code done 2026-09-13; live call pending) | Real outbound calls through CALL-E (heycall-e.com), webhook handling, call outcomes, retries, calling hours, callbacks, start/pause. | 4 |
 | 6 | Progress and results dashboard (done 2026-09-13) | Live per-contact status, transcripts, summaries, per-question answers, callback list, exports. | 5 |
@@ -68,7 +68,7 @@ See [phase-01.md](phase-01.md) for the task-level breakdown.
 **Goal.** Make the "describe the goal, review the questions" step real.
 
 **Scope.**
-- Add the Strands Agents SDK to `apps/api` with OpenAI as the model provider (model id and settings in one config module). A `draftQuestions` service takes goal, background context, and extra topics and returns 4–8 questions with a type each: open, rating (1–5), or single choice with options. Store the prompt version alongside generated questions.
+- Add the Strands Agents SDK to `apps/api` with OpenAI as the model provider (model id and settings in one config module). A `draftQuestions` service takes goal, background context, and extra topics and returns four questions with a type each: open, rating (1–5), or single choice with options. Store the prompt version alongside generated questions.
 - Campaign background: a "context" field organizers fill in (who they are, what changed, anything the assistant may use to clarify a question). This is the only material the call agent may use later to explain a question.
 - Question editor on the campaign page: edit text, change type and options, add, remove, reorder, mark a question required or optional, toggle whether clarification is allowed. Manual mode skips drafting.
 - Calling preferences move from the mock Settings page into per-campaign settings with workspace defaults: language, max call length, calling hours and time zone, max attempts per contact, follow-up mode (dynamic or fixed).
@@ -84,7 +84,7 @@ See [phase-01.md](phase-01.md) for the task-level breakdown.
 **Goal.** Organizers bring an Excel file and leave with a clean, reviewed call list.
 
 **Scope.**
-- Upload `.xlsx` / `.csv` (parsed server-side with a SheetJS-style library). Show the first rows and let the organizer pick the name column, the phone column, and which extra columns to keep as per-contact context.
+- Upload `.xlsx` / `.csv` (parsed server-side with a SheetJS-style library) using exactly two columns in this order: `name`, `phone`.
 - Normalize numbers to E.164 with a default country chosen on the campaign. Flag missing numbers, unparseable numbers, and duplicates within the file and against contacts already in the campaign.
 - `contacts` table with status (`ready`, `invalid`, `duplicate`, `opted_out`, `excluded`) and a JSON context column. An organizer can exclude or fix individual rows before calling.
 - Workspace-level `opt_outs` table keyed by normalized phone; uploads are checked against it and matches are shown.
@@ -190,7 +190,7 @@ This changes the shape of Phase 4: because CALL-E runs the spoken conversation i
 
 **Scope.**
 - Connections page becomes real: OAuth for Google (Sheets and Calendar) and Notion, with connect / disconnect and the last sync status per campaign.
-- Google Sheets: read a shared sheet as a contact source (through the Phase 3 mapping flow) and write answers and call statuses back to a results tab after each completed call.
+- Google Sheets: read a shared sheet as a contact source through the fixed Phase 3 column contract and write answers and call statuses back to a results tab after each completed call.
 - Google Calendar: when a callback is scheduled, create a calendar event; when the callback is executed, update the event. A calendar entry never replaces the scheduler.
 - Notion: publish the Phase 7 report as a page with quotes, counts, and suggested next steps; republish on regenerate.
 - Every integration write is recorded in `campaign_events` with success or failure so the dashboard and Discord can show failed updates.

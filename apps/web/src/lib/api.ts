@@ -21,6 +21,10 @@ export type UpdateCampaignInput = InferRequestType<typeof campaignRoute.$patch>[
 export type ReplaceQuestionsInput = InferRequestType<typeof campaignRoute.questions.$put>["json"];
 export type QuestionInput = ReplaceQuestionsInput["questions"][number];
 export type DraftResult = Res<typeof campaignRoute.questions.draft.$post, 200>;
+export type DraftedQuestion = DraftResult["questions"][number];
+type RedraftQuestionRoute = (typeof campaignRoute.questions)["draft-one"]["$post"];
+export type RedraftQuestionInput = InferRequestType<RedraftQuestionRoute>["json"];
+export type RedraftQuestionResult = Res<RedraftQuestionRoute, 200>;
 export type WorkspaceSettings = Res<typeof settingsRoute.$get, 200>;
 export type UpdateSettingsInput = InferRequestType<typeof settingsRoute.$put>["json"];
 
@@ -47,6 +51,8 @@ export const updateCampaign = (id: string, json: UpdateCampaignInput) =>
 export const replaceQuestions = (id: string, json: ReplaceQuestionsInput) =>
   campaignRoute.questions.$put({ param: { id }, json }).then((response) => unwrap<Campaign>(response));
 export const draftQuestions = (id: string) => campaignRoute.questions.draft.$post({ param: { id } }).then((response) => unwrap<DraftResult>(response));
+export const redraftQuestion = (id: string, json: RedraftQuestionInput) =>
+  campaignRoute.questions["draft-one"].$post({ param: { id }, json }).then((response) => unwrap<RedraftQuestionResult>(response));
 export const deleteCampaign = (id: string) => campaignRoute.$delete({ param: { id } }).then((response) => unwrap<void>(response));
 export const purgeCampaign = (id: string) => campaignRoute.purge.$post({ param: { id } }).then((response) => unwrap<{ contacts: number; imports: number; calls: number }>(response));
 export const getSettings = () => settingsRoute.$get().then((response) => unwrap<WorkspaceSettings>(response));
@@ -54,7 +60,6 @@ export const updateSettings = (json: UpdateSettingsInput) => settingsRoute.$put(
 
 // ---- Contacts and opt-outs (Phase 3) ----
 const contactsRoute = campaignRoute.contacts;
-const importRoute = contactsRoute.imports[":importId"];
 const contactRoute = contactsRoute[":contactId"];
 const optOutsRoute = client.api["opt-outs"];
 
@@ -62,17 +67,13 @@ export type ContactList = Res<typeof contactsRoute.$get, 200>;
 export type Contact = ContactList["contacts"][number];
 export type ContactStatus = Contact["status"];
 export type ContactProblem = NonNullable<Contact["problem"]>;
-export type ImportPreview = Res<typeof contactsRoute.imports.$post, 201>;
-export type CommitImportInput = InferRequestType<typeof importRoute.commit.$post>["json"];
-export type ImportSummary = Res<typeof importRoute.commit.$post, 200>;
+export type ImportSummary = Res<typeof contactsRoute.imports.$post, 201>;
 export type UpdateContactInput = InferRequestType<typeof contactRoute.$patch>["json"];
 export type OptOut = Res<typeof optOutsRoute.$get, 200>[number];
 
 export const listContacts = (id: string) => contactsRoute.$get({ param: { id } }).then((response) => unwrap<ContactList>(response));
 export const uploadContacts = (id: string, file: File) =>
-  contactsRoute.imports.$post({ param: { id }, form: { file } }).then((response) => unwrap<ImportPreview>(response));
-export const commitImport = (id: string, importId: string, json: CommitImportInput) =>
-  importRoute.commit.$post({ param: { id, importId }, json }).then((response) => unwrap<ImportSummary>(response));
+  contactsRoute.imports.$post({ param: { id }, form: { file } }).then((response) => unwrap<ImportSummary>(response));
 export const updateContact = (id: string, contactId: string, json: UpdateContactInput) =>
   contactRoute.$patch({ param: { id, contactId }, json }).then((response) => unwrap<Contact>(response));
 export const deleteContact = (id: string, contactId: string) => contactRoute.$delete({ param: { id, contactId } }).then((response) => unwrap<void>(response));
@@ -157,7 +158,7 @@ export const listCampaignConnections = (id: string) => campaignConnectionsRoute.
 export const setCampaignConnection = (id: string, kind: CampaignConnectionKind, json: { url?: string; enabled?: boolean }) =>
   campaignConnectionsRoute[":kind"].$put({ param: { id, kind }, json }).then((response) => unwrap<CampaignConnection>(response));
 export const removeCampaignConnection = (id: string, kind: CampaignConnectionKind) => campaignConnectionsRoute[":kind"].$delete({ param: { id, kind } }).then((response) => unwrap<void>(response));
-export const importFromSheet = (id: string) => campaignConnectionsRoute.sheets.import.$post({ param: { id } }).then((response) => unwrap<ImportPreview>(response));
+export const importFromSheet = (id: string) => campaignConnectionsRoute.sheets.import.$post({ param: { id } }).then((response) => unwrap<ImportSummary>(response));
 export const syncToSheet = (id: string) => campaignConnectionsRoute.sheets.sync.$post({ param: { id } }).then((response) => unwrap<{ url: string | null }>(response));
 export const publishToNotion = (id: string, version?: number) =>
   campaignConnectionsRoute.notion.publish.$post({ param: { id }, json: version ? { version } : {} }).then((response) => unwrap<{ url: string }>(response));

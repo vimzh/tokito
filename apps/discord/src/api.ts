@@ -31,9 +31,7 @@ export function createApi(baseUrl: string, fetchImpl: FetchLike = fetch, token =
   type ReplaceQuestionsInput = InferRequestType<typeof campaign.questions.$put>['json']
   type DraftResult = Res<typeof campaign.questions.draft.$post, 200>
   type ContactList = Res<typeof campaign.contacts.$get, 200>
-  type ImportPreview = Res<typeof campaign.contacts.imports.$post, 201>
-  type ImportSummary = Res<typeof campaign.contacts.imports[':importId']['commit']['$post'], 200>
-  type CommitInput = InferRequestType<typeof campaign.contacts.imports[':importId']['commit']['$post']>['json']
+  type ImportSummary = Res<typeof campaign.contacts.imports.$post, 201>
   type OutreachStatus = Res<typeof campaign.outreach.$get, 200>
   type CampaignResults = Res<typeof campaign.results.$get, 200>
   type ReportResponse = Res<typeof campaign.report.$get, 200>
@@ -50,8 +48,7 @@ export function createApi(baseUrl: string, fetchImpl: FetchLike = fetch, token =
     draftQuestions: (id: string) => campaign.questions.draft.$post({ param: { id } }).then((r) => unwrap<DraftResult>(r)),
     replaceQuestions: (id: string, json: ReplaceQuestionsInput) => campaign.questions.$put({ param: { id }, json }).then((r) => unwrap<Campaign>(r)),
     listContacts: (id: string) => campaign.contacts.$get({ param: { id } }).then((r) => unwrap<ContactList>(r)),
-    uploadContacts: (id: string, file: File) => campaign.contacts.imports.$post({ param: { id }, form: { file } }).then((r) => unwrap<ImportPreview>(r)),
-    commitImport: (id: string, importId: string, json: CommitInput) => campaign.contacts.imports[':importId'].commit.$post({ param: { id, importId }, json }).then((r) => unwrap<ImportSummary>(r)),
+    uploadContacts: (id: string, file: File) => campaign.contacts.imports.$post({ param: { id }, form: { file } }).then((r) => unwrap<ImportSummary>(r)),
     getOutreach: (id: string) => campaign.outreach.$get({ param: { id } }).then((r) => unwrap<OutreachStatus>(r)),
     startOutreach: (id: string) => campaign.outreach.start.$post({ param: { id } }).then((r) => unwrap<Campaign>(r)),
     pauseOutreach: (id: string) => campaign.outreach.pause.$post({ param: { id } }).then((r) => unwrap<Campaign>(r)),
@@ -75,7 +72,7 @@ export type CampaignResults = Awaited<ReturnType<Api['getResults']>>
 export type ReportResponse = Awaited<ReturnType<Api['getReport']>>
 export type ReportContent = NonNullable<ReportResponse['report']>['content']
 export type AskResult = Awaited<ReturnType<Api['askReport']>>
-export type ImportSummary = Awaited<ReturnType<Api['commitImport']>>
+export type ImportSummary = Awaited<ReturnType<Api['uploadContacts']>>
 export type EventRow = Awaited<ReturnType<Api['listEvents']>>[number]
 
 // Finds a campaign by id or by a case-insensitive name fragment. Throws with the candidates when ambiguous.

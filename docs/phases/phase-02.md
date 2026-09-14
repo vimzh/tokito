@@ -20,7 +20,7 @@ An organizer describes a goal and some background, asks Tokito to draft question
 - `PATCH /api/campaigns/:id` accepts the new preference fields and `context`, with validation (`HH:MM` times, end after start, 1–20 minutes, 1–5 attempts, valid time zone).
 - `GET /api/settings`, `PUT /api/settings` for workspace defaults.
 - `POST /api/campaigns/:id/questions/draft` → runs the drafting service and returns `{ questions, model, promptVersion }` without saving. The organizer applies them through the questions endpoint, so a draft never silently overwrites edits. The `questions.drafted` event records the run.
-- Drafting service in `src/ai/`: a Strands Agents SDK agent (`@strands-agents/sdk`) using the OpenAI model provider through the OpenAI API, with a zod structured-output schema, model in one config module (`OPENAI_MODEL`, default `gpt-5.5`), and a prompt version constant. The same agent wrapper is reused by later phases. The prompt asks for 4–8 questions, a screening question when the goal assumes an experience, no leading wording, and a mix of types only where a rating or choice is natural. Missing `OPENAI_API_KEY` returns a 503 with a clear message.
+- Drafting service in `src/ai/`: a Strands Agents SDK agent (`@strands-agents/sdk`) using the OpenAI model provider through the OpenAI API, with a zod structured-output schema, model in one config module (`OPENAI_MODEL`, default `gpt-5.5`), and a prompt version constant. The same agent wrapper is reused by later phases. The prompt asks for four questions, a screening question when the goal assumes an experience, no leading wording, and a mix of types only where a rating or choice is natural. Missing `OPENAI_API_KEY` returns a 503 with a clear message.
 - Tests: validation of the questions payload, settings defaults applied on create, drafting service against a fake client, and the "not configured" path.
 
 ### 3. Web
@@ -33,7 +33,7 @@ An organizer describes a goal and some background, asks Tokito to draft question
 
 ## Acceptance checks
 
-1. With a key configured: the restaurant goal produces 4–8 relevant questions including a screening question, none leading. Recorded in the completion note with the actual output.
+1. With a key configured: the restaurant goal produces four relevant questions including a screening question, none leading. Recorded in the completion note with the actual output.
 2. Without a key: the Draft button shows the "not configured" message and the campaign stays editable.
 3. Edits, reorders, type changes, and preferences persist across reload.
 4. Accepting a draft over existing questions requires confirmation; Discard leaves questions untouched.

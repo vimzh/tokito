@@ -51,7 +51,7 @@ describe('deletion and retention', () => {
   test('purge removes collected data, keeps the campaign, and logs the deletion', async () => {
     const campaign = createCampaign(db, { name: 'Purge me', goal: 'g', questionSource: 'manual', conversationMode: 'dynamic', questions: ['q'] })
     const preview = createImport(db, campaign.id, 'c.csv', new TextEncoder().encode('Name,Phone\nAsha,9876543210\n'))
-    commitImport(db, campaign.id, preview.id, { nameColumn: 0, phoneColumn: 1, contextColumns: [] })
+    commitImport(db, campaign.id, preview.id)
     db.insert(calls).values({ id: 'call-p', campaignId: campaign.id, contactId: null, provider: 'simulator', attempt: 1, status: 'completed', task: 't', resultSchema: {}, questionMap: {}, createdAt: 1, updatedAt: 1 }).run()
     const response = await app.request(`/api/campaigns/${campaign.id}/purge`, { method: 'POST', headers: auth })
     expect(response.status).toBe(200)
